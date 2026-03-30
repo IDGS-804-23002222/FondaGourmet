@@ -66,9 +66,11 @@ def crearCuenta():
     if form.validate_on_submit():
         exito, error = crear_cliente(form)
         if exito:
+            current_app.logger.info(f"Cuenta creada para cliente: {form.username.data}")
             flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('auth.login'))
         else:
+            current_app.logger.error(f"Error al crear cuenta: {str(error)}")
             flash(error, 'danger')
 
     return render_template('auth/crear_cuenta.html', form=form)
@@ -100,6 +102,7 @@ def editar_perfil():
     if form.validate_on_submit():
         exito, error = actualizar_cliente(usuario.id_usuario, form)
         if exito:
+            current_app.logger.info(f"Perfil actualizado para cliente: {form.username.data}")
             flash('Perfil actualizado correctamente.', 'success')
             return redirect(url_for('auth.mi_perfil'))
         else:
