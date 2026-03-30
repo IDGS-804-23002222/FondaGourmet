@@ -8,12 +8,12 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, current_user  # Solo flask_login
 from config import DevelopmentConfig
 from models import db, Usuario, Rol
-from auth.routes import auth
-from dashboard.routes import dashboard
-from ventas.routes import ventas
-from produccion.routes import produccion
-from tienda.routes import tienda
-from usuarios.routes import usuarios
+from auth import auth
+from dashboard import dashboard
+from ventas import ventas
+from produccion import produccion
+from tienda import tienda
+from usuarios import usuarios
 
 migrate = Migrate()
 csrf = CSRFProtect()

@@ -1,39 +1,621 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container">
-    <h1 class="display-5 mb-4">Dashboard de Ventas</h1>
-    
-    <div class="alert alert-success">
-        <h4>✅ ¡Login exitoso!</h4>
-        <p>Ya estás dentro del sistema. Aquí irán las gráficas de ventas diarias, productos más vendidos y presentaciones.</p>
+<div class="dashboard-container">
+    <!-- Encabezado con saludo personalizado -->
+    <div class="welcome-section mb-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="display-4 fw-bold mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                    ¡Bienvenido, {{ current_user.username }}! 👋
+                </h1>
+                <p class="text-muted fs-5">Aquí encontrarás el resumen de tus ventas y actividades del día.</p>
+            </div>
+            <div class="date-time-card">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-calendar3 fs-2 text-primary"></i>
+                    <div>
+                        <div class="small text-muted">Fecha actual</div>
+                        <div class="fw-bold" id="currentDate"></div>
+                    </div>
+                    <div class="vr"></div>
+                    <div>
+                        <div class="small text-muted">Hora</div>
+                        <div class="fw-bold" id="currentTime"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row text-center">
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Ventas del día</h5>
-                    <h2>$0.00</h2>
+    <!-- Tarjetas de estadísticas principales -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-card-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-title">Ventas del día</h3>
+                    <div class="stat-card-value">$12,450.00</div>
+                    <div class="stat-card-change positive">
+                        <i class="bi bi-arrow-up-short"></i> +15% vs ayer
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Productos más vendidos</h5>
-                    <h2>0</h2>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card stat-card-success">
+                <div class="stat-card-icon">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-title">Top producto</h3>
+                    <div class="stat-card-value">Tacos al pastor</div>
+                    <div class="stat-card-change">127 unidades vendidas</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5>Producción pendiente</h5>
-                    <h2>0</h2>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-card-icon">
+                    <i class="bi bi-clock-history"></i>
                 </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-title">Producción pendiente</h3>
+                    <div class="stat-card-value">8 pedidos</div>
+                    <div class="stat-card-change">Tiempo estimado: 45 min</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card stat-card-info">
+                <div class="stat-card-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-title">Clientes atendidos</h3>
+                    <div class="stat-card-value">42 hoy</div>
+                    <div class="stat-card-change">+8 vs ayer</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficas y datos detallados -->
+    <div class="row g-4 mb-5">
+        <!-- Gráfica de ventas -->
+        <div class="col-lg-8">
+            <div class="card-modern">
+                <div class="card-header-custom">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h5 class="mb-1 fw-bold">📊 Ventas de la semana</h5>
+                            <p class="text-muted small mb-0">Comparativa de ventas diarias</p>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary active">Semana</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary">Mes</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary">Año</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos más vendidos -->
+        <div class="col-lg-4">
+            <div class="card-modern">
+                <div class="card-header-custom">
+                    <h5 class="mb-1 fw-bold">🏆 Top productos</h5>
+                    <p class="text-muted small mb-0">Los más pedidos hoy</p>
+                </div>
+                <div class="card-body-custom">
+                    <div class="top-products-list">
+                        <div class="product-item">
+                            <div class="product-rank rank-1">1</div>
+                            <div class="product-info">
+                                <div class="product-name">Tacos al pastor</div>
+                                <div class="product-stats">127 unidades · $2,540.00</div>
+                            </div>
+                            <div class="product-trend">
+                                <i class="bi bi-arrow-up-short text-success"></i>
+                                <span class="text-success">+23%</span>
+                            </div>
+                        </div>
+                        <div class="product-item">
+                            <div class="product-rank rank-2">2</div>
+                            <div class="product-info">
+                                <div class="product-name">Quesadillas</div>
+                                <div class="product-stats">98 unidades · $1,470.00</div>
+                            </div>
+                            <div class="product-trend">
+                                <i class="bi bi-arrow-up-short text-success"></i>
+                                <span class="text-success">+12%</span>
+                            </div>
+                        </div>
+                        <div class="product-item">
+                            <div class="product-rank rank-3">3</div>
+                            <div class="product-info">
+                                <div class="product-name">Tortas</div>
+                                <div class="product-stats">76 unidades · $1,140.00</div>
+                            </div>
+                            <div class="product-trend">
+                                <i class="bi bi-arrow-down-short text-danger"></i>
+                                <span class="text-danger">-5%</span>
+                            </div>
+                        </div>
+                        <div class="product-item">
+                            <div class="product-rank">4</div>
+                            <div class="product-info">
+                                <div class="product-name">Tamales</div>
+                                <div class="product-stats">54 unidades · $810.00</div>
+                            </div>
+                            <div class="product-trend">
+                                <i class="bi bi-arrow-up-short text-success"></i>
+                                <span class="text-success">+8%</span>
+                            </div>
+                        </div>
+                        <div class="product-item">
+                            <div class="product-rank">5</div>
+                            <div class="product-info">
+                                <div class="product-name">Aguas frescas</div>
+                                <div class="product-stats">142 unidades · $710.00</div>
+                            </div>
+                            <div class="product-trend">
+                                <i class="bi bi-arrow-up-short text-success"></i>
+                                <span class="text-success">+34%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda fila de gráficas -->
+    <div class="row g-4 mb-5">
+        <!-- Ventas por categoría -->
+        <div class="col-md-6">
+            <div class="card-modern">
+                <div class="card-header-custom">
+                    <h5 class="mb-1 fw-bold">🥘 Ventas por categoría</h5>
+                    <p class="text-muted small mb-0">Distribución de ventas</p>
+                </div>
+                <div class="card-body-custom">
+                    <canvas id="categoryChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="col-md-6">
+            <div class="card-modern">
+                <div class="card-header-custom">
+                    <h5 class="mb-1 fw-bold">🕐 Actividad reciente</h5>
+                    <p class="text-muted small mb-0">Últimos movimientos</p>
+                </div>
+                <div class="card-body-custom p-0">
+                    <div class="activity-timeline">
+                        <div class="activity-item">
+                            <div class="activity-icon bg-success">
+                                <i class="bi bi-cart-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">Venta #1234 completada</div>
+                                <div class="activity-time">Hace 5 minutos</div>
+                            </div>
+                            <div class="activity-amount">$450.00</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-warning">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">Producción iniciada - Pedido #89</div>
+                                <div class="activity-time">Hace 15 minutos</div>
+                            </div>
+                            <div class="activity-amount">3 items</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-info">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">Nuevo cliente registrado</div>
+                                <div class="activity-time">Hace 32 minutos</div>
+                            </div>
+                            <div class="activity-amount">Cliente #42</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-danger">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">Stock bajo: Tortillas</div>
+                                <div class="activity-time">Hace 1 hora</div>
+                            </div>
+                            <div class="activity-amount">Urgente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+        <h5 class="mb-3 fw-bold">⚡ Acciones rápidas</h5>
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <a href="#" class="quick-action-btn">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Nueva venta</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#" class="quick-action-btn">
+                    <i class="bi bi-receipt"></i>
+                    <span>Ver pedidos</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#" class="quick-action-btn">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Reportes</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#" class="quick-action-btn">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Inventario</span>
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Dashboard styles */
+    .dashboard-container {
+        padding: 0;
+    }
+
+    /* Tarjetas de estadísticas */
+    .stat-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 20px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .stat-card:hover::before {
+        left: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .stat-card-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .stat-card-content {
+        flex: 1;
+    }
+
+    .stat-card-title {
+        font-size: 0.9rem;
+        color: #a0a0a0;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-card-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 5px;
+    }
+
+    .stat-card-change {
+        font-size: 0.8rem;
+    }
+
+    .stat-card-change.positive {
+        color: #10b981;
+    }
+
+    .stat-card-change.negative {
+        color: #ef4444;
+    }
+
+    .stat-card-primary .stat-card-icon { color: #667eea; }
+    .stat-card-success .stat-card-icon { color: #10b981; }
+    .stat-card-warning .stat-card-icon { color: #f59e0b; }
+    .stat-card-info .stat-card-icon { color: #3b82f6; }
+
+    /* Tarjetas modernas */
+    .card-modern {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .card-modern:hover {
+        transform: translateY(-3px);
+    }
+
+    .card-header-custom {
+        padding: 20px 25px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .card-body-custom {
+        padding: 20px 25px;
+    }
+
+    /* Lista de productos */
+    .top-products-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .product-item:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateX(5px);
+    }
+
+    .product-rank {
+        width: 35px;
+        height: 35px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .product-rank.rank-1 { background: #f59e0b; color: white; }
+    .product-rank.rank-2 { background: #64748b; color: white; }
+    .product-rank.rank-3 { background: #cd7f32; color: white; }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .product-stats {
+        font-size: 0.8rem;
+        color: #a0a0a0;
+    }
+
+    .product-trend {
+        font-size: 0.85rem;
+    }
+
+    /* Timeline de actividad */
+    .activity-timeline {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-text {
+        font-weight: 500;
+        margin-bottom: 3px;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: #a0a0a0;
+    }
+
+    .activity-amount {
+        font-weight: 600;
+        color: #10b981;
+    }
+
+    /* Acciones rápidas */
+    .quick-actions {
+        margin-top: 30px;
+    }
+
+    .quick-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 15px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-5px);
+        background: linear-gradient(135deg, #e63939, #d62828);
+        color: white;
+    }
+
+    .quick-action-btn i {
+        font-size: 2rem;
+    }
+
+    /* Fecha y hora */
+    .date-time-card {
+        background: rgba(255,255,255,0.05);
+        padding: 12px 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Fecha y hora en tiempo real
+    function updateDateTime() {
+        const now = new Date();
+        const dateElement = document.getElementById('currentDate');
+        const timeElement = document.getElementById('currentTime');
+        
+        if (dateElement) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = now.toLocaleDateString('es-MX', options);
+        }
+        
+        if (timeElement) {
+            timeElement.textContent = now.toLocaleTimeString('es-MX');
+        }
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Gráfica de ventas
+    const ctx = document.getElementById('salesChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                datasets: [{
+                    label: 'Ventas',
+                    data: [8500, 9200, 7800, 10400, 12800, 15600, 11200],
+                    borderColor: '#e63939',
+                    backgroundColor: 'rgba(230, 57, 57, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: { color: 'white' }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfica de categorías
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Tacos', 'Quesadillas', 'Tortas', 'Bebidas', 'Postres'],
+                datasets: [{
+                    data: [35, 25, 20, 12, 8],
+                    backgroundColor: ['#e63939', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: 'white' }
+                    }
+                }
+            }
+        });
+    }
+</script>
 {% endblock %}

@@ -2,6 +2,12 @@ from functools import wraps
 from flask import redirect, url_for, flash
 from flask_login import current_user
 
+#1 - Administrador
+#2 - Cocinero
+#3 - Cajero
+#4 - Cliente
+
+
 def role_required(*roles):
     def decorator(func):
         @wraps(func)

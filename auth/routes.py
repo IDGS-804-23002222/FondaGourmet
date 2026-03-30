@@ -8,11 +8,7 @@ from forms import LoginForm
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    
-    # Si ya está autenticado, redirigir según su rol
-    if current_user.is_authenticated:
-        return redirect_por_rol(current_user)
-    
+      
     if form.validate_on_submit():
         remember = True if request.form.get('remember') else False
         

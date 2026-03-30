@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField, RadioField, BooleanField, DateField, SelectField, EmailField, FloatField, PasswordField
 from wtforms import validators
+from models import Usuario, Persona
+from wtforms.validators import ValidationError
 
 class LoginForm(FlaskForm):
     username = StringField('Nombre de usuario',[
@@ -55,7 +57,8 @@ class RegistroUsuarioForm(FlaskForm):
     
     contrasena = PasswordField('Contraseña', [
         validators.DataRequired(message="La contraseña es obligatoria."),
-        validators.Length(min=8, message="La contraseña debe tener al menos 8 caracteres.")
+        validators.Length(min=8, message="La contraseña debe tener al menos 8 caracteres."),
+        validators.Regexp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', message="La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.")  
         ])
     
     confirmar_contrasena = PasswordField('Confirmar contraseña', [
@@ -63,19 +66,27 @@ class RegistroUsuarioForm(FlaskForm):
         validators.EqualTo('contrasena', message="Las contraseñas deben coincidir.")
     ])
     
-    rol= SelectField('Rol', choices=[
-        ('Cocinero', 'Cocinero'),   
-        ('Administrador', 'Administrador'),
-        ('Cajero', 'Cajero'),
-        ('Dueño', 'Dueño'),
-        ('Cliente', 'Cliente')
-        ], validators=[
-            validators.DataRequired(message="Seleccione un rol."),
-            validators.AnyOf(values=['Cocinero', 'Administrador', 'Cajero', 'Dueño', 'Cliente'], message="Seleccione un rol válido.")
-        ])
+    rol= SelectField('Rol', choices=[], coerce=str)
     
-    submit = SubmitField('Crear usuario')
+    def __init__(self, *args, **kwargs):
+        super(RegistroUsuarioForm, self).__init__(*args, **kwargs)
+        # Cargar roles desde la base de datos
+        from models import Rol
+        roles = Rol.query.all()
+        self.rol.choices = [(rol.nombre, rol.nombre) for rol in roles]
+    
+    def validate_username(self, field):
+        usuario = Usuario.query.filter_by(username=field.data).first()
+        if usuario:
+            raise ValidationError('Este nombre de usuario ya está registrado')
+    
+    def validate_correo(self, field):
+        persona = Persona.query.filter_by(correo=field.data).first()
+        if persona:
+            raise ValidationError('Este correo ya está registrado')
 
+    submit = SubmitField('Registrar usuario')
+    
 class RegistroClienteForm(FlaskForm):
     nombre = StringField('Nombre', [
         validators.DataRequired(message="El nombre es obligatorio."),
