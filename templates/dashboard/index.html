@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-5 mb-4">Dashboard de Ventas</h1>
+    
+    <div class="alert alert-success">
+        <h4>✅ ¡Login exitoso!</h4>
+        <p>Ya estás dentro del sistema. Aquí irán las gráficas de ventas diarias, productos más vendidos y presentaciones.</p>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Ventas del día</h5>
+                    <h2>$0.00</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Productos más vendidos</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5>Producción pendiente</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

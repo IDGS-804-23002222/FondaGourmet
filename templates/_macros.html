@@ -1,0 +1,22 @@
+{% macro campo(field, class="", placeholder="") %}
+<div class="mb-5">
+
+    <label class="block mb-2 text-sm font-medium text-gray-200">
+        {{ field.label.text }}
+    </label>
+
+    {{ field(
+        class="w-full px-4 py-2 bg-gray-800 text-white border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition "
+        + ("border-red-500" if field.errors else "border-gray-600")
+        + " " + class,
+        placeholder=placeholder if placeholder else field.label.text
+    ) }}
+
+    {% if field.errors %}
+        <p class="mt-1 text-sm text-red-500">
+            {{ field.errors[0] }}
+        </p>
+    {% endif %}
+
+</div>
+{% endmacro %}
