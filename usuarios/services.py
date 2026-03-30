@@ -5,38 +5,7 @@ from flask import current_app
 import logging
 
 logger = logging.getLogger(__name__)
-
-def crear_cliente(form):
-    try:
-        password_hash = generate_password_hash(form.contrasena.data)
-
-        db.session.execute(text("""
-            CALL sp_crearCliente(
-                :nombre, :ap_p, :ap_m,
-                :telefono, :correo, :direccion,
-                :username, :password
-            )
-        """), {
-            "nombre": form.nombre.data,
-            "ap_p": form.apellido_p.data,
-            "ap_m": form.apellido_m.data,
-            "telefono": form.telefono.data,
-            "correo": form.correo.data,
-            "direccion": form.direccion.data,
-            "username": form.username.data,
-            "password": password_hash
-        })
-
-        db.session.commit()
-        logger.info(f"Cliente creado: {form.username.data}")
-        return True, "Cliente creado exitosamente"
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error al crear cliente: {str(e)}")
-        return False, str(e)
-    
-def crear_empleado(form):
+def crear_usuario(form):
     try:
         password_hash = generate_password_hash(form.contrasena.data)
         
@@ -45,7 +14,7 @@ def crear_empleado(form):
         if not rol:
             return False, f"Rol '{form.rol.data}' no encontrado"
         
-        logger.info(f"Creando empleado: {form.username.data}, Rol: {rol.nombre} (ID: {rol.id_rol})")
+        logger.info(f"Creando usuario: {form.username.data}, Rol: {rol.nombre} (ID: {rol.id_rol})")
         
         # Enviar el NOMBRE del rol en lugar del ID
         db.session.execute(text("""
@@ -145,7 +114,6 @@ def activar_usuario(id_usuario):
         return False, str(e)
     
 def obtener_usuario(id_usuario):
-    """Obtiene un usuario con el nombre del rol"""
     try:
         result = db.session.execute(text("""
             SELECT 
@@ -162,9 +130,11 @@ def obtener_usuario(id_usuario):
                 p.direccion
             FROM usuarios u
             INNER JOIN roles r ON u.id_rol = r.id_rol
-            LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
-            LEFT JOIN personas p ON e.id_persona = p.id_persona
+            LEFT JOIN clientes c ON c.id_usuario = u.id_usuario
+            LEFT JOIN empleados e ON e.id_usuario = u.id_usuario
+            LEFT JOIN personas p ON p.id_persona = COALESCE(c.id_persona, e.id_persona)
             WHERE u.id_usuario = :id_usuario
+
         """), {"id_usuario": id_usuario})
         
         usuario = result.fetchone()
@@ -189,98 +159,38 @@ def obtener_usuario(id_usuario):
     
 def actualizar_usuario(id_usuario, form):
     try:
-        password_hash = generate_password_hash(form.contrasena.data) if form.contrasena.data else None
-        
-        # Obtener el id_rol desde el nombre del rol
-        rol = Rol.query.filter_by(nombre=form.rol.data).first()
-        if not rol:
-            return False, f"Rol '{form.rol.data}' no encontrado"
+        password_hash = generate_password_hash(form.get('contrasena')) if form.get('contrasena') else None
 
-        logger.info(f"Actualizando usuario {id_usuario} con Rol ID: {rol.id_rol}")
-        
+        rol = Rol.query.filter_by(nombre=form.get('rol')).first()
+        if not rol:
+            return False, "Rol no encontrado"
+
         db.session.execute(text("""
             CALL sp_actualizarUsuario(
                 :id_usuario, :nombre, :ap_p, :ap_m,
                 :telefono, :correo, :direccion,
                 :username, :password, :id_rol
-            )
+            )   
         """), {
             "id_usuario": id_usuario,
-            "nombre": form.nombre.data,
-            "ap_p": form.apellido_p.data,
-            "ap_m": form.apellido_m.data,
-            "telefono": form.telefono.data,
-            "correo": form.correo.data,
-            "direccion": form.direccion.data,
-            "username": form.username.data,
+            "nombre": form.get('nombre'),
+            "ap_p": form.get('apellido_p'),
+            "ap_m": form.get('apellido_m'),
+            "telefono": form.get('telefono') or None,
+            "correo": form.get('correo') or None,
+            "direccion": form.get('direccion') or None,
+            "username": form.get('username'),
             "password": password_hash,
-            "id_rol": rol.id_rol  # Enviamos el ID del rol
+            "id_rol": rol.id_rol
         })
 
         db.session.commit()
-        logger.info(f"Usuario {id_usuario} actualizado")
-        return True, "Usuario actualizado exitosamente"
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error al actualizar usuario: {str(e)}")
-        return False, str(e)
-    
-def ver_mi_cuenta(id_usuario):
-    try:
-        result = db.session.execute(text("""
-            SELECT 
-                u.id_usuario,
-                u.username,
-                r.nombre as rol_nombre,
-                p.nombre,
-                p.apellido_p,
-                p.apellido_m,
-                p.correo,
-                p.telefono,
-                p.direccion
-            FROM usuarios u
-            INNER JOIN roles r ON u.id_rol = r.id_rol
-            LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
-            LEFT JOIN personas p ON e.id_persona = p.id_persona
-            WHERE u.id_usuario = :id_usuario
-        """), {"id_usuario": id_usuario})
-        
-        usuario = result.fetchone()
-        return usuario, None
-    except Exception as e:
-        logger.error(f"Error al ver mi cuenta: {str(e)}")
-        return None, str(e)
-    
-def actualizar_mi_cuenta(id_usuario, form):
-    try:
-        password_hash = generate_password_hash(form.contrasena.data) if form.contrasena.data else None
-
-        db.session.execute(text("""
-            CALL sp_actualizarMiCuenta(
-                :id_usuario, :nombre, :ap_p, :ap_m,
-                :telefono, :correo, :direccion,
-                :username, :password
-            )
-        """), {
-            "id_usuario": id_usuario,
-            "nombre": form.nombre.data,
-            "ap_p": form.apellido_p.data,
-            "ap_m": form.apellido_m.data,
-            "telefono": form.telefono.data,
-            "correo": form.correo.data,
-            "direccion": form.direccion.data,
-            "username": form.username.data,
-            "password": password_hash
-        })
-
-        db.session.commit()
-        return True, "Cuenta actualizada exitosamente"
+        return True, "Usuario actualizado"
 
     except Exception as e:
         db.session.rollback()
         return False, str(e)
-
+    
 # Función auxiliar para obtener todos los roles (para llenar selects)
 def obtener_roles():
     """Obtiene todos los roles disponibles"""

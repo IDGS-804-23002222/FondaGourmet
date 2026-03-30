@@ -13,7 +13,7 @@
         </div>
         
         <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-            <a href="{{ url_for('usuarios.crearEmpleado') }}" 
+            <a href="{{ url_for('usuarios.crearUsuario') }}" 
                class="group relative inline-flex items-center justify-center gap-2 px-6 py-3 
                       bg-gradient-to-r from-emerald-500 to-green-600 
                       hover:from-emerald-600 hover:to-green-700
@@ -148,7 +148,7 @@
                                 {% endif %}">
                                 <span class="w-2 h-2 rounded-full 
                                     {% if usuario.estado_bool %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
-                                {{ usuario.estado }}
+                                {{ usuario.estado_display if usuario.estado_display is defined else ('Activo' if usuario.estado_bool else 'Inactivo') }}
                             </span>
                         </td>
                         
@@ -164,11 +164,11 @@
                                         title="Ver detalles">
                                     <i class="bi bi-eye text-lg"></i>
                                 </button>
-                                {% if usuario.estado == 'Activo' or usuario.estado == True %}
+                                {% if usuario.estado_bool %}
                                 <button onclick="desactivarUsuario('{{ usuario.id_usuario }}', '{{ usuario.nombre }}')"
                                         class="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
                                         title="Desactivar">
-                                    <i class="bi bi-ban text-lg"></i>
+                                    <i class="bi bi-ban text-lg"></i>       
                                 </button>
                                 {% else %}
                                 <button onclick="activarUsuario('{{ usuario.id_usuario }}', '{{ usuario.nombre }}')"
@@ -188,7 +188,7 @@
                             <div class="flex flex-col items-center gap-4">
                                 <i class="bi bi-people text-7xl text-gray-300 dark:text-gray-600"></i>
                                 <p class="text-xl font-medium text-gray-500 dark:text-gray-400">No hay usuarios registrados</p>
-                                <a href="{{ url_for('usuarios.crearEmpleado') }}" 
+                                <a href="{{ url_for('usuarios.crearUsuario') }}" 
                                    class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
                                     <i class="bi bi-person-plus"></i>
                                     Crear primer usuario
@@ -213,6 +213,7 @@
 <!-- El resto del JavaScript se mantiene igual (solo actualicé ligeramente los estilos de botones) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = "{{ csrf_token() }}";
         const searchInput = document.getElementById('searchInput');
         const roleFilter = document.getElementById('roleFilter');
         const statusFilter = document.getElementById('statusFilter');
@@ -272,38 +273,49 @@
         };
 
         window.desactivarUsuario = function(id, nombre) {
-            if (confirm(`¿Seguro que deseas desactivar a ${nombre}?`)) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/usuarios/desactivar';
-                
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'id_usuario';
-                input.value = id;
-                
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        };
+    if (confirm(`¿Desactivar a ${nombre}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuarios/desactivar';
 
-        window.activarUsuario = function(id, nombre) {
-            if (confirm(`¿Seguro que deseas activar a ${nombre}?`)) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/usuarios/activar';
-                
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'id_usuario';
-                input.value = id;
-                
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        };
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id_usuario';
+        input.value = id;
+
+                form.appendChild(csrfInput);
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+};
+      window.activarUsuario = function(id, nombre) {
+    if (confirm(`¿Activar a ${nombre}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuarios/activar';
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id_usuario';
+        input.value = id;
+
+                form.appendChild(csrfInput);
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+};
     });
 </script>
 

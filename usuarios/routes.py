@@ -1,10 +1,10 @@
 from . import usuarios
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from forms import RegistroUsuarioForm, RegistroClienteForm
+from forms import RegistroUsuarioForm, EditarUsuarioForm
 from utils.security import role_required
 from .services import (
-    crear_cliente, crear_empleado, ver_usuarios, desactivar_usuario,
+    crear_usuario, ver_usuarios, desactivar_usuario,
     activar_usuario, obtener_usuario, actualizar_usuario,
     obtener_roles, obtener_roles_nombres
 )
@@ -22,26 +22,10 @@ def listaUsuarios():
         return redirect(url_for('dashboard.index'))
     return render_template('usuarios/lista_usuarios.html', usuarios=resultados, name=current_user.username)
 
-@usuarios.route('/crearCliente', methods=['GET', 'POST'])
-def crearCliente():
-    form = RegistroClienteForm()
-    if form.validate_on_submit():
-        exito, error = crear_cliente(form)
-
-        if exito:
-            current_app.logger.info(f"Cliente creado: {form.username.data}")    
-            flash('Cuenta creada exitosamente', 'success')
-            return redirect(url_for('auth.login'))
-        else:
-            current_app.logger.error(f"Error al crear cliente: {str(error)}")
-            flash(error, 'danger')
-
-    return render_template('usuarios/crear_cliente.html', form=form)
-
-@usuarios.route('/crearEmpleado', methods=['GET', 'POST'])
+@usuarios.route('/crearUsuario', methods=['GET', 'POST'])
 @login_required
 @role_required(1)
-def crearEmpleado():
+def crearUsuario():
     form = RegistroUsuarioForm()
 
     roles, error = obtener_roles_nombres()
@@ -51,17 +35,17 @@ def crearEmpleado():
         roles = []
 
     if form.validate_on_submit():
-        exito, error = crear_empleado(form)
+        exito, error = crear_usuario(form)
 
         if exito:
-            current_app.logger.info(f"Empleado creado: {form.username.data}")   
-            flash('Empleado creado correctamente', 'success')
+            current_app.logger.info(f"Usuario creado: {form.username.data}")   
+            flash('Usuario creado correctamente', 'success')
             return redirect(url_for('usuarios.listaUsuarios'))
         else:
-            current_app.logger.error(f"Error al crear empleado: {str(error)}")
+            current_app.logger.error(f"Error al crear usuario: {str(error)}")
             flash(error, 'danger')
 
-    return render_template('usuarios/crear_empleado.html', form=form)
+    return render_template('usuarios/crear_usuario.html', form=form)
 
 
 
@@ -70,13 +54,16 @@ def crearEmpleado():
 @role_required(1)
 def desactivarUsuario():
     id_usuario = request.form.get('id_usuario')
-    usuario, error = obtener_usuario(id_usuario)
+
     exito, error = desactivar_usuario(id_usuario)
+
     if exito:
-        current_app.logger.info(f"Usuario desactivado: {usuario.username}")
-        flash('Usuario desactivado correctamente', 'success')
-    else:        
+        current_app.logger.info(f"Usuario desactivado: ID {id_usuario}")
+        flash('Usuario desactivado', 'success')
+    else:
+        current_app.logger.error(f"Error al desactivar usuario: {str(error)}")
         flash(error, 'danger')
+
     return redirect(url_for('usuarios.listaUsuarios'))
 
 @usuarios.route('/activar', methods=['POST'])
@@ -84,14 +71,16 @@ def desactivarUsuario():
 @role_required(1)
 def activarUsuario():
     id_usuario = request.form.get('id_usuario')
-    usuario, error = obtener_usuario(id_usuario)    
+
     exito, error = activar_usuario(id_usuario)
+
     if exito:
-        current_app.logger.info(f"Usuario activado: {usuario.username}")
-        flash('Usuario activado correctamente', 'success')
-    else:        
+        current_app.logger.info(f"Usuario activado: ID {id_usuario}")
+        flash('Usuario activado', 'success')
+    else:
         current_app.logger.error(f"Error al activar usuario: {str(error)}")
         flash(error, 'danger')
+
     return redirect(url_for('usuarios.listaUsuarios'))
 
 @usuarios.route('/detalles')
@@ -112,33 +101,41 @@ def detallesUsuario():
 @login_required
 @role_required(1)
 def editarUsuario():
-    id_usuario = request.args.get('id_usuario')
+    form = EditarUsuarioForm()
+    
+    id_usuario = request.args.get('id_usuario') or request.form.get('id_usuario')
+    if not id_usuario:
+        flash('No se recibió el usuario a editar.', 'warning')
+        return redirect(url_for('usuarios.listaUsuarios'))
+
     usuario, error = obtener_usuario(id_usuario)
     if error:
-        current_app.logger.error(f"Error al obtener usuario: {str(error)}")
+        current_app.logger.error(f"Error al obtener usuario para edición: {str(error)}")
         flash(error, 'danger')
-        return redirect(url_for('usuarios.listaUsuarios'))  
-    if request.method == 'POST':
-        exito, error = actualizar_usuario(id_usuario, request.form)
+        return redirect(url_for('usuarios.listaUsuarios'))
+    
+    roles, _ = obtener_roles_nombres()
+    form.rol.choices = [(r, r) for r in roles]
+   
+    if request.method == 'GET':
+        form.nombre.data = usuario.get('nombre')
+        form.apellido_p.data = usuario.get('apellido_paterno')
+        form.apellido_m.data = usuario.get('apellido_materno')
+        form.telefono.data = usuario.get('telefono')
+        form.correo.data = usuario.get('correo')
+        form.direccion.data = usuario.get('direccion')
+        form.username.data = usuario.get('username')
+        form.rol.data = usuario.get('rol_nombre')
+    
+    if request.method == 'POST' and form.validate_on_submit():
+            exito, error = actualizar_usuario(id_usuario, request.form)
 
-        if exito:
-            flash('Usuario actualizado correctamente', 'success')
-            return redirect(url_for('usuarios.listaUsuarios'))
-        else:
-            flash(error, 'danger')
-
-    usuario, _ = obtener_usuario(id_usuario)
-
-    return render_template('usuarios/editar_usuario.html', usuario=usuario)
-
-@usuarios.route('/miperfil', methods=['GET', 'POST'])
-@login_required
-def miPerfil():
-    usuario, error = obtener_usuario(current_user.id_usuario)
-
-    if error:
-        current_app.logger.error(f"Error al obtener perfil del usuario: {str(error)}")
-        flash(error, 'danger')
-        return redirect(url_for('dashboard.index'))
-        
-    return render_template('usuarios/mi_perfil.html', usuario=usuario)
+            if exito:
+                current_app.logger.info(f"Usuario actualizado: {form.username.data}")   
+                flash('Usuario actualizado correctamente', 'success')
+                return redirect(url_for('usuarios.listaUsuarios'))
+            else:
+                current_app.logger.error(f"Error al actualizar usuario: {str(error)}")
+                flash(error, 'danger')
+    
+    return render_template('usuarios/editar_usuario.html', form=form, usuario=usuario)

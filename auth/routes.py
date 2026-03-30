@@ -2,9 +2,11 @@ from . import auth
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, login_user, logout_user, current_user
 from models import db, Usuario
-from forms import LoginForm
+from forms import LoginForm, RegistroClienteForm
+from .services import (
+    crear_cliente, actualizar_mi_cuenta, ver_mi_cuenta
+    )
 
-# ====================== LOGIN ======================
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -57,6 +59,53 @@ def redirect_por_rol(user):
         return redirect(url_for('tienda.index'))
     else:
         return redirect(url_for('dashboard.index'))
+
+@auth.route('/crearCuenta', methods=['GET', 'POST'])
+def crearCuenta():
+    form = RegistroClienteForm()
+    if form.validate_on_submit():
+        exito, error = crear_cliente(form)
+        if exito:
+            flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash(error, 'danger')
+
+    return render_template('auth/crear_cuenta.html', form=form)
+
+@auth.route('/miPerfil')
+@login_required
+def mi_perfil():
+    usuario = current_user
+    if not usuario:
+        current_app.logger.error("Usuario no encontrado en la base de datos.")
+        flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
+        return redirect(url_for('dashboard.index'))
+    
+    # Aquí podrías agregar más lógica para cargar información adicional del perfil si es necesario
+    
+    return render_template('auth/mi_perfil.html', usuario=usuario)
+
+@auth.route('/editarPerfil', methods=['GET', 'POST'])
+@login_required
+def editar_perfil():
+    usuario = current_user
+    if not usuario:
+        current_app.logger.error("Usuario no encontrado en la base de datos.")
+        flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
+        return redirect(url_for('dashboard.index'))
+    
+    form = RegistroClienteForm(obj=usuario)
+    
+    if form.validate_on_submit():
+        exito, error = actualizar_cliente(usuario.id_usuario, form)
+        if exito:
+            flash('Perfil actualizado correctamente.', 'success')
+            return redirect(url_for('auth.mi_perfil'))
+        else:
+            flash(error, 'danger')  
+    
+        return render_template('auth/editar_perfil.html', form=form, usuario=usuario)
 
 @auth.route('/logout')
 @login_required
