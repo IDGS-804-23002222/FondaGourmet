@@ -1,0 +1,69 @@
+{% extends "cliente/base_cliente.html" %}
+{% block title %}Confirmación de pedido{% endblock %}
+
+{% block content %}
+
+<div class="confirm-card">
+
+    <h1 class="confirm-title">¡Gracias por tu compra!</h1>
+    <p class="confirm-subtitle">
+        Tu pedido ha sido registrado con el número <strong>#{{ pedido.id }}</strong>.
+    </p>
+    <p class="confirm-subtitle">Te enviaremos un mensaje de confirmación.</p>
+
+    <div class="confirm-section">
+        <h3>Detalles del pedido</h3>
+
+        <ul class="confirm-list">
+            <li><strong>Nombre:</strong> {{ pedido.nombre }}</li>
+            <li><strong>Teléfono:</strong> {{ pedido.telefono }}</li>
+            <li><strong>Dirección:</strong> {{ pedido.direccion }}</li>
+            <li><strong>Notas:</strong> {{ pedido.notas or 'Ninguna' }}</li>
+            <li><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</li>
+            <li><strong>Estado:</strong> {{ pedido.estado }}</li>
+            <li><strong>Fecha:</strong> {{ pedido.fecha }}</li>
+        </ul>
+    </div>
+
+    <div class="confirm-section">
+        <h3>Productos del pedido</h3>
+
+        <table class="data-table confirm-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in pedido.productos %}
+                <tr>
+                    <td>{{ producto.nombre }}</td>
+                    <td>{{ producto.cantidad }}</td>
+                    <td>${{ producto.precio }}</td>
+                    <td>${{ producto.precio * producto.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-actions confirm-actions">
+        <a href="{{ url_for('cliente.cliente_consultar_pedidos') }}" class="btn-success">
+            Ver mis pedidos
+        </a>
+
+        <a href="{{ url_for('cliente.cliente_menu') }}" class="btn-primary">
+            Volver al menú
+        </a>
+
+        <a href="{{ url_for('cliente.cancelar_pedido', pedido_id=pedido.id) }}" class="btn-danger">
+            Cancelar pedido
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

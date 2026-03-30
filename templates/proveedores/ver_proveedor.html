@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Proveedor{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Proveedor</h1>
+        <p>Información completa del proveedor ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-full">
+                <label>Nombre del proveedor</label>
+                <div class="info-value">Proveedor Ejemplo</div>
+            </div>
+            
+            <div class="form-group-half">
+                <label>Teléfono</label>
+                <div class="info-value">0000000000</div>
+            </div>
+            
+            <div class="form-group-half">
+                <label>Correo electrónico</label>
+                <div class="info-value">proveedor@ejemplo.com</div>
+            </div>
+            
+            <div class="form-group-full">
+                <label>Dirección</label>
+                <div class="info-value">Dirección de ejemplo</div>
+            </div>
+            
+            <div class="form-group-half">
+                <label>Persona de contacto</label>
+                <div class="info-value">Contacto Ejemplo</div>
+            </div>
+            
+            <div class="form-group-half">
+                <label>Estado</label>
+                <div class="info-value"><span class="badge active">Activo</span></div>
+            </div>
+            
+            <div class="form-group-full">
+                <label>Observaciones</label>
+                <div class="info-value">Observaciones de ejemplo</div>
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-text">
+                <strong>Resumen de compras</strong><br>
+                Última compra: Fecha de ejemplo | Total compras: Monto de ejemplo | Productos adquiridos: Ejemplo
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Últimas compras</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Producto ejemplo</td>
+                    <td>Cantidad ejemplo</td>
+                    <td>Monto ejemplo</td>
+                </tr>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Producto ejemplo</td>
+                    <td>Cantidad ejemplo</td>
+                    <td>Monto ejemplo</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-edit" onclick="window.location.href='/proveedores/editar/{{ id }}'">Editar proveedor</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/proveedores'">Volver</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-value {
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris);
+    color: #333;
+}
+.info-card {
+    background: #f8f9fa;
+    border-left: 4px solid var(--verde);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+.info-text {
+    font-size: 0.85rem;
+    color: #555;
+}
+</style>
+{% endblock %}

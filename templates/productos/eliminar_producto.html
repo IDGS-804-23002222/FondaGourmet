@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Producto{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Producto</h1>
+        <p>¿Está seguro de que desea eliminar el producto con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Nombre:</span>
+                <span class="value">Producto Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Categoría:</span>
+                <span class="value">Plato fuerte</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Precio:</span>
+                <span class="value">$0.00</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Ventas asociadas:</span>
+                <span class="value">Ejemplo</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará el producto de todos los registros asociados (ventas, recetas, etc.). No se podrá recuperar.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar producto</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/productos'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

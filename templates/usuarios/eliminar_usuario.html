@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Usuario{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Usuario</h1>
+        <p>¿Está seguro de que desea eliminar el usuario con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Usuario:</span>
+                <span class="value">admin</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Rol:</span>
+                <span class="value">Administrador</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Empleado:</span>
+                <span class="value">Paulo Essau</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará permanentemente al usuario y no se podrá recuperar.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar usuario</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/usuarios'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "cliente/base_cliente.html" %}
+{% block title %}Carrito{% endblock %}
+
+{% block content %}
+<h1 class="carrito-title">Mi Carrito</h1>
+
+{% if carrito %}
+<form method="post" action="{{ url_for('cliente.actualizar_carrito') }}">
+
+    <div class="carrito-card">
+        <table class="data-table carrito-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in carrito %}
+                <tr>
+                    <td>{{ item.nombre }}</td>
+                    <td>${{ "%.2f"|format(item.precio) }}</td>
+
+                    <td>
+                        <input type="number" name="cantidad_{{ item.id }}" value="{{ item.cantidad }}" min="0"
+                            class="input-cantidad">
+                    </td>
+
+                    <td>${{ "%.2f"|format(item.precio * item.cantidad) }}</td>
+
+                    <td>
+                        <a href="{{ url_for('cliente.eliminar_carrito', id=item.id) }}" class="btn-danger">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="total-label">Total:</td>
+                    <td class="total-value">${{ "%.2f"|format(total) }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="carrito-actions">
+        <button type="submit" class="btn-primary">Actualizar cantidades</button>
+
+        <a href="{{ url_for('cliente.checkout') }}" class="btn-success">
+            Finalizar compra
+        </a>
+
+        <a href="{{ url_for('cliente.cliente_menu') }}" class="btn-info">
+            Seguir comprando
+        </a>
+
+        <a href="{{ url_for('cliente.cliente_consultar_pedidos') }}" class="btn-info">
+            Mis pedidos
+        </a>
+    </div>
+</form>
+
+{% else %}
+<p class="carrito-vacio">
+    Tu carrito está vacío.
+    <a href="{{ url_for('cliente.cliente_menu') }}" class="link-menu">Ver el menú</a>
+</p>
+{% endif %}
+
+{% endblock %}

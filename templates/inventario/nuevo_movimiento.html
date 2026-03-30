@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Registrar Movimiento{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Registrar Movimiento de Inventario</h1>
+        <p>Registre entradas, salidas o ajustes de inventario</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="ingrediente">Ingrediente</label>
+                    <select id="ingrediente" name="ingrediente" required>
+                        <option value="">Seleccione un ingrediente</option>
+                        <option value="1">Ingrediente Ejemplo 1 (Stock: 0.0 kg)</option>
+                        <option value="2">Ingrediente Ejemplo 2 (Stock: 0.0 L)</option>
+                        <option value="3">Ingrediente Ejemplo 3 (Stock: 0.0 kg)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="tipo_movimiento">Tipo de movimiento</label>
+                    <select id="tipo_movimiento" name="tipo_movimiento" required>
+                        <option value="entrada">Entrada (compra)</option>
+                        <option value="salida">Salida (consumo)</option>
+                        <option value="ajuste">Ajuste manual</option>
+                        <option value="devolucion">Devolución</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="cantidad">Cantidad</label>
+                    <input type="number" step="0.1" id="cantidad" name="cantidad" placeholder="0.0" required>
+                </div>
+                
+                <div class="form-group-half" id="costoRow" style="display: none;">
+                    <label for="costo_unitario">Costo unitario</label>
+                    <input type="number" step="0.01" id="costo_unitario" name="costo_unitario" placeholder="0.00">
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="motivo">Motivo</label>
+                    <textarea id="motivo" name="motivo" rows="2" placeholder="Ej: Compra a proveedor, consumo en producción, merma" required></textarea>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="referencia">Referencia</label>
+                    <input type="text" id="referencia" name="referencia" placeholder="Ej: Factura #000, Orden #000">
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="notas">Notas adicionales</label>
+                    <input type="text" id="notas" name="notas" placeholder="Información adicional">
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Registrar movimiento</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/inventario'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('tipo_movimiento').addEventListener('change', function(e) {
+        const costoRow = document.getElementById('costoRow');
+        if (e.target.value === 'entrada') {
+            costoRow.style.display = 'flex';
+        } else {
+            costoRow.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

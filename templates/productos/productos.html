@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Productos{% endblock %}
+{% block content %}
+<h1>Gestión de Productos</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/productos/nuevo'">Nuevo producto</button>
+    <input type="text" class="search" placeholder="Buscar producto...">
+    <select class="filter">
+        <option value="">Todas las categorías</option>
+        <option value="plato_fuerte">Platos fuertes</option>
+        <option value="bebidas">Bebidas</option>
+        <option value="postres">Postres</option>
+        <option value="antojitos">Antojitos</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Costo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Producto Ejemplo 1</td>
+            <td>Plato fuerte</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Activo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/productos/ver/1'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/productos/editar/1'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/productos/eliminar/1'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Producto Ejemplo 2</td>
+            <td>Bebidas</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Activo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/productos/ver/2'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/productos/editar/2'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/productos/eliminar/2'">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

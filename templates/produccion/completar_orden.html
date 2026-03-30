@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Completar Orden{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Completar Orden de Producción</h1>
+        <p>Confirmar finalización de producción</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="info-card">
+            <div class="info-text">
+                <strong>Información de la orden</strong><br>
+                Orden ID: {{ id }} | Producto: Producto Ejemplo | Cantidad: 15 piezas | Estado actual: En proceso
+            </div>
+        </div>
+        
+        <div class="success-message">
+            <strong>Nota:</strong> Al completar la orden, los productos estarán disponibles para la venta.
+        </div>
+        
+        <form>
+            <div class="form-grid">
+                <div class="form-group-half">
+                    <label for="cantidad_producida">Cantidad producida</label>
+                    <input type="number" step="0.5" id="cantidad_producida" name="cantidad_producida" value="15" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="merma">Merma</label>
+                    <input type="number" step="0.1" id="merma" name="merma" value="0" placeholder="Cantidad de merma">
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="comentarios">Comentarios</label>
+                    <textarea id="comentarios" name="comentarios" rows="2" placeholder="Agregar comentarios sobre la producción..."></textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-completar btn-large">Sí, completar orden</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/produccion'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

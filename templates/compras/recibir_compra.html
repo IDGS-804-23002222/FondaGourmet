@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Recibir Compra{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Recibir Compra</h1>
+        <p>Registrar recepción de compra ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="info-card" style="margin-bottom: 25px;">
+            <div class="info-text">
+                <strong>Información de la compra</strong><br>
+                Proveedor: Proveedor ejemplo | Fecha compra: Fecha de ejemplo | Total: $0.00 | Estado actual: Pendiente
+            </div>
+        </div>
+        
+        <h3 style="margin-bottom: 15px; color: var(--verde);">Productos a recibir</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad pedida</th>
+                    <th>Cantidad recibida</th>
+                    <th>Unidad</th>
+                    <th>Estado</th>
+                </thead>
+            <tbody>
+                <tr>
+                    <td>Ingrediente ejemplo</td>
+                    <td>0.0</td>
+                    <td><input type="number" step="0.1" value="0.0" style="width: 100px;"></td>
+                    <td>kg</td>
+                    <td><span class="badge process">Pendiente</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="form-grid" style="margin-top: 20px;">
+            <div class="form-group-full">
+                <label for="guia">Número de guía</label>
+                <input type="text" id="guia" name="guia" placeholder="Ej: GUI-2026-001">
+            </div>
+            
+            <div class="form-group-full">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="2" placeholder="Notas sobre la recepción"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="submit" class="btn-primary" style="background: var(--verde-menta);">Confirmar recepción</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/compras'">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-card {
+    background: #f8f9fa;
+    border-left: 4px solid var(--verde);
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+.info-text {
+    font-size: 0.85rem;
+    color: #555;
+}
+</style>
+{% endblock %}

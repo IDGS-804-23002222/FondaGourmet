@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Editar Compra{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Editar Compra</h1>
+        <p>Modificando compra ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="proveedor">Proveedor</label>
+                    <select id="proveedor" name="proveedor" required>
+                        <option value="1" selected>Proveedor Ejemplo 1</option>
+                        <option value="2">Proveedor Ejemplo 2</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" value="Usuario ejemplo" disabled>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" id="fecha" value="2026-03-29" disabled>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="factura">Número de factura</label>
+                    <input type="text" id="factura" name="factura" value="F-0000-00000">
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="fecha_factura">Fecha de factura</label>
+                    <input type="date" id="fecha_factura" name="fecha_factura" value="2026-03-29">
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="pendiente" selected>Pendiente</option>
+                        <option value="recibido">Recibido</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Detalles de la compra</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <select name="ingrediente[]">
+                                <option value="1" selected>Ingrediente Ejemplo 1</option>
+                                <option value="2">Ingrediente Ejemplo 2</option>
+                            </select>
+                        </td>
+                        <td><input type="number" step="0.1" value="0"></td>
+                        <td><input type="text" value="kg" style="background: #f0f0f0;" readonly></td>
+                        <td><input type="number" step="0.01" value="0.00"></td>
+                        <td class="subtotal">0.00</td>
+                        <td><button type="button" class="btn-delete">Eliminar</button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align: right; font-weight: bold;">Subtotal:</td>
+                        <td>0.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right;">IVA (16%):</td>
+                        <td>0.00</td>
+                        <td></td>
+                    </tr>
+                    <tr style="font-weight: bold; background: #f0f0f0;">
+                        <td colspan="4" style="text-align: right;">Total:</td>
+                        <td>0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <button type="button" class="btn-secondary">Agregar producto</button>
+            
+            <div class="form-actions" style="margin-top: 25px;">
+                <button type="submit" class="btn-primary btn-large">Actualizar compra</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/compras'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

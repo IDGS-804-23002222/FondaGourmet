@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Quitar del Menú{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Quitar Producto del Menú</h1>
+        <p>¿Está seguro de que desea quitar el siguiente producto del menú?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">ID:</span>
+                <span class="value">{{ id }}</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Producto:</span>
+                <span class="value">Producto Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Categoría:</span>
+                <span class="value">Plato fuerte</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Precio:</span>
+                <span class="value">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará el producto del menú visible para los clientes.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, quitar del menú</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/menu'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

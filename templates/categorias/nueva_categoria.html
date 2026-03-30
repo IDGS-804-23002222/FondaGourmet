@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Nueva Categoría{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Registrar Nueva Categoría</h1>
+        <p>Complete los datos de la categoría</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="nombre">Nombre de la categoría</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Platos fuertes, Bebidas, Lácteos" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Seleccione un tipo</option>
+                        <option value="producto">Productos (menú)</option>
+                        <option value="ingrediente">Materia prima (inventario)</option>
+                        <option value="ambos">Ambos (productos y materia prima)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción de la categoría..."></textarea>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="activo" selected>Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Guardar categoría</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/categorias'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

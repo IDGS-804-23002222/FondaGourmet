@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Iniciar Orden{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Iniciar Orden de Producción</h1>
+        <p>Confirmar inicio de producción</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="info-card">
+            <div class="info-text">
+                <strong>Información de la orden</strong><br>
+                Orden ID: {{ id }} | Producto: Producto Ejemplo | Cantidad: 10 piezas | Estado actual: Solicitar
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Nota:</strong> Al iniciar la producción, se descontarán los ingredientes del inventario.
+        </div>
+        
+        <form>
+            <div class="form-grid">
+                <div class="form-group-half">
+                    <label for="responsable">Responsable</label>
+                    <input type="text" id="responsable" value="Usuario ejemplo" disabled>
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="comentarios">Comentarios</label>
+                    <textarea id="comentarios" name="comentarios" rows="2" placeholder="Agregar comentarios sobre el inicio..."></textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Sí, iniciar producción</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/produccion'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

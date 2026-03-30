@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<h1>Gestión de Usuarios</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/usuarios/nuevo'">Nuevo usuario</button>
+    <input type="text" class="search" placeholder="Buscar...">
+</div>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Empleado asociado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>admin</td>
+            <td>Administrador</td>
+            <td>Paulo Essau</td>
+            <td>
+                <button type="button" class="btn-edit" onclick="window.location.href='/usuarios/editar/1'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/usuarios/eliminar/1'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>cajero1</td>
+            <td>Cajero</td>
+            <td>Diana Martínez</td>
+            <td>
+                <button type="button" class="btn-edit" onclick="window.location.href='/usuarios/editar/2'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/usuarios/eliminar/2'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>cocinero</td>
+            <td>Cocinero</td>
+            <td>Jairo López</td>
+            <td>
+                <button type="button" class="btn-edit" onclick="window.location.href='/usuarios/editar/3'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/usuarios/eliminar/3'">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

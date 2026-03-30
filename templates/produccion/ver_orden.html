@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Orden{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Orden de Producción</h1>
+        <p>Información completa de la orden ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-half">
+                <label>ID Orden</label>
+                <div class="info-value">{{ id }}</div>
+            </div>
+            <div class="form-group-half">
+                <label>Producto</label>
+                <div class="info-value">Producto Ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Cantidad</label>
+                <div class="info-value">15 piezas</div>
+            </div>
+            <div class="form-group-half">
+                <label>Estado</label>
+                <div class="info-value"><span class="badge process">En proceso</span></div>
+            </div>
+            <div class="form-group-half">
+                <label>Fecha solicitud</label>
+                <div class="info-value">Fecha de ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Fecha producción</label>
+                <div class="info-value">Fecha de ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Responsable</label>
+                <div class="info-value">Usuario ejemplo</div>
+            </div>
+            <div class="form-group-full">
+                <label>Observaciones</label>
+                <div class="info-value">Observaciones de ejemplo</div>
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Ingredientes utilizados</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad requerida</th>
+                    <th>Cantidad utilizada</th>
+                    <th>Unidad</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Ingrediente Ejemplo 1</td>
+                    <td>0.0</td>
+                    <td>0.0</td>
+                    <td>kg</td>
+                    <td><span class="badge active">Completado</span></td>
+                </tr>
+                <tr>
+                    <td>Ingrediente Ejemplo 2</td>
+                    <td>0.0</td>
+                    <td>0.0</td>
+                    <td>L</td>
+                    <td><span class="badge active">Completado</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Bitácora de producción</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha/Hora</th>
+                    <th>Acción</th>
+                    <th>Usuario</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Orden solicitada</td>
+                    <td>Usuario ejemplo</td>
+                    <td>Orden creada automáticamente</td>
+                </tr>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Producción iniciada</td>
+                    <td>Usuario ejemplo</td>
+                    <td>Inicio de preparación</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-primary" onclick="window.location.href='/produccion/iniciar/{{ id }}'">Iniciar producción</button>
+            <button type="button" class="btn-completar" onclick="window.location.href='/produccion/completar/{{ id }}'">Completar orden</button>
+            <button type="button" class="btn-delete" onclick="window.location.href='/produccion/cancelar/{{ id }}'">Cancelar orden</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/produccion'">Volver</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

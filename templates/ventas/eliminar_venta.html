@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Venta{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Venta</h1>
+        <p>¿Está seguro de que desea eliminar la venta con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Fecha:</span>
+                <span class="value">Fecha de ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Cliente:</span>
+                <span class="value">Cliente ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Total:</span>
+                <span class="value">$0.00</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Estado:</span>
+                <span class="value">Completada</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará todos los detalles de la venta y no se podrá recuperar.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar venta</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/ventas'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

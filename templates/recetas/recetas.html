@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Recetas{% endblock %}
+{% block content %}
+<h1>Gestión de Recetas</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/recetas/nueva'">Nueva receta</button>
+    <input type="text" class="search" placeholder="Buscar receta...">
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Ingredientes</th>
+            <th>Costo total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Producto Ejemplo 1</td>
+            <td>3 ingredientes</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Activa</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/recetas/ver/1'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/recetas/editar/1'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/recetas/eliminar/1'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Producto Ejemplo 2</td>
+            <td>4 ingredientes</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Activa</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/recetas/ver/2'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/recetas/editar/2'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/recetas/eliminar/2'">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

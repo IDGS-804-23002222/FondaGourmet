@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Menú{% endblock %}
+{% block content %}
+<h1>Menú del Restaurante</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/menu/agregar'">Agregar al menú</button>
+    <input type="text" class="search" placeholder="Buscar en menú...">
+    <select class="filter">
+        <option value="todas">Todas las categorías</option>
+        <option value="plato_fuerte">Platos fuertes</option>
+        <option value="bebidas">Bebidas</option>
+        <option value="postres">Postres</option>
+        <option value="antojitos">Antojitos</option>
+    </select>
+    <select class="filter">
+        <option value="todos">Todos</option>
+        <option value="disponible">Disponibles</option>
+        <option value="no_disponible">No disponibles</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Disponibilidad</th>
+            <th>Destacado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Producto Ejemplo 1</td>
+            <td>Plato fuerte</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Disponible</span></td>
+            <td><span class="badge" style="background: var(--amarillo); color: #333;">Destacado</span></td>
+            <td class="acciones">
+                <button type="button" class="btn-edit" onclick="window.location.href='/menu/editar/1'">Editar</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo);" onclick="window.location.href='/menu/cambiar-disponibilidad/1'">Cambiar disponibilidad</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/menu/eliminar/1'">Quitar del menú</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Producto Ejemplo 2</td>
+            <td>Bebidas</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Disponible</span></td>
+            <td><span class="badge">Normal</span></td>
+            <td class="acciones">
+                <button type="button" class="btn-edit" onclick="window.location.href='/menu/editar/2'">Editar</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo);" onclick="window.location.href='/menu/cambiar-disponibilidad/2'">Cambiar disponibilidad</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/menu/eliminar/2'">Quitar del menú</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Producto Ejemplo 3</td>
+            <td>Postres</td>
+            <td>$0.00</td>
+            <td><span class="badge inactive">No disponible</span></td>
+            <td><span class="badge">Normal</span></td>
+            <td class="acciones">
+                <button type="button" class="btn-edit" onclick="window.location.href='/menu/editar/3'">Editar</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo);" onclick="window.location.href='/menu/cambiar-disponibilidad/3'">Cambiar disponibilidad</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/menu/eliminar/3'">Quitar del menú</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

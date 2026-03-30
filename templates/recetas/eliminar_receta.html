@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Receta{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Receta</h1>
+        <p>¿Está seguro de que desea eliminar la receta con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Producto:</span>
+                <span class="value">Producto Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Ingredientes:</span>
+                <span class="value">3 ingredientes</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Costo total:</span>
+                <span class="value">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará todos los ingredientes asociados a esta receta.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar receta</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/recetas'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

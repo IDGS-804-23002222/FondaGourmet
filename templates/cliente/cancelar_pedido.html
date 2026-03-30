@@ -1,0 +1,34 @@
+{% extends "cliente/base_cliente.html" %}
+{% block title %}Cancelar pedido{% endblock %}
+
+{% block content %}
+
+<div class="cancel-card">
+
+    <h1 class="cancel-title">Cancelar pedido #{{ pedido.id }}</h1>
+
+    <p class="cancel-text">¿Estás seguro de que deseas cancelar este pedido?</p>
+
+    <ul class="cancel-info">
+        <li><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</li>
+        <li><strong>Estado actual:</strong> {{ pedido.estado }}</li>
+    </ul>
+
+    <div class="cancel-actions">
+
+        <a href="{{ url_for('cliente.cliente_confirmacion', pedido_id=pedido.id) }}" class="btn-primary cancel-btn">
+            No, volver
+        </a>
+
+        <form action="{{ url_for('cliente.cancelar_pedido_confirmar', pedido_id=pedido.id) }}" method="POST"
+            style="display:inline;">
+            <button type="submit" class="btn-success cancel-btn">
+                Confirmar cancelación
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

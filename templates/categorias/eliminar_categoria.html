@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Categoría{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Categoría</h1>
+        <p>¿Está seguro de que desea eliminar la categoría con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Nombre:</span>
+                <span class="value">Platos fuertes</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Tipo:</span>
+                <span class="value">Productos</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Descripción:</span>
+                <span class="value">Platos principales del menú</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Productos asociados:</span>
+                <span class="value">3 productos</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Ingredientes asociados:</span>
+                <span class="value">0 ingredientes</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará la categoría de todos los productos e ingredientes asociados.
+        </div>
+        
+        <form>
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label for="confirmacion">Confirmar eliminación</label>
+                <input type="text" id="confirmacion" name="confirmacion" placeholder="Escriba el nombre de la categoría para confirmar" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-delete btn-large">Sí, eliminar categoría</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/categorias'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "cliente/base_cliente.html" %}
+
+{% block title %}Finalizar compra{% endblock %}
+
+{% block content %}
+<h1>Datos de envío</h1><br>
+
+<form method="POST" action="{{ url_for('cliente.realizar_pedido') }}">
+    <div class="form-row">
+        <label>Nombre completo:</label>
+        <input type="text" name="nombre" required>
+    </div>
+
+    <div class="form-row">
+        <label>Teléfono:</label>
+        <input type="tel" name="telefono" required>
+    </div>
+
+    <div class="form-row">
+        <label>Dirección de entrega:</label>
+        <textarea name="direccion" rows="3" required></textarea>
+    </div>
+
+    <div class="form-row">
+        <label>Notas adicionales (opcional):</label>
+        <textarea name="notas" rows="2"></textarea>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-success">Confirmar pedido</button>
+
+        <!-- ENLACE CORRECTO AL CARRITO -->
+        <a href="{{ url_for('cliente.ver_carrito') }}" class="btn-secondary">
+            Volver al carrito
+        </a>
+    </div>
+</form>
+{% endblock %}

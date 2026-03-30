@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Ingrediente{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Ingrediente</h1>
+        <p>Información completa del ingrediente ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-half">
+                <label>ID</label>
+                <div class="info-value">{{ id }}</div>
+            </div>
+            <div class="form-group-half">
+                <label>Nombre</label>
+                <div class="info-value">Ingrediente Ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Categoría</label>
+                <div class="info-value">Lácteos</div>
+            </div>
+            <div class="form-group-half">
+                <label>Unidad</label>
+                <div class="info-value">kg</div>
+            </div>
+            <div class="form-group-half">
+                <label>Stock actual</label>
+                <div class="info-value">0.0</div>
+            </div>
+            <div class="form-group-half">
+                <label>Stock mínimo</label>
+                <div class="info-value">0.0</div>
+            </div>
+            <div class="form-group-half">
+                <label>Estado</label>
+                <div class="info-value"><span class="badge active">Normal</span></div>
+            </div>
+            <div class="form-group-half">
+                <label>Costo promedio</label>
+                <div class="info-value">$0.00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Ubicación</label>
+                <div class="info-value">Estante de ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Proveedor principal</label>
+                <div class="info-value">Proveedor Ejemplo</div>
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-text">
+                <strong>Información de movimientos</strong><br>
+                Último movimiento: Fecha de ejemplo | Total de movimientos: 0 | Valor total inventario: $0.00
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Movimientos recientes</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Stock después</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Entrada</td>
+                    <td>+0.0</td>
+                    <td>0.0</td>
+                    <td>Compra de ejemplo</td>
+                </tr>
+                <tr>
+                    <td>Fecha de ejemplo</td>
+                    <td>Salida</td>
+                    <td>-0.0</td>
+                    <td>0.0</td>
+                    <td>Producción de ejemplo</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-edit" onclick="window.location.href='/materiaprima/editar/{{ id }}'">Editar ingrediente</button>
+            <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/materiaprima/ajustar-stock/{{ id }}'">Ajustar stock</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/materiaprima'">Volver</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-value {
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris);
+    color: #333;
+}
+.info-card {
+    background: #f8f9fa;
+    border-left: 4px solid var(--verde);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+.info-text {
+    font-size: 0.85rem;
+    color: #555;
+}
+</style>
+{% endblock %}

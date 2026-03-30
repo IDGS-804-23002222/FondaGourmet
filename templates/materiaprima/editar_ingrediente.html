@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Editar Ingrediente{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Editar Ingrediente</h1>
+        <p>Modificando ingrediente ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="nombre">Nombre del ingrediente</label>
+                    <input type="text" id="nombre" name="nombre" value="Ingrediente Ejemplo" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="lacteos" selected>Lácteos</option>
+                        <option value="verduras">Verduras</option>
+                        <option value="carnes">Carnes</option>
+                        <option value="granos">Granos</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="unidad">Unidad de medida</label>
+                    <select id="unidad" name="unidad" required>
+                        <option value="kg" selected>Kilogramos (kg)</option>
+                        <option value="g">Gramos (g)</option>
+                        <option value="L">Litros (L)</option>
+                        <option value="ml">Mililitros (ml)</option>
+                        <option value="pz">Piezas (pz)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="stock_actual">Stock actual</label>
+                    <input type="number" step="0.1" id="stock_actual" name="stock_actual" value="0.0" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="stock_minimo">Stock mínimo</label>
+                    <input type="number" step="0.1" id="stock_minimo" name="stock_minimo" value="0.0" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="costo">Costo promedio</label>
+                    <input type="number" step="0.01" id="costo" name="costo" value="0.00" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="proveedor">Proveedor principal</label>
+                    <select id="proveedor" name="proveedor">
+                        <option value="">Seleccione un proveedor</option>
+                        <option value="1" selected>Proveedor Ejemplo 1</option>
+                        <option value="2">Proveedor Ejemplo 2</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="ubicacion">Ubicación</label>
+                    <input type="text" id="ubicacion" name="ubicacion" value="Estante de ejemplo">
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Actualizar ingrediente</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/materiaprima'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

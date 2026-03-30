@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Producción{% endblock %}
+{% block content %}
+<h1>Órdenes de Producción</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/produccion/nueva'">Nueva orden</button>
+    <input type="text" class="search" placeholder="Buscar orden...">
+    <select class="filter">
+        <option value="todas">Todas las órdenes</option>
+        <option value="solicitada">Solicitadas</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Estado</th>
+            <th>Fecha Solicitud</th>
+            <th>Fecha Producción</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Producto Ejemplo 1</td>
+            <td>15</td>
+            <td><span class="badge process">En proceso</span></td>
+            <td>Fecha de ejemplo</td>
+            <td>Fecha de ejemplo</td>
+            <td>
+                <button type="button" class="btn-completar" onclick="window.location.href='/produccion/completar/1'">Completar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/produccion/cancelar/1'">Cancelar</button>
+                <button type="button" class="btn-view" onclick="window.location.href='/produccion/ver/1'">Ver detalle</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Producto Ejemplo 2</td>
+            <td>10</td>
+            <td><span class="badge requested">Solicitada</span></td>
+            <td>Fecha de ejemplo</td>
+            <td>-</td>
+            <td>
+                <button type="button" class="btn-primary" onclick="window.location.href='/produccion/iniciar/2'">Iniciar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/produccion/cancelar/2'">Cancelar</button>
+                <button type="button" class="btn-view" onclick="window.location.href='/produccion/ver/2'">Ver detalle</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Producto Ejemplo 3</td>
+            <td>25</td>
+            <td><span class="badge active">Completada</span></td>
+            <td>Fecha de ejemplo</td>
+            <td>Fecha de ejemplo</td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/produccion/ver/3'">Ver detalle</button>
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Producto Ejemplo 4</td>
+            <td>8</td>
+            <td><span class="badge cancelled">Cancelada</span></td>
+            <td>Fecha de ejemplo</td>
+            <td>-</td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/produccion/ver/4'">Ver detalle</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

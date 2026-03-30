@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Reporte Detallado{% endblock %}
+{% block content %}
+<h1>Reporte Detallado de {{ tipo|capitalize }}</h1>
+
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body" style="padding: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div>
+                <p><strong>Período:</strong> Fecha de ejemplo - Fecha de ejemplo</p>
+                <p><strong>Generado por:</strong> Usuario ejemplo</p>
+            </div>
+            <div>
+                <p><strong>Fecha de generación:</strong> Fecha de ejemplo</p>
+                <p><strong>Hora:</strong> Hora de ejemplo</p>
+            </div>
+            <div>
+                <p><strong>Tipo de reporte:</strong> {{ tipo|capitalize }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if tipo == 'ventas' %}
+<h3>Detalle de Ventas por Día</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Ventas Totales</th>
+            <th>Transacciones</th>
+            <th>Ticket Promedio</th>
+            <th>Producto más vendido</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>Fecha de ejemplo</td>
+            <td>$0.00</td>
+            <td>0</td>
+            <td>$0.00</td>
+            <td>Producto ejemplo</td>
+        </tr>
+    </tbody>
+</table>
+{% elif tipo == 'inventario' %}
+<h3>Movimientos de Inventario</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Ingrediente</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Stock Final</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>Fecha de ejemplo</td>
+            <td>Ingrediente ejemplo</td>
+            <td>Entrada</td>
+            <td>0.0</td>
+            <td>0.0</td>
+        </tr>
+    </tbody>
+</table>
+{% elif tipo == 'produccion' %}
+<h3>Órdenes de Producción</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID Orden</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Producto ejemplo</td>
+            <td>0</td>
+            <td>Fecha de ejemplo</td>
+            <td>Completada</td>
+        </tr>
+    </tbody>
+</table>
+{% elif tipo == 'financiero' %}
+<h3>Estado de Resultados</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Porcentaje</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>Ingresos totales</td>
+            <td>$0.00</td>
+            <td>100%</td>
+        </tr>
+        <tr>
+            <td>Costo de ventas</td>
+            <td>$0.00</td>
+            <td>0%</td>
+        </tr>
+        <tr>
+            <td>Utilidad bruta</td>
+            <td>$0.00</td>
+            <td>0%</td>
+        </tr>
+        <tr>
+            <td>Gastos operativos</td>
+            <td>$0.00</td>
+            <td>0%</td>
+        </tr>
+        <tr style="font-weight: bold; background: #f0f0f0;">
+            <td>Utilidad neta</td>
+            <td>$0.00</td>
+            <td>0%</td>
+        </tr>
+    </tbody>
+</table>
+{% elif tipo == 'compras' %}
+<h3>Compras por Proveedor</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Proveedor</th>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>Proveedor ejemplo</td>
+            <td>Fecha de ejemplo</td>
+            <td>Producto ejemplo</td>
+            <td>0</td>
+            <td>$0.00</td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+<div class="form-actions" style="margin-top: 20px;">
+    <button type="button" class="btn-primary" onclick="window.print()">Imprimir reporte</button>
+    <button type="button" class="btn-secondary" onclick="window.location.href='/reportes'">Volver</button>
+</div>
+{% endblock %}

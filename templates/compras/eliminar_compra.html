@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Materia Prima{% endblock %}
+{% block content %}
+<h1>Gestión de Materia Prima</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/materiaprima/nuevo'">Nuevo ingrediente</button>
+    <input type="text" class="search" placeholder="Buscar ingrediente...">
+    <select class="filter">
+        <option value="todos">Todos</option>
+        <option value="critico">Stock crítico</option>
+        <option value="bajo">Stock bajo</option>
+        <option value="normal">Stock normal</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Unidad</th>
+            <th>Stock Actual</th>
+            <th>Stock Mínimo</th>
+            <th>Costo Promedio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Ingrediente Ejemplo 1</td>
+            <td>Categoría ejemplo</td>
+            <td>kg</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Normal</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/materiaprima/ver/1'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/materiaprima/editar/1'">Editar</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/materiaprima/ajustar-stock/1'">Ajustar stock</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/materiaprima/eliminar/1'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Ingrediente Ejemplo 2</td>
+            <td>Categoría ejemplo</td>
+            <td>L</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>$0.00</td>
+            <td><span class="badge warning">Bajo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/materiaprima/ver/2'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/materiaprima/editar/2'">Editar</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/materiaprima/ajustar-stock/2'">Ajustar stock</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/materiaprima/eliminar/2'">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

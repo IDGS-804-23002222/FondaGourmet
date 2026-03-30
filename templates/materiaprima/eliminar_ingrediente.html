@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Ingrediente{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Ingrediente</h1>
+        <p>¿Está seguro de que desea eliminar el ingrediente con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Nombre:</span>
+                <span class="value">Ingrediente Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Categoría:</span>
+                <span class="value">Lácteos</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Stock actual:</span>
+                <span class="value">0.0 kg</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Costo promedio:</span>
+                <span class="value">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará el ingrediente de todas las recetas y movimientos asociados. No se podrá recuperar.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar ingrediente</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/materiaprima'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

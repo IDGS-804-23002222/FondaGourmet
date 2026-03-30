@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Proveedor{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Registrar Nuevo Proveedor</h1>
+        <p>Complete los datos del proveedor para agregarlo al sistema</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="nombre">Nombre del proveedor</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Nombre del proveedor" required>
+                    <small>Nombre comercial o razón social</small>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Número de teléfono" required>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="correo@ejemplo.com">
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="direccion">Dirección</label>
+                    <textarea id="direccion" name="direccion" rows="2" placeholder="Dirección completa"></textarea>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="contacto">Persona de contacto</label>
+                    <input type="text" id="contacto" name="contacto" placeholder="Nombre del representante">
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="activo" selected>Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" rows="2" placeholder="Notas adicionales sobre el proveedor"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Guardar proveedor</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/proveedores'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

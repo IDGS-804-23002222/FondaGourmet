@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Menú - Fonda Gourmet{% endblock %}
+{% block content %}
+<h1>Menú del Día</h1>
+
+<div class="menu-categories" style="margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary">Todos</button>
+        <button type="button" class="btn-secondary">Destacados</button>
+        <button type="button" class="btn-secondary">Platos fuertes</button>
+        <button type="button" class="btn-secondary">Bebidas</button>
+        <button type="button" class="btn-secondary">Postres</button>
+        <button type="button" class="btn-secondary">Antojitos</button>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    <div class="menu-item" style="border: 1px solid var(--gris); border-radius: 8px; overflow: hidden;">
+        <div style="background: var(--verde); color: white; padding: 12px;">
+            <h3 style="margin: 0; display: inline-block;">Producto Ejemplo 1</h3>
+            <span class="badge" style="background: var(--amarillo); color: #333; margin-left: 10px;">Destacado</span>
+        </div>
+        <div style="padding: 15px;">
+            <p>Descripción del producto ejemplo</p>
+            <p style="font-size: 20px; font-weight: bold; color: var(--verde); margin-top: 10px;">$0.00</p>
+        </div>
+    </div>
+    
+    <div class="menu-item" style="border: 1px solid var(--gris); border-radius: 8px; overflow: hidden;">
+        <div style="background: var(--verde); color: white; padding: 12px;">
+            <h3 style="margin: 0;">Producto Ejemplo 2</h3>
+        </div>
+        <div style="padding: 15px;">
+            <p>Descripción del producto ejemplo</p>
+            <p style="font-size: 20px; font-weight: bold; color: var(--verde); margin-top: 10px;">$0.00</p>
+        </div>
+    </div>
+    
+    <div class="menu-item" style="border: 1px solid var(--gris); border-radius: 8px; overflow: hidden;">
+        <div style="background: var(--verde); color: white; padding: 12px;">
+            <h3 style="margin: 0;">Producto Ejemplo 3</h3>
+        </div>
+        <div style="padding: 15px;">
+            <p>Descripción del producto ejemplo</p>
+            <p style="font-size: 20px; font-weight: bold; color: var(--verde); margin-top: 10px;">$0.00</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-actions" style="margin-top: 30px;">
+    <button type="button" class="btn-secondary" onclick="window.location.href='/menu'">Volver</button>
+</div>
+{% endblock %}

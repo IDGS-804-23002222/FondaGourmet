@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Venta{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Venta</h1>
+        <p>Información completa de la venta ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-half">
+                <label>ID Venta</label>
+                <div class="info-value">{{ id }}</div>
+            </div>
+            <div class="form-group-half">
+                <label>Fecha/Hora</label>
+                <div class="info-value">Fecha de ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Cliente</label>
+                <div class="info-value">Cliente ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Usuario</label>
+                <div class="info-value">Usuario ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Método de pago</label>
+                <div class="info-value">Efectivo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Estado</label>
+                <div class="info-value"><span class="badge active">Completada</span></div>
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Productos vendidos</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                 </tr>
+            </thead>
+            <tbody>
+                 <tr>
+                    <td>Producto ejemplo</td>
+                    <td>0</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                 </tr>
+            </tbody>
+            <tfoot style="background: #f0f0f0;">
+                 <tr>
+                    <td colspan="3" style="text-align: right;">Subtotal:</td>
+                    <td>$0.00</td>
+                 </tr>
+                 <tr>
+                    <td colspan="3" style="text-align: right;">IVA (16%):</td>
+                    <td>$0.00</td>
+                 </tr>
+                 <tr style="font-weight: bold;">
+                    <td colspan="3" style="text-align: right;">Total:</td>
+                    <td>$0.00</td>
+                 </tr>
+            </tfoot>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-edit" onclick="window.location.href='/ventas/editar/{{ id }}'">Editar venta</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/ventas/imprimir/{{ id }}'">Imprimir ticket</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/ventas'">Volver</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-value {
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris);
+    color: #333;
+}
+</style>
+{% endblock %}

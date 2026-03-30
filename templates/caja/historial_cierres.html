@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Historial de Cierres{% endblock %}
+{% block content %}
+<h1>Historial de Cierres de Caja</h1>
+<div class="toolbar">
+    <input type="text" class="search" placeholder="Buscar por fecha..." style="width: 300px;">
+    <select class="filter">
+        <option value="marzo">Marzo 2026</option>
+        <option value="febrero">Febrero 2026</option>
+        <option value="enero">Enero 2026</option>
+    </select>
+    <button type="button" class="btn-secondary" onclick="window.location.href='/caja'">Volver a caja</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID Cierre</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Usuario</th>
+            <th>Total ventas</th>
+            <th>Efectivo</th>
+            <th>Tarjeta</th>
+            <th>Diferencia</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>101</td>
+            <td>Fecha de ejemplo</td>
+            <td>18:00</td>
+            <td>Usuario ejemplo</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td><span style="color: var(--verde-menta);">$0.00</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/caja/ver-cierre/101'">Ver detalle</button>
+             </td>
+         </tr>
+         <tr>
+            <td>100</td>
+            <td>Fecha de ejemplo</td>
+            <td>18:00</td>
+            <td>Usuario ejemplo</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td>$0.00</td>
+            <td><span style="color: var(--verde-menta);">$0.00</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/caja/ver-cierre/100'">Ver detalle</button>
+             </td>
+         </tr>
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Ticket de Venta{% endblock %}
+{% block content %}
+<div class="ticket-container" style="max-width: 300px; margin: 0 auto; padding: 20px; border: 1px solid var(--gris); background: white;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: var(--verde);">FONDA GOURMET</h2>
+        <p>Dirección de ejemplo</p>
+        <p>Tel: 000-000-0000</p>
+        <hr>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <p><strong>Ticket #{{ id }}</strong></p>
+        <p>Fecha: Fecha de ejemplo</p>
+        <p>Atendió: Usuario ejemplo</p>
+        <p>Cliente: Cliente ejemplo</p>
+        <hr>
+    </div>
+    
+    <table style="width: 100%; margin-bottom: 15px;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--gris);">
+                <th style="text-align: left;">Producto</th>
+                <th style="text-align: right;">Cant</th>
+                <th style="text-align: right;">Precio</th>
+                <th style="text-align: right;">Subtotal</th>
+             </tr>
+        </thead>
+        <tbody>
+             <tr>
+                <td style="text-align: left;">Producto ejemplo</td>
+                <td style="text-align: right;">0</td>
+                <td style="text-align: right;">$0.00</td>
+                <td style="text-align: right;">$0.00</td>
+             </tr>
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 1px solid var(--gris);">
+                <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                <td style="text-align: right;"><strong>$0.00</strong></td>
+             </tr>
+        </tfoot>
+    </table>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Método de pago: Efectivo</p>
+        <p>Gracias por su compra</p>
+        <hr>
+        <p>www.ejemplo.com</p>
+    </div>
+</div>
+
+<div class="form-actions" style="text-align: center; margin-top: 20px;">
+    <button type="button" class="btn-primary" onclick="window.print()">Imprimir ticket</button>
+    <button type="button" class="btn-secondary" onclick="window.location.href='/ventas'">Volver</button>
+</div>
+{% endblock %}

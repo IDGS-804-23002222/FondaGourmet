@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Cierre{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Cierre de Caja</h1>
+        <p>Información completa del cierre ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-half">
+                <label>Fecha</label>
+                <div class="info-value">Fecha de ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Hora</label>
+                <div class="info-value">18:00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Usuario</label>
+                <div class="info-value">Usuario ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Total ventas</label>
+                <div class="info-value">$0.00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Efectivo (sistema)</label>
+                <div class="info-value">$0.00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Efectivo (contado)</label>
+                <div class="info-value">$0.00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Tarjeta</label>
+                <div class="info-value">$0.00</div>
+            </div>
+            <div class="form-group-half">
+                <label>Diferencia</label>
+                <div class="info-value"><span style="color: var(--verde-menta);">$0.00</span></div>
+            </div>
+            <div class="form-group-full">
+                <label>Observaciones</label>
+                <div class="info-value">Cierre sin incidencias</div>
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Ventas incluidas en este cierre</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Venta ID</th>
+                    <th>Hora</th>
+                    <th>Cliente</th>
+                    <th>Monto</th>
+                    <th>Método de pago</th>
+                 </tr>
+            </thead>
+            <tbody>
+                 <tr>
+                    <td>1</td>
+                    <td>10:30</td>
+                    <td>Cliente ejemplo</td>
+                    <td>$0.00</td>
+                    <td>Efectivo</td>
+                 </tr>
+                 <tr>
+                    <td>2</td>
+                    <td>11:15</td>
+                    <td>Cliente ejemplo</td>
+                    <td>$0.00</td>
+                    <td>Tarjeta</td>
+                 </tr>
+            </tbody>
+            <tfoot style="background: #f0f0f0; font-weight: bold;">
+                 <tr>
+                    <td colspan="3" style="text-align: right;">Total:</td>
+                    <td>$0.00</td>
+                    <td></td>
+                 </tr>
+            </tfoot>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-primary" onclick="window.print()">Imprimir reporte</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/caja/historial'">Volver al historial</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-value {
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris);
+    color: #333;
+}
+</style>
+{% endblock %}

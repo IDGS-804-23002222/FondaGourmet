@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Ver Receta{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Detalle de Receta</h1>
+        <p>Información completa de la receta ID: {{ id }}</p>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-grid">
+            <div class="form-group-half">
+                <label>ID Receta</label>
+                <div class="info-value">{{ id }}</div>
+            </div>
+            <div class="form-group-half">
+                <label>Producto</label>
+                <div class="info-value">Producto Ejemplo</div>
+            </div>
+            <div class="form-group-full">
+                <label>Descripción</label>
+                <div class="info-value">Descripción de la receta ejemplo</div>
+            </div>
+            <div class="form-group-half">
+                <label>Rendimiento</label>
+                <div class="info-value">4 porciones</div>
+            </div>
+            <div class="form-group-half">
+                <label>Costo total</label>
+                <div class="info-value">$0.00</div>
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Ingredientes</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th>Unidad</th>
+                    <th>Costo unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Ingrediente Ejemplo 1</td>
+                    <td>0.0</td>
+                    <td>kg</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                </tr>
+                <tr>
+                    <td>Ingrediente Ejemplo 2</td>
+                    <td>0.0</td>
+                    <td>L</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                </tr>
+                <tr style="font-weight: bold; background: #f0f0f0;">
+                    <td colspan="4" style="text-align: right;">Total:</td>
+                    <td>$0.00</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="form-actions" style="margin-top: 25px;">
+            <button type="button" class="btn-edit" onclick="window.location.href='/recetas/editar/{{ id }}'">Editar receta</button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/recetas'">Volver</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-value {
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris);
+    color: #333;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Anular Venta{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Anular Venta</h1>
+        <p>¿Está seguro de que desea anular la venta con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Fecha:</span>
+                <span class="value">Fecha de ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Cliente:</span>
+                <span class="value">Cliente ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Monto:</span>
+                <span class="value">$0.00</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Método de pago:</span>
+                <span class="value">Efectivo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Usuario:</span>
+                <span class="value">Usuario ejemplo</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción anulará la venta y no se podrá recuperar. El inventario será ajustado.
+        </div>
+        
+        <form>
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label for="motivo">Motivo de anulación</label>
+                <textarea id="motivo" name="motivo" rows="2" placeholder="Especifique el motivo de la anulación..."></textarea>
+            </div>
+            
+            <div class="form-group-half">
+                <label for="autoriza">Autoriza</label>
+                <input type="text" id="autoriza" value="Usuario ejemplo" disabled>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 25px;">
+                <button type="submit" class="btn-delete btn-large">Sí, anular venta</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/caja'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

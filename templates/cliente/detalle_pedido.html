@@ -1,0 +1,68 @@
+{% extends "cliente/base_cliente.html" %}
+{% block title %}Detalle del pedido{% endblock %}
+
+{% block content %}
+
+<div class="pedido-detalle-card">
+
+    <h1 class="pedido-title">Detalle del Pedido #{{ pedido.id }}</h1>
+
+    <h3 class="subtitulo">Información del cliente</h3>
+    <ul class="info-list">
+        <li><strong>Nombre:</strong> {{ pedido.nombre }}</li>
+        <li><strong>Teléfono:</strong> {{ pedido.telefono }}</li>
+        <li><strong>Dirección:</strong> {{ pedido.direccion }}</li>
+        <li><strong>Notas:</strong> {{ pedido.notas or 'Ninguna' }}</li>
+        <li><strong>Fecha:</strong> {{ pedido.fecha }}</li>
+        <li><strong>Estado:</strong> {{ pedido.estado }}</li>
+    </ul>
+
+    <h3 class="subtitulo">Productos</h3>
+    <table class="data-table detalle-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in pedido.productos %}
+            {% if producto is mapping %}
+            <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.cantidad }}</td>
+                <td>${{ producto.precio }}</td>
+                <td>${{ producto.precio * producto.cantidad }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">{{ producto }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3 class="pedido-total">Total del Pedido: ${{ "%.2f"|format(pedido.total) }}</h3>
+
+    <div class="form-actions pedido-actions">
+        {% if pedido.estado == 'Pendiente' %}
+        <a href="{{ url_for('cliente.cancelar_pedido', pedido_id=pedido.id) }}" class="btn-danger">
+            Cancelar pedido
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('cliente.cliente_consultar_pedidos') }}" class="btn-primary">
+            Volver a mis pedidos
+        </a>
+
+        <a href="{{ url_for('cliente.cliente_menu') }}" class="btn-info">
+            Volver al menú
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

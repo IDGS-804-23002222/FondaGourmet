@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Nueva Receta{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Registrar Nueva Receta</h1>
+        <p>Complete los datos de la receta</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                <div class="form-group-full">
+                    <label for="producto">Producto</label>
+                    <select id="producto" name="producto" required>
+                        <option value="">Seleccione un producto</option>
+                        <option value="1">Producto Ejemplo 1</option>
+                        <option value="2">Producto Ejemplo 2</option>
+                        <option value="3">Producto Ejemplo 3</option>
+                    </select>
+                </div>
+                
+                <div class="form-group-full">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="3" placeholder="Instrucciones de preparación..."></textarea>
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="rendimiento">Rendimiento</label>
+                    <input type="text" id="rendimiento" name="rendimiento" placeholder="Ej: 4 porciones">
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Ingredientes</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <select name="ingrediente[]">
+                                <option value="">Seleccione ingrediente</option>
+                                <option value="1">Ingrediente Ejemplo 1</option>
+                                <option value="2">Ingrediente Ejemplo 2</option>
+                                <option value="3">Ingrediente Ejemplo 3</option>
+                            </select>
+                        </td>
+                        <td><input type="text" name="cantidad[]" placeholder="Cantidad"></td>
+                        <td>
+                            <select name="unidad[]">
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="L">L</option>
+                                <option value="ml">ml</option>
+                                <option value="pz">pz</option>
+                            </select>
+                        </td>
+                        <td><button type="button" class="btn-delete">Eliminar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <button type="button" class="btn-secondary">Agregar ingrediente</button>
+            
+            <div class="form-actions" style="margin-top: 25px;">
+                <button type="submit" class="btn-primary btn-large">Guardar receta</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/recetas'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

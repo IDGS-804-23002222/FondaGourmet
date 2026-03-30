@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Ventas{% endblock %}
+{% block content %}
+<h1>Gestión de Ventas</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/ventas/nueva'">Nueva venta</button>
+    <input type="text" class="search" placeholder="Buscar venta...">
+    <select id="filtroEstado" class="filter">
+        <option value="todos">Todos los estados</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+        <option value="pendiente">Pendientes</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha/Hora</th>
+            <th>Cliente</th>
+            <th>Usuario</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Fecha de ejemplo</td>
+            <td>Cliente ejemplo</td>
+            <td>Usuario ejemplo</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Completada</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/ventas/ver/1'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/ventas/editar/1'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/ventas/eliminar/1'">Eliminar</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='/ventas/imprimir/1'">Imprimir</button>
+             </td>
+         </tr>
+         <tr>
+             <td>2</td>
+             <td>Fecha de ejemplo</td>
+             <td>Cliente ejemplo</td>
+             <td>Usuario ejemplo</td>
+             <td>$0.00</td>
+             <td><span class="badge process">Pendiente</span></td>
+             <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/ventas/ver/2'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/ventas/editar/2'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/ventas/eliminar/2'">Eliminar</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='/ventas/imprimir/2'">Imprimir</button>
+             </td>
+         </tr>
+    </tbody>
+</table>
+{% endblock %}

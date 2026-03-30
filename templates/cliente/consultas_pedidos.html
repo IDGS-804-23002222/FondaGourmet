@@ -1,0 +1,66 @@
+{% extends "cliente/base_cliente.html" %}
+{% block title %}Mis pedidos{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">Mis Pedidos</h1>
+
+{% if pedidos %}
+<div class="pedidos-wrapper">
+
+    <table class="data-table pedidos-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for pedido in pedidos|reverse %}
+            <tr>
+                <td>#{{ pedido.id }}</td>
+                <td>{{ pedido.fecha }}</td>
+                <td>${{ "%.2f"|format(pedido.total) }}</td>
+                <td>
+                    {% if pedido.estado == 'Pendiente' %}
+                    <span class="badge badge-pendiente">{{ pedido.estado }}</span>
+                    {% elif pedido.estado == 'Cancelado' %}
+                    <span class="badge badge-cancelado">{{ pedido.estado }}</span>
+                    {% else %}
+                    <span class="badge badge-completado">{{ pedido.estado }}</span>
+                    {% endif %}
+                </td>
+
+                <td class="acciones-cell">
+                    {% if pedido.estado == 'Pendiente' %}
+                    <a href="{{ url_for('cliente.cancelar_pedido', pedido_id=pedido.id) }}"
+                        class="btn-danger btn-cancel">
+                        Cancelar
+                    </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('cliente.detalle_pedido', id=pedido.id) }}" class="btn-primary btn-view">
+                        Ver
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% else %}
+<p class="no-pedidos">No tienes pedidos aún.</p>
+{% endif %}
+
+<div class="center-btn">
+    <a href="{{ url_for('cliente.cliente_menu') }}" class="btn-success">
+        Seguir comprando
+    </a>
+</div>
+
+{% endblock %}

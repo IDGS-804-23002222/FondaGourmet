@@ -1,0 +1,52 @@
+{% macro tabla_datos(columnas, filas, acciones=True) %}
+<table class="data-table">
+    <thead>
+        <tr>
+            {% for col in columnas %}
+            <th>{{ col }}</th>
+            {% endfor %}
+            {% if acciones %}
+            <th>Acciones</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for fila in filas %}
+        <tr>
+            {% for valor in fila %}
+            <td>{{ valor|safe }}</td>
+            {% endfor %}
+            {% if acciones %}
+            <td>
+                <button class="btn-edit">✏️</button>
+                <button class="btn-delete">🗑️</button>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
+{% macro formulario(campos, titulo, boton="Guardar", action="#") %}
+<div class="form-card">
+    <h3>{{ titulo }}</h3>
+    <form method="post" action="{{ action }}">
+        {% for campo in campos %}
+        <div class="form-row">
+            <label for="{{ campo.id }}">{{ campo.label }}</label>
+            {% if campo.tipo == 'textarea' %}
+            <textarea name="{{ campo.name }}" id="{{ campo.id }}" rows="3"></textarea>
+            {% else %}
+            <input type="{{ campo.tipo or 'text' }}" name="{{ campo.name }}" id="{{ campo.id }}" {% if campo.placeholder
+                %}placeholder="{{ campo.placeholder }}" {% endif %}>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">{{ boton }}</button>
+            <button type="reset" class="btn-secondary">Limpiar</button>
+        </div>
+    </form>
+</div>
+{% endmacro %}

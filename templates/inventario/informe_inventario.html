@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Informe de Inventario{% endblock %}
+{% block content %}
+<h1>Informe de Inventario</h1>
+
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body" style="padding: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+            <div>
+                <p><strong>Total ingredientes:</strong> 0</p>
+                <p><strong>Valor total:</strong> $0.00</p>
+            </div>
+            <div>
+                <p><strong>Stock normal:</strong> 0</p>
+                <p><strong>Stock bajo:</strong> 0</p>
+            </div>
+            <div>
+                <p><strong>Stock crítico:</strong> 0</p>
+                <p><strong>Agotados:</strong> 0</p>
+            </div>
+            <div>
+                <p><strong>Rotación mensual:</strong> 0%</p>
+                <p><strong>Días de cobertura:</strong> 0 días</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Recomendaciones de compra</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Ingrediente</th>
+            <th>Stock actual</th>
+            <th>Stock mínimo</th>
+            <th>Cantidad a comprar</th>
+            <th>Prioridad</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>Ingrediente Ejemplo 1</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td><span class="badge danger">Alta</span></td>
+        </tr>
+        <tr>
+            <td>Ingrediente Ejemplo 2</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td><span class="badge warning">Media</span></td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="form-actions" style="margin-top: 20px;">
+    <button type="button" class="btn-primary" onclick="window.print()">Imprimir informe</button>
+    <button type="button" class="btn-secondary">Exportar a PDF</button>
+    <button type="button" class="btn-secondary" onclick="window.location.href='/inventario'">Volver</button>
+</div>
+{% endblock %}

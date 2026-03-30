@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Proveedor{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Eliminar Proveedor</h1>
+        <p>¿Está seguro de que desea eliminar el proveedor con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Nombre:</span>
+                <span class="value">Proveedor Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Teléfono:</span>
+                <span class="value">0000000000</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Correo:</span>
+                <span class="value">proveedor@ejemplo.com</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Compras asociadas:</span>
+                <span class="value">Ejemplo</span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción eliminará al proveedor y todas sus compras asociadas. No se podrá recuperar.
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-delete btn-large">Sí, eliminar proveedor</button>
+            <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/proveedores'">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

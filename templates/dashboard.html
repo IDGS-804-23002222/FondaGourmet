@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="cards">
+    <div class="card">
+        <h3>Ventas hoy</h3>
+        <p class="value">$12,500</p>
+    </div>
+    <div class="card">
+        <h3>Stock crítico</h3>
+        <p class="value warning">3 ingredientes</p>
+    </div>
+    <div class="card">
+        <h3>Producción activa</h3>
+        <p class="value">2 órdenes</p>
+    </div>
+    <div class="card">
+        <h3>Movimientos recientes</h3>
+        <p class="value">8 registros</p>
+    </div>
+</div>
+<div class="chart-container">
+    <canvas id="ventasChart" width="400" height="200"></canvas>
+</div>
+<script>
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            datasets: [{
+                label: 'Ventas',
+                data: [8500, 9200, 7800, 11000, 13500, 15800, 12500],
+                borderColor: '#2C5F2D',
+                tension: 0.3
+            }]
+        }
+    });
+</script>
+{% endblock %}

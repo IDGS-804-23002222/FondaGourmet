@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+<h1>Gestión de Proveedores</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/proveedores/nuevo'">Nuevo proveedor</button>
+    <input type="text" class="search" placeholder="Buscar proveedor...">
+    <select class="filter">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+    </select>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Proveedor Ejemplo 1</td>
+            <td>0000000000</td>
+            <td>proveedor1@ejemplo.com</td>
+            <td><span class="badge active">Activo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/proveedores/ver/1'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/proveedores/editar/1'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/proveedores/eliminar/1'">Eliminar</button>
+            </td>
+        </tr>
+         <tr>
+            <td>2</td>
+            <td>Proveedor Ejemplo 2</td>
+            <td>0000000000</td>
+            <td>proveedor2@ejemplo.com</td>
+            <td><span class="badge active">Activo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/proveedores/ver/2'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/proveedores/editar/2'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/proveedores/eliminar/2'">Eliminar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Proveedor Ejemplo 3</td>
+            <td>0000000000</td>
+            <td>proveedor3@ejemplo.com</td>
+            <td><span class="badge inactive">Inactivo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/proveedores/ver/3'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='/proveedores/editar/3'">Editar</button>
+                <button type="button" class="btn-delete" onclick="window.location.href='/proveedores/eliminar/3'">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

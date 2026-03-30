@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<h1>Inventario de Materia Prima</h1>
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='/inventario/nuevo-movimiento'">Registrar movimiento</button>
+    <input type="text" class="search" placeholder="Buscar ingrediente...">
+    <select id="filtroEstado" class="filter">
+        <option value="todos">Todos los estados</option>
+        <option value="normal">Normal</option>
+        <option value="bajo">Stock bajo</option>
+        <option value="critico">Crítico</option>
+    </select>
+    <button type="button" class="btn-secondary" onclick="window.location.href='/inventario/informe'">Exportar inventario</button>
+</div>
+
+<div class="alert alert-warning">
+    <strong>Alertas de stock bajo</strong>
+    <ul style="margin-top: 10px; margin-bottom: 0;">
+        <li>Ingrediente ejemplo: stock actual 0.0 (mínimo 0.0) - Bajo</li>
+        <li>Ingrediente ejemplo: stock actual 0.0 (mínimo 0.0) - CRÍTICO</li>
+    </ul>
+</div>
+
+<table class="data-table" id="tablaInventario">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ingrediente</th>
+            <th>Categoría</th>
+            <th>Unidad</th>
+            <th>Stock Actual</th>
+            <th>Stock Mínimo</th>
+            <th>Valor Inventario</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Ingrediente Ejemplo 1</td>
+            <td>Categoría ejemplo</td>
+            <td>kg</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>$0.00</td>
+            <td><span class="badge active">Normal</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/inventario/movimientos/1'">Movimientos</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/inventario/ajustar/1'">Ajustar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Ingrediente Ejemplo 2</td>
+            <td>Categoría ejemplo</td>
+            <td>L</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>$0.00</td>
+            <td><span class="badge warning">Bajo</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/inventario/movimientos/2'">Movimientos</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/inventario/ajustar/2'">Ajustar</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Ingrediente Ejemplo 3</td>
+            <td>Categoría ejemplo</td>
+            <td>kg</td>
+            <td>0.0</td>
+            <td>0.0</td>
+            <td>$0.00</td>
+            <td><span class="badge danger">Crítico</span></td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='/inventario/movimientos/3'">Movimientos</button>
+                <button type="button" class="btn-primary" style="background: var(--amarillo); color: #333;" onclick="window.location.href='/inventario/ajustar/3'">Ajustar</button>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot style="background: #f0f0f0; font-weight: bold;">
+        <tr>
+            <td colspan="6" style="text-align: right;">Valor total del inventario:</td>
+            <td>$0.00</td>
+            <td colspan="2"></td>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    document.getElementById('filtroEstado').addEventListener('change', function(e) {
+        const filtro = e.target.value;
+        const rows = document.querySelectorAll('#tablaInventario tbody tr');
+        
+        rows.forEach(row => {
+            const estadoBadge = row.querySelector('.badge');
+            if (estadoBadge) {
+                const estado = estadoBadge.innerText.toLowerCase();
+                if (filtro === 'todos') {
+                    row.style.display = '';
+                } else if (filtro === 'normal' && estado === 'normal') {
+                    row.style.display = '';
+                } else if (filtro === 'bajo' && estado === 'bajo') {
+                    row.style.display = '';
+                } else if (filtro === 'critico' && estado === 'crítico') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+    
+    document.querySelector('.search').addEventListener('input', function(e) {
+        const busqueda = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tablaInventario tbody tr');
+        rows.forEach(row => {
+            const nombre = row.cells[1].innerText.toLowerCase();
+            if (nombre.includes(busqueda)) {
+                row.style.display = '';
+            } else {
+                if (row.style.display !== 'none') {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

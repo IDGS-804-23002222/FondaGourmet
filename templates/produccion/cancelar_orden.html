@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Cancelar Orden{% endblock %}
+{% block content %}
+<div class="delete-page">
+    <div class="delete-container">
+        <h1>Cancelar Orden de Producción</h1>
+        <p>¿Está seguro de que desea cancelar la orden de producción con ID <strong>{{ id }}</strong>?</p>
+        
+        <div class="user-info-card">
+            <div class="user-info-row">
+                <span class="label">Producto:</span>
+                <span class="value">Producto Ejemplo</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Cantidad:</span>
+                <span class="value">10 piezas</span>
+            </div>
+            <div class="user-info-row">
+                <span class="label">Estado actual:</span>
+                <span class="value"><span class="badge requested">Solicitada</span></span>
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+        </div>
+        
+        <form>
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label for="motivo">Motivo de cancelación</label>
+                <textarea id="motivo" name="motivo" rows="2" placeholder="Especifique el motivo de cancelación..." required></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-delete btn-large">Sí, cancelar orden</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='/produccion'">No, volver</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
