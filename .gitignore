@@ -1,4 +1,14 @@
 .env/
 __pycache__/
 *.pyc
-static/
+/static/style/
+/static/js/
+/static/favicon.svg
+/logs/
+*.log
+.venv/
+venv/
+*.swp
+*.swo
+.DS_Store
+.vscode/

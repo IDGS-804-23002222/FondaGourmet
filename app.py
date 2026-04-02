@@ -14,6 +14,7 @@ from dashboard import dashboard
 from ventas import ventas
 from produccion import produccion
 from modules.proveedores import proveedores
+from modules.productos import productos
 from tienda import tienda
 from modules.usuarios import usuarios
 
@@ -58,6 +59,7 @@ def create_app():
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
     app.register_blueprint(proveedores, url_prefix='/proveedores')
+    app.register_blueprint(productos, url_prefix='/productos')
     
     # Configurar logging
     if not os.path.exists('logs'):

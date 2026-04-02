@@ -287,3 +287,91 @@ class EditarProveedorForm(FlaskForm):
     ])
     
     submit= SubmitField('Actualizar proveedor')
+
+
+class CrearProductoForm(FlaskForm):
+    nombre = StringField('Nombre', [
+        validators.DataRequired(message="El nombre es obligatorio."),
+        validators.Length(min=3, max=100, message="El nombre debe tener entre 3 y 100 caracteres.")
+    ])
+    
+    descripcion = StringField('Descripción', [
+        validators.Optional(),
+        validators.Length(max=500, message="La descripción no debe exceder 500 caracteres.")
+    ])
+    
+    precio = FloatField('Precio', [
+        validators.DataRequired(message="El precio es obligatorio."),
+        validators.NumberRange(min=0.01, message="El precio debe ser mayor a 0.")
+    ])
+    
+    stock_actual = FloatField('Stock Actual', [
+        validators.DataRequired(message="El stock actual es obligatorio."),
+        validators.NumberRange(min=0, message="El stock no puede ser negativo.")
+    ])
+    
+    stock_minimo = FloatField('Stock Mínimo', [
+        validators.DataRequired(message="El stock mínimo es obligatorio."),
+        validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
+    ])
+    
+    id_categoria = SelectField('Categoría', [
+        validators.DataRequired(message="Debe seleccionar una categoría.")
+    ], coerce=int)
+    
+    imagen = StringField('URL Imagen (opcional)', [
+        validators.Optional(),
+        validators.URL(message="Ingrese una URL válida.")
+    ])
+    
+    submit = SubmitField('Crear Producto')
+    
+    def __init__(self, *args, **kwargs):
+        super(CrearProductoForm, self).__init__(*args, **kwargs)
+        from models import Categoria
+        categorias = Categoria.query.filter_by(estado=True).all()
+        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+
+
+class EditarProductoForm(FlaskForm):
+    nombre = StringField('Nombre', [
+        validators.Optional(),
+        validators.Length(min=3, max=100, message="El nombre debe tener entre 3 y 100 caracteres.")
+    ])
+    
+    descripcion = StringField('Descripción', [
+        validators.Optional(),
+        validators.Length(max=500, message="La descripción no debe exceder 500 caracteres.")
+    ])
+    
+    precio = FloatField('Precio', [
+        validators.Optional(),
+        validators.NumberRange(min=0.01, message="El precio debe ser mayor a 0.")
+    ])
+    
+    stock_actual = FloatField('Stock Actual', [
+        validators.Optional(),
+        validators.NumberRange(min=0, message="El stock no puede ser negativo.")
+    ])
+    
+    stock_minimo = FloatField('Stock Mínimo', [
+        validators.Optional(),
+        validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
+    ])
+    
+    id_categoria = SelectField('Categoría', [
+        validators.Optional()
+    ], coerce=int)
+    
+    imagen = StringField('URL Imagen (opcional)', [
+        validators.Optional(),
+        validators.URL(message="Ingrese una URL válida.")
+    ])
+    
+    submit = SubmitField('Actualizar Producto')
+    
+    def __init__(self, *args, **kwargs):
+        super(EditarProductoForm, self).__init__(*args, **kwargs)
+        from models import Categoria
+        categorias = Categoria.query.filter_by(estado=True).all()
+        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
