@@ -1,0 +1,42 @@
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    flex: 1;
+    min-width: 200px;
+    border-left: 4px solid var(--verde);
+}
+
+.card-custom {
+    background: #16213e;
+    padding: 30px;
+    border-radius: 15px;
+    transition: 0.3s;
+    height: 100%;
+}
+
+.card-custom:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.card-custom h4 {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.card h3 {
+    margin-bottom: 10px;
+    color: var(--marrón);
+}
+
+.card .value {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.card .value.warning {
+    color: var(--rojo);
+}
+

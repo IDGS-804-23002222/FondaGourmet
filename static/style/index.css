@@ -1,0 +1,323 @@
+:root {
+    --verde: #2C5F2D;
+    --crema: #F9F5E3;
+    --marrón: #8B5A2B;
+    --blanco: #FFF9F0;
+    --gris: #E0E0E0;
+    --rojo: #A4161A;
+    --verde-menta: #4CAF50;
+    --amarillo: #FFC107;
+    --azul: #3A6EA5;
+    --navbar-height: 70px;
+    --sidebar-width: 250px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--crema);
+}
+
+.app-container {
+    display: flex;
+}
+
+  .content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 130px);
+        }
+
+.hero {
+    height: 100vh;
+    color: white;
+    padding: 80px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:  linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+                url('/static/imagen/tacos.jpg') center/cover no-repeat;
+}
+
+.hero h1 {
+    color: var(--crema);
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.hero p {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+.main-content {
+    margin-top: var(--navbar-height);
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    min-height: calc(100vh - var(--navbar-height));
+    min-width: calc(100% - var(--sidebar-width));
+}
+
+.section-dark {
+    background: #1a1a2e;
+    color: white;
+    padding: 80px 0;
+}
+
+.section-light {
+    background: white;
+    padding: 80px 0;
+}
+
+.icon {
+    font-size: 2.5rem;
+    color: var(--rojo);
+}
+
+header {
+    background-color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: flex-end;
+    border-bottom: 1px solid var(--gris);
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logout {
+    background-color: var(--rojo);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.content {
+    padding: 30px;
+    background-color: var(--blanco);
+    flex: 1;
+}
+
+         .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .contact-info p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+.contact-info i {
+    color: var(--rojo);
+    margin-right: 8px;
+}
+.footer {
+    background: #0f0f1a;
+    color: #ccc;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+        .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge.active { background-color: var(--verde-menta); color: white; }
+.badge.inactive { background-color: var(--gris); color: #333; }
+.badge.normal { background-color: var(--verde-menta); color: white; }
+.badge.low { background-color: var(--amarillo); color: #333; }
+.badge.critical { background-color: var(--rojo); color: white; }
+.badge.process { background-color: var(--azul); color: white; }
+.badge.requested { background-color: var(--marrón); color: white; }
+.badge.completed { background-color: var(--verde-menta); color: white; }
+.badge.cancelled { background-color: var(--gris); color: #333; }
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.search, .filter {
+    padding: 8px 12px;
+    border: 1px solid var(--gris);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.search {
+    flex: 1;
+}
+
+.filter {
+    width: auto;
+    min-width: 150px;
+}
+
+.info-card {
+    background: #f8f9fa;
+    border-left: 4px solid var(--verde);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.info-text {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-top: var(--navbar-height);
+                margin-left: 0;
+                padding: 20px;
+                min-height: calc(100vh - var(--navbar-height));
+                min-width: 100%;
+            }
+        .mobile-menu-btn {
+                display: block;
+            }
+        .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+        }
+
+        /* CONTENEDOR */
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+}
+
+/* CARD PRINCIPAL */
+.profile-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 25px;
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    color: var(--blanco);
+}
+
+/* HEADER */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: var(--verde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.profile-header span {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* BODY */
+.profile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ITEMS */
+.profile-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 12px;
+
+    transition: 0.3s;
+}
+
+.profile-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.profile-item i {
+    font-size: 20px;
+    color: var(--verde-menta);
+}
+
+.profile-item small {
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.profile-item p {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* BOTONES */
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+
+/* ID */
+.profile-id {
+    text-align: center;
+    font-size: 10px;
+    margin-top: 15px;
+    opacity: 0.6;
+}
+
+        
+        

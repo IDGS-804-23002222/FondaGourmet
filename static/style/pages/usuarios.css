@@ -1,0 +1,203 @@
+.user-page{
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.user-row {
+    opacity: 0;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Scrollbar personalizado para móviles */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 20px;
+}
+
+/* Mejoras opcionales de usabilidad */
+#searchInput:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+button:hover {
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+/* Mejora visual para los badges de rol y estado */
+[data-rol] + td span,
+[data-estado] + td span {
+    transition: all 0.2s ease;
+}
+
+[data-rol] + td span:hover,
+[data-estado] + td span:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Asegurar que los colores dark mode se vean bien */
+.dark .bg-purple-900\/50 { background-color: rgb(126 34 206 / 0.5); }
+.dark .bg-blue-900\/50   { background-color: rgb(29 78 216 / 0.5); }
+.dark .bg-amber-900\/50  { background-color: rgb(180 83 9 / 0.5); }
+.dark .bg-emerald-900\/50{ background-color: rgb(4 120 87 / 0.5); }
+
+.user-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.user-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #0c4d24;
+    box-shadow: 0 10px 30px rgba(2, 36, 9, 0.4);
+    padding: 30px;
+}
+
+.user-header {
+    background: green;
+    padding: 20px;
+    color: white;
+    border-radius: 20px 20px 0 0;
+    margin: -30px -30px 20px -30px;
+}
+
+.user-header-content {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.user-info h1 {
+    font-size: 25px;
+    margin: 0;
+}
+
+.user-info p {
+    font-size: 15px;
+    opacity: 0.8;
+}
+
+/* BODY */
+.user-body {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ITEM */
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-item span {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.user-item p {
+    margin: 0;
+    font-size: 20px;
+    color: #c0c2c7;
+}
+
+/* ICONOS */
+.icon {
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.icon.purple { background: #5b21b6; color: white; }
+.icon.green { background: #065f46; color: white; }
+.icon.blue { background: #1e40af; color: white; }
+.icon.yellow { background: #92400e; color: white; }
+.icon.gray { background: #374151; color: white; }
+
+/* ESTADO */
+.activo {
+    color: #10b981;
+}
+
+.inactivo {
+    color: #ef4444;
+}
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+
+    .user-container {
+        padding: 10px;
+    }
+
+    .user-card {
+        border-radius: 15px;
+    }
+
+    .user-header {
+        padding: 15px;
+    }
+
+    .avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .user-info h1 {
+        font-size: 14px;
+    }
+
+    .user-info p {
+        font-size: 11px;
+    }
+
+    .user-body {
+        gap: 12px;
+    }
+
+    .user-item p {
+        font-size: 12px;
+    }
+
+}

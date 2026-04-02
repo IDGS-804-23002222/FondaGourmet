@@ -125,7 +125,6 @@ class MateriaPrima(db.Model):
     unidad_medida = db.Column(db.String(20), nullable=False)
     stock_actual = db.Column(db.Float, default=0, nullable=False)
     stock_minimo = db.Column(db.Float, nullable=False)
-    precio = db.Column(db.Float, nullable=False)
     porcentaje_merma = db.Column(db.Float, default=0, nullable=False)
     factor_conversion = db.Column(db.Float, default=1, nullable=False)
     estado = db.Column(db.Boolean, default=True)
@@ -141,7 +140,6 @@ class MateriaPrima(db.Model):
     detalle_producciones = db.relationship('DetalleProduccion', back_populates='materia_prima', lazy=True)  
 
     __table_args__ = (
-        CheckConstraint('precio >= 0', name='check_precio_materia_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_materia_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_materia_no_negativo'),
         CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='check_porcentaje_merma'),

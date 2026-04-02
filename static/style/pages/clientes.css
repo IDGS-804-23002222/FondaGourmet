@@ -1,0 +1,625 @@
+/* ===== CLIENTE - ESTILOS EXCLUSIVOS ===== */
+
+.cliente-container a.btn-primary,
+.cliente-container a.btn-secondary,
+.cliente-container a.btn-danger,
+.cliente-container a.btn-edit,
+.cliente-container a.btn-delete,
+.cliente-container a.btn-merma,
+.cliente-container .btn-add {
+    text-decoration: none !important;
+}
+
+.cliente-container a.btn-primary:hover,
+.cliente-container a.btn-secondary:hover,
+.cliente-container a.btn-danger:hover,
+.cliente-container a.btn-edit:hover,
+.cliente-container a.btn-delete:hover,
+.cliente-container a.btn-merma:hover,
+.cliente-container .btn-add:hover {
+    text-decoration: none !important;
+}
+
+/* Estilo base de botones para <a> y <button> en cliente */
+.cliente-container a.btn-primary,
+.cliente-container a.btn-success,
+.cliente-container a.btn-danger,
+.cliente-container a.btn-info,
+.cliente-container button.btn-primary,
+.cliente-container button.btn-success,
+.cliente-container button.btn-danger,
+.cliente-container button.btn-info {
+    text-decoration: none !important;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-block;
+    transition: 0.25s ease;
+    border: none;
+    cursor: pointer;
+}
+
+/* AZUL – Acción normal */
+.cliente-container a.btn-primary,
+.cliente-container button.btn-primary {
+    background: #3498DB;
+    color: white !important;
+}
+
+.cliente-container a.btn-primary:hover,
+.cliente-container button.btn-primary:hover {
+    background: #2980b9;
+}
+
+/* VERDE – Confirmar */
+.cliente-container a.btn-success,
+.cliente-container button.btn-success {
+    background: #4CAF50;
+    color: white !important;
+}
+
+.cliente-container a.btn-success:hover,
+.cliente-container button.btn-success:hover {
+    background: #449d48;
+}
+
+/* ROJO – Eliminar */
+.cliente-container a.btn-danger,
+.cliente-container button.btn-danger {
+    background: #E74C3C;
+    color: white !important;
+}
+
+.cliente-container a.btn-danger:hover,
+.cliente-container button.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* CELESTE / INFO – Acciones secundarias */
+.cliente-container a.btn-info,
+.cliente-container button.btn-info {
+    background: #c89f61;
+    color: white !important;
+}
+
+.cliente-container a.btn-info:hover,
+.cliente-container button.btn-info:hover {
+    background: #b5905e;
+}
+
+/* ====== LOGIN CLIENTE ====== */
+
+.cliente-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 0;
+}
+
+.cliente-login-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 2.2rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid var(--verde);
+    animation: fadeIn 0.4s ease;
+}
+
+.login-title {
+    text-align: center;
+    color: var(--verde);
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-form .form-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form label {
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    color: #444;
+}
+
+.login-form input {
+    padding: 0.7rem;
+    border: 1px solid var(--gris);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.login-form input:focus {
+    border-color: var(--verde);
+    outline: none;
+}
+
+.login-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.8rem;
+    font-size: 1.05rem;
+    border-radius: 6px;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ====== MENU CLIENTE ====== */
+
+.menu-title {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--verde);
+    margin-bottom: 2rem;
+    font-weight: bold;
+}
+
+.cliente-menu-list .cliente-producto-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+.cliente-menu-list .cliente-producto-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.producto-img-area {
+    width: 100%;
+    height: 150px;
+    background-color: var(--crema);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.producto-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--verde);
+    opacity: 0.15;
+}
+
+.cliente-producto-card .producto-info {
+    padding: 1.3rem;
+    text-align: left;
+}
+
+.cliente-producto-card h3 {
+    color: var(--verde);
+    font-size: 1.3rem;
+    margin-bottom: 0.4rem;
+}
+
+.cliente-producto-card .descripcion {
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+}
+
+.cliente-producto-card .precio {
+    font-size: 1.3rem;
+    color: var(--marrón);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* ====== CARRITO CLIENTE ====== */
+.btn-add {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.carrito-title {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    color: #333;
+}
+
+.carrito-card {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+.carrito-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.carrito-table thead {
+    background: #f4f4f4;
+}
+
+.carrito-table th,
+.carrito-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.input-cantidad {
+    width: 75px;
+    padding: 5px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.btn-delete-table {
+    color: white !important;
+    background: #e63946;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.btn-delete-table:hover {
+    background: #c81d2c;
+}
+
+.total-label {
+    text-align: right;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.total-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2a9d8f;
+}
+
+.carrito-actions {
+    max-width: 900px;
+    margin: 25px auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.carrito-vacio {
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.link-menu {
+    color: #2a9d8f;
+    font-weight: bold;
+}
+
+/* ===== CONFIRMACIÓN DE PEDIDO ===== */
+
+.confirm-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.confirm-title {
+    text-align: center;
+    color: var(--verde);
+    margin-bottom: 0.5rem;
+}
+
+.confirm-subtitle {
+    text-align: center;
+    margin-bottom: 0.3rem;
+    color: #555;
+}
+
+.confirm-section {
+    margin-top: 2rem;
+}
+
+.confirm-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+}
+
+.confirm-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gris);
+    color: #444;
+}
+
+.confirm-table th {
+    background-color: var(--verde);
+    color: white;
+}
+
+.confirm-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.cancel-card {
+    max-width: 600px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.3s ease;
+}
+
+/* ===== CANCELAR PEDIDO ===== */
+.cancel-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.cancel-text {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.cancel-info {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    background: #f7f7f7;
+    padding: 15px 20px;
+    border-radius: 10px;
+}
+
+.cancel-info li {
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.cancel-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* ===== CONSULTAR PEDIDOS ===== */
+.section-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.pedidos-wrapper {
+    background: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pedidos-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.pedidos-table thead {
+    background: #d97a42;
+    color: white;
+}
+
+.pedidos-table th {
+    padding: 12px;
+    font-size: 15px;
+    text-transform: uppercase;
+}
+
+.pedidos-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e7d5c9;
+}
+
+.pedidos-table tr:nth-child(even) {
+    background: white;
+}
+
+.pedidos-table tr:hover {
+    background: #fff0e3;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.badge-pendiente {
+    background: #c7832f;
+}
+
+.badge-cancelado {
+    background: #b84040;
+}
+
+.badge-completado {
+    background: #3d7c59;
+}
+
+.acciones-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-table {
+    padding: 7px 14px;
+    border-radius: 7px;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease-in-out;
+}
+
+.btn-view {
+    background: #4c75af;
+}
+
+.btn-view:hover {
+    background: #3a5e8c;
+}
+
+.btn-cancel {
+    background: #b84040;
+}
+
+.btn-cancel:hover {
+    background: #953232;
+}
+
+.no-pedidos {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 18px;
+    color: #7a1f1f;
+}
+
+.center-btn {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.center-btn .btn-primary {
+    background: #3d7c59;
+    color: white;
+    padding: 10px 20px;
+}
+
+.center-btn .btn-primary:hover {
+    background: #315f45;
+}
+
+/* ===== DETALLE PEDIDO ===== */
+.pedido-detalle-card {
+    max-width: 800px;
+    margin: 25px auto;
+    background: white;
+    padding: 25px 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.3s ease;
+}
+
+.pedido-title {
+    text-align: center;
+    font-size: 30px;
+    color: #7a1f1f;
+    margin-bottom: 20px;
+}
+
+.subtitulo {
+    font-size: 20px;
+    margin-top: 15px;
+    color: #d97a42;
+}
+
+.info-list {
+    background: #f9efe9;
+    padding: 15px 18px;
+    border-radius: 10px;
+    list-style: none;
+    margin-bottom: 18px;
+}
+
+.info-list li {
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.detalle-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.detalle-table thead {
+    background: #d97a42;
+    color: white;
+}
+
+.detalle-table th {
+    padding: 12px;
+    text-transform: uppercase;
+}
+
+.detalle-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e7d5c9;
+}
+
+.detalle-table tr:hover {
+    background: #fae6d4;
+}
+
+.pedido-total {
+    text-align: right;
+    font-size: 22px;
+    margin-top: 20px;
+    color: #7a1f1f;
+    font-weight: bold;
+}
+
+.pedido-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

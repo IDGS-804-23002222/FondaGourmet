@@ -8,17 +8,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">
-                    <i class="bi bi-box-seam"></i> Materias Primas
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
                     <i class="bi bi-cart"></i> Compras
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-recipe"></i> Recetas
                 </a>
             </li>
             <li class="nav-item">
@@ -44,7 +34,22 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ 'active' if request.endpoint == 'proveedores.index' else '' }}" href="{{ url_for('proveedores.index') }}">
-                    <i class="bi bi-people"></i> Proveedores
+                    <i class="bi bi-truck"></i> Proveedores
+                </a>
+            </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-egg-fried"></i> Productos
+                </a>
+            </li>
+                        <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ingredientes.index') }}">
+                    <i class="bi bi-box"></i> Ingredientes
+                </a>
+            </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-book"></i> Recetas
                 </a>
             </li>
             {% endif %}

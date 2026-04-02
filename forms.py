@@ -287,3 +287,351 @@ class EditarProveedorForm(FlaskForm):
     ])
     
     submit= SubmitField('Actualizar proveedor')
+
+class RegistrarCategoriaForm(FlaskForm):
+    nombre = StringField('Nombre de categoría', [
+        validators.DataRequired(message="El nombre de la categoría es obligatorio."),
+        validators.Length(min=2, max=50, message="El nombre de la categoría debe tener entre 2 y 50 caracteres.")
+    ])
+    
+    descripcion = StringField('Descripción', [
+        validators.Optional(),
+        validators.Length(max=200, message="La descripción no puede exceder los 200 caracteres.")
+    ])
+    
+    submit = SubmitField('Registrar categoría')
+    
+class EditarCategoriaForm(FlaskForm):
+    nombre = StringField('Nombre de categoría', [
+        validators.Optional(),
+        validators.Length(min=2, max=50, message="El nombre de la categoría debe tener entre 2 y 50 caracteres.")
+    ])
+    
+    descripcion = StringField('Descripción', [
+        validators.Optional(),
+        validators.Length(max=200, message="La descripción no puede exceder los 200 caracteres.")
+    ])
+    
+    submit = SubmitField('Actualizar categoría')
+    
+class RegistrarIngredienteForm(FlaskForm):
+    nombre = StringField('Nombre del ingrediente', [
+        validators.DataRequired(message="El nombre del ingrediente es obligatorio."),
+        validators.Length(min=2, max=50, message="El nombre del ingrediente debe tener entre 2 y 50 caracteres.")
+    ])
+    
+    unidad_medida = StringField('Unidad de medida', [
+        validators.DataRequired(message="La unidad de medida es obligatoria."),
+        validators.Length(min=1, max=20, message="La unidad de medida debe tener entre 1 y 20 caracteres.")
+    ], choices=[
+        ('kg', 'Kilogramos'), 
+        ('g', 'Gramos'), 
+        ('l', 'Litros'), 
+        ('ml', 'Mililitros'), 
+        ('pz', 'Piezas')
+    ])
+    
+    stock_minimo = FloatField('Stock mínimo', [
+        validators.DataRequired(message="El stock mínimo es obligatorio."),
+        validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
+    ])
+    
+    porcentaje_mermas = FloatField('Porcentaje de mermas', [
+        validators.DataRequired(message="El porcentaje de mermas es obligatorio."),
+        validators.NumberRange(min=0, max=100, message="El porcentaje de mermas debe estar entre 0 y 100.")
+    ])
+    
+    factor_conversion = FloatField('Factor de conversión', [
+        validators.DataRequired(message="El factor de conversión es obligatorio."),
+        validators.NumberRange(min=0.0001, message="El factor de conversión no puede ser cero.")
+    ])
+        
+    id_categoria = SelectField('Categoría', coerce=int, validators=[
+        validators.DataRequired(message="La categoría es obligatoria.")
+    ])
+    
+    id_proveedor = SelectField('Proveedor', coerce=int, validators=[
+        validators.DataRequired(message="El proveedor es obligatorio.")
+    ])
+    
+    submit = SubmitField('Registrar ingrediente')
+    
+class EditarIngredienteForm(FlaskForm):
+    nombre = StringField('Nombre del ingrediente', [
+        validators.Optional(),
+        validators.Length(min=2, max=50)
+    ])
+    
+    unidad_medida = StringField('Unidad de medida', [
+        validators.Optional(),
+        validators.Length(min=1, max=20)
+    ], choices=[
+        ('kg', 'Kilogramos'),
+        ('g', 'Gramos'),
+        ('l', 'Litros'),
+        ('ml', 'Mililitros'),
+        ('pz', 'Piezas')
+    ])
+    
+    stock_actual = FloatField('Stock actual', [
+        validators.Optional(),
+        validators.NumberRange(min=0, message="El stock actual no puede ser negativo.")
+    ])
+    
+    stock_minimo = FloatField('Stock mínimo', [
+        validators.Optional(),
+        validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo."  )
+    ])
+    
+    porcentaje_mermas = FloatField('Porcentaje de mermas', [
+        validators.Optional(),
+        validators.NumberRange(min=0, max=100, message="El porcentaje de mermas debe estar entre 0 y 100.")
+    ])
+    
+    factor_conversion = FloatField('Factor de conversión', [
+        validators.Optional(),
+        validators.NumberRange(min=0.0001, message="El factor de conversión no puede ser cero.")  # 🔥 nunca 0
+    ])
+    
+    submit = SubmitField('Actualizar ingrediente')
+
+class RegistrarProductoForm(FlaskForm):
+    nombre = StringField('Nombre del producto', [
+        validators.DataRequired(message="El nombre del producto es obligatorio."),
+        validators.Length(min=2, max=50, message="El nombre del producto debe tener entre 2 y 50 caracteres.")
+    ])
+    
+    descripcion = StringField('Descripción', [
+        validators.Optional(),
+        validators.Length(max=200, message="La descripción no puede exceder los 200 caracteres.")
+    ])
+    
+    precio = FloatField('Precio', [
+        validators.DataRequired(message="El precio es obligatorio."),
+        validators.NumberRange(min=0, message="El precio no puede ser negativo.")
+    ])
+    
+    stock_minimo = IntegerField('Stock mínimo', [
+        validators.DataRequired(message="El stock mínimo es obligatorio."),
+        validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
+    ])
+    
+    imagen = StringField('Imagen', [
+        validators.Optional(),
+        validators.DataRequired(message="Debe ingresar archivo válido."),
+        validators.Regexp(r'^[^\\/:*?"<>|]+$', message="El nombre del archivo no puede contener caracteres inválidos.")
+    ])
+    
+    id_categoria = SelectField('Categoría', coerce=int, validators=[
+        validators.DataRequired(message="La categoría es obligatoria.")
+    ])        
+    
+    submit = SubmitField('Registrar producto')
+
+class RegistrarCompraIngredienteForm(FlaskForm):
+    id_materia = SelectField('Ingrediente', coerce=int, validators=[
+        validators.DataRequired(message="Debe seleccionar un ingrediente.")
+    ])
+    
+    cantidad = FloatField('Cantidad comprada', [
+        validators.DataRequired(message="La cantidad comprada es obligatoria."),
+        validators.NumberRange(min=0.01, message="La cantidad comprada debe ser un valor positivo.")
+    ])
+    
+    precio_u = FloatField('Precio unitario', [
+        validators.DataRequired(message="El precio unitario es obligatorio."),
+        validators.NumberRange(min=0, message="El precio unitario no puede ser negativo.")
+    ])
+    
+    submit = SubmitField('Registrar compra')
+
+
+
+class PersonaForm(FlaskForm):
+    nombre = StringField('Nombre', [
+        validators.DataRequired(),
+        validators.Length(min=2, max=100)
+    ])
+    
+    apellido_p = StringField('Apellido paterno', [
+        validators.DataRequired(),
+        validators.Length(min=2, max=50)
+    ])
+    
+    apellido_m = StringField('Apellido materno', [
+        validators.Optional(),
+        validators.Length(max=50)
+    ])
+    
+    telefono = StringField('Teléfono', [
+        validators.DataRequired(),
+        validators.Regexp(r'^\d{10}$', message="Debe tener 10 dígitos")
+    ])
+    
+    correo = StringField('Correo', [
+        validators.DataRequired(),
+        validators.Email()
+    ])
+    
+    direccion = StringField('Dirección', [
+        validators.Optional(),
+        validators.Length(max=200)
+    ])
+
+class UsuarioForm(FlaskForm):
+    username = StringField('Usuario', [
+        validators.DataRequired(),
+        validators.Length(min=4, max=100)
+    ])
+    
+    password = PasswordField('Contraseña', [
+        validators.DataRequired(),
+        validators.Length(min=6)
+    ])
+    
+    id_rol = SelectField('Rol', coerce=int)
+
+
+class ClienteForm(PersonaForm, UsuarioForm):
+    submit = SubmitField('Registrar Cliente')
+
+
+class EmpleadoForm(PersonaForm, UsuarioForm):
+    submit = SubmitField('Registrar Empleado')
+
+
+class ProveedorForm(PersonaForm):
+    submit = SubmitField('Registrar Proveedor')
+
+class MateriaPrimaForm(FlaskForm):
+    nombre = StringField('Nombre', [
+        validators.DataRequired(),
+        validators.Length(max=100)
+    ])
+
+    unidad_medida = SelectField('Unidad', choices=[
+        ('kg', 'Kilogramos'),
+        ('g', 'Gramos'),
+        ('l', 'Litros'),
+        ('ml', 'Mililitros'),
+        ('pz', 'Piezas')
+    ])
+
+    stock_actual = FloatField('Stock actual', [
+        validators.Optional(),
+        validators.NumberRange(min=0)
+    ])
+
+    stock_minimo = FloatField('Stock mínimo', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0)
+    ])
+
+    porcentaje_merma = FloatField('Merma (%)', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0, max=100)
+    ])
+
+    factor_conversion = FloatField('Factor conversión', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0.0001)
+    ])
+
+    id_categoria = SelectField('Categoría', coerce=int)
+    id_proveedor = SelectField('Proveedor', coerce=int)
+
+    submit = SubmitField('Guardar')
+
+class ProductoForm(FlaskForm):
+    nombre = StringField('Nombre', [validators.DataRequired()])
+    descripcion = TextAreaField('Descripción')
+    
+    precio = FloatField('Precio', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0)
+    ])
+    
+    stock_minimo = FloatField('Stock mínimo', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0)
+    ])
+    
+    imagen = StringField('URL Imagen')
+    
+    id_categoria = SelectField('Categoría', coerce=int)
+
+    submit = SubmitField('Guardar Producto')
+
+class RecetaForm(FlaskForm):
+    id_producto = SelectField('Producto', coerce=int)
+    submit = SubmitField('Crear Receta')
+
+class RecetaDetalleForm(FlaskForm):
+    id_materia = SelectField('Materia Prima', coerce=int)
+    
+    cantidad = FloatField('Cantidad', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0.01)
+    ])
+
+    submit = SubmitField('Agregar Ingrediente')
+
+class RecetaDetalleForm(FlaskForm):
+    id_materia = SelectField('Materia Prima', coerce=int)
+    
+    cantidad = FloatField('Cantidad', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0.01)
+    ])
+
+    submit = SubmitField('Agregar Ingrediente')
+
+class CompraForm(FlaskForm):
+    id_proveedor = SelectField('Proveedor', coerce=int)
+    metodo_pago = SelectField('Método de pago', choices=[
+        ('Efectivo', 'Efectivo'),
+        ('Tarjeta', 'Tarjeta'),
+        ('Transferencia', 'Transferencia')
+    ])
+    
+    submit = SubmitField('Registrar Compra')
+
+class DetalleCompraForm(FlaskForm):
+    id_materia = SelectField('Materia Prima', coerce=int)
+    
+    cantidad = FloatField('Cantidad', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0.01)
+    ])
+    
+    precio_u = FloatField('Precio unitario', [
+        validators.DataRequired(),
+        validators.NumberRange(min=0)
+    ])
+
+    submit = SubmitField('Agregar')
+
+class VentaForm(FlaskForm):
+    metodo_pago = SelectField('Método de pago', choices=[
+        ('Efectivo', 'Efectivo'),
+        ('Tarjeta', 'Tarjeta'),
+        ('Transferencia', 'Transferencia')
+    ])
+    
+    submit = SubmitField('Registrar Venta')
+
+class DetalleVentaForm(FlaskForm):
+    id_producto = SelectField('Producto', coerce=int)
+    
+    cantidad = IntegerField('Cantidad', [
+        validators.DataRequired(),
+        validators.NumberRange(min=1)
+    ])
+
+    submit = SubmitField('Agregar')
+
+class CategoriaForm(FlaskForm):
+    nombre = StringField('Nombre', [validators.DataRequired()])
+    descripcion = TextAreaField('Descripción')
+    
+    submit = SubmitField('Guardar')

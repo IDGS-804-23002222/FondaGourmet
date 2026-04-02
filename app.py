@@ -9,7 +9,9 @@ from flask_login import LoginManager, current_user  # Solo flask_login
 from config import DevelopmentConfig
 from models import db, Usuario, Rol
 from modules.auth import auth
+from modules.categorias import categorias
 from modules.cuenta import cuenta
+from modules.ingredientes import ingredientes
 from dashboard import dashboard
 from ventas import ventas
 from produccion import produccion
@@ -52,12 +54,14 @@ def create_app():
     # Registrar blueprints
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(cuenta, url_prefix='/cuenta')
+    app.register_blueprint(categorias, url_prefix='/categorias')
     app.register_blueprint(dashboard, url_prefix='/dashboard')
     app.register_blueprint(ventas, url_prefix='/ventas')
     app.register_blueprint(produccion, url_prefix='/produccion')
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
     app.register_blueprint(proveedores, url_prefix='/proveedores')
+    app.register_blueprint(ingredientes, url_prefix='/ingredientes')
     
     # Configurar logging
     if not os.path.exists('logs'):

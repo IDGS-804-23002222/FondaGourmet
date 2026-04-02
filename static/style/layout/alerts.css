@@ -1,0 +1,99 @@
+        .alert-floating {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            width: auto;
+            min-width: 300px;
+            max-width: 500px;
+            pointer-events: none;
+        }
+
+        .alert-custom {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.5s ease forwards;
+            transition:all 0.3s ease;
+            pointer-events: auto;
+        }
+
+@keyframes slideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+        .alert-custom i {
+            font-size: 1.5rem;
+            margin-right: 12px;
+        }
+
+        .alert-custom .btn-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: white;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+        }
+
+        .alert-custom .btn-close:hover {
+            opacity: 1;
+        }
+
+        
+        .alert {
+            width: 90%;
+            margin: 10px auto;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .alert-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+@media (max-width: 576px) {
+    .alert-floating {
+        top: 60px;
+        width: 90%;
+        min-width: unset;
+        max-width: unset;
+    }
+}
+.alerts-container .alert {
+    min-width: 300px;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 
+                0 4px 6px -4px rgb(0 0 0 / 0.1);
+    animation: slideInRight 0.4s ease forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
