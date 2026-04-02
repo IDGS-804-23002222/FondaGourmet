@@ -18,7 +18,6 @@ class Persona(db.Model):
     telefono = db.Column(db.String(10), unique=True, nullable=False)
     correo = db.Column(db.String(100), unique=True, nullable=False)
     direccion = db.Column(db.String(200))
-    estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
 
     empleado = db.relationship('Empleado', back_populates='persona', uselist=False)
@@ -102,6 +101,7 @@ class Proveedor(db.Model):
     __tablename__ = 'proveedores'
     id_proveedor = db.Column(db.Integer, primary_key=True)
     id_persona = db.Column(db.Integer, db.ForeignKey('personas.id_persona'), nullable=False)
+    estado = db.Column(db.Boolean, default=True)
     
     persona = db.relationship('Persona', back_populates='proveedor')
     materias_primas = db.relationship('MateriaPrima', back_populates='proveedor', lazy=True)

@@ -3,9 +3,7 @@ from flask import render_template, redirect, url_for, flash, request, current_ap
 from flask_login import login_required, login_user, logout_user, current_user
 from models import db, Usuario
 from forms import LoginForm, RegistroClienteForm
-from .services import (
-    crear_cliente, actualizar_mi_cuenta, ver_mi_cuenta
-    )
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -116,3 +114,8 @@ def logout():
     logout_user()
     flash('Sesión cerrada correctamente.', 'info')
     return redirect(url_for('index'))
+
+@auth.route('/redirigir')
+@login_required
+def redirigir():
+    return redirect_por_rol(current_user)

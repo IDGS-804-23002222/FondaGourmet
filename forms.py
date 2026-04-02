@@ -136,6 +136,40 @@ class RegistroClienteForm(FlaskForm):
     
     submit = SubmitField('Crear cuenta')
 
+class RegistroProveedorForm(FlaskForm):
+    nombre = StringField('Nombre', [
+        validators.DataRequired(message="El nombre es obligatorio."),
+        validators.Length(min=2, max=50, message="El nombre debe tener entre 2 y 50 caracteres.")
+        ])
+    
+    apellido_p = StringField('Apellido Paterno', [
+        validators.DataRequired(message="El apellido es obligatorio."),
+        validators.Length(min=2, max=50, message="El apellido debe tener entre 2 y 50 caracteres.")
+        ])
+    
+    apellido_m = StringField('Apellido Materno', [
+        validators.Length(min=2, max=50, message="El apellido debe tener entre 2 y 50 caracteres.")
+        ])
+    
+    telefono = StringField('Teléfono', [
+        validators.DataRequired(message="El teléfono es obligatorio."),
+        validators.Regexp(r'^\d{10}$', message="El teléfono debe tener 10 dígitos.")
+        ])
+    
+    correo = EmailField('Correo', [
+        validators.DataRequired(message="El correo es obligatorio."),
+        validators.Email(message="Ingrese un correo electrónico válido."),
+        validators.Length(min=5, max=100, message="El correo debe tener entre 5 y 100 caracteres."),
+        validators.Regexp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', message="El correo debe tener un formato válido.")
+        ])
+    
+    direccion = StringField('Dirección', [
+        validators.Length(min=5, max=100, message="La dirección debe tener entre 5 y 100 caracteres.")
+        ])
+    
+    submit = SubmitField('Registrar proveedor')
+    
+
 class EditarUsuarioForm(FlaskForm):
     nombre = StringField('Nombre', [    
                                     validators.Optional()
@@ -182,5 +216,74 @@ class EditarUsuarioForm(FlaskForm):
         ], choices=[])
     
     submit= SubmitField('Actualizar usuario')
-        
     
+class EditarPerfilForm(FlaskForm):
+    nombre = StringField('Nombre', [    
+                                    validators.Optional()
+    ])
+    apellido_p = StringField('Apellido Paterno', [
+                                    validators.Optional()
+    ])
+
+    apellido_m = StringField('Apellido Materno', [
+                                    validators.Optional()
+    ])
+    telefono = StringField('Teléfono', [
+                                    validators.Optional(),
+                                    validators.Regexp(r'^\d{10}$', message="El teléfono debe tener 10 dígitos.")
+    ])
+    correo = EmailField('Correo', [
+                                    validators.Optional(),
+                                    validators.Email(message="Ingrese un correo electrónico válido."),
+                                    validators.Length(min=5, max=100, message="El correo debe tener entre 5 y 100 caracteres."),
+                                    validators.Regexp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', message="El correo debe tener un formato válido.")
+    ])
+    direccion = StringField('Dirección', [
+                                    validators.Optional(),  
+                                    validators.Length(min=5, max=100, message="La dirección debe tener entre 5 y 100 caracteres.")
+    ])
+    username = StringField('Username', [
+        validators.Optional(),
+        validators.Length(min=4, max=25, message="El nombre de usuario debe tener entre 4 y 25 caracteres.")
+        ])
+    
+    contrasena = PasswordField('Contraseña', [
+        validators.Optional(),
+        validators.Length(min=8, message="La contraseña debe tener al menos 8 caracteres."),
+        validators.Regexp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', message="La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.")  
+        ])
+    
+    confirmar_contrasena = PasswordField('Confirmar contraseña', [
+        validators.Optional(),
+        validators.EqualTo('contrasena', message="Las contraseñas deben coincidir.")
+    ])
+    
+    submit= SubmitField('Actualizar perfil')
+        
+class EditarProveedorForm(FlaskForm):
+    nombre = StringField('Nombre', [    
+                                    validators.Optional()
+    ])
+    apellido_p = StringField('Apellido Paterno', [
+                                    validators.Optional()
+    ])
+
+    apellido_m = StringField('Apellido Materno', [
+                                    validators.Optional()
+    ])
+    telefono = StringField('Teléfono', [
+                                    validators.Optional(),
+                                    validators.Regexp(r'^\d{10}$', message="El teléfono debe tener 10 dígitos.")
+    ])
+    correo = EmailField('Correo', [
+                                    validators.Optional(),
+                                    validators.Email(message="Ingrese un correo electrónico válido."),
+                                    validators.Length(min=5, max=100, message="El correo debe tener entre 5 y 100 caracteres."),
+                                    validators.Regexp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', message="El correo debe tener un formato válido.")
+    ])
+    direccion = StringField('Dirección', [
+                                    validators.Optional(),  
+                                    validators.Length(min=5, max=100, message="La dirección debe tener entre 5 y 100 caracteres.")
+    ])
+    
+    submit= SubmitField('Actualizar proveedor')

@@ -8,12 +8,14 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, current_user  # Solo flask_login
 from config import DevelopmentConfig
 from models import db, Usuario, Rol
-from auth import auth
+from modules.auth import auth
+from modules.cuenta import cuenta
 from dashboard import dashboard
 from ventas import ventas
 from produccion import produccion
+from modules.proveedores import proveedores
 from tienda import tienda
-from usuarios import usuarios
+from modules.usuarios import usuarios
 
 migrate = Migrate()
 csrf = CSRFProtect()
@@ -49,11 +51,13 @@ def create_app():
     
     # Registrar blueprints
     app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(cuenta, url_prefix='/cuenta')
     app.register_blueprint(dashboard, url_prefix='/dashboard')
     app.register_blueprint(ventas, url_prefix='/ventas')
     app.register_blueprint(produccion, url_prefix='/produccion')
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
+    app.register_blueprint(proveedores, url_prefix='/proveedores')
     
     # Configurar logging
     if not os.path.exists('logs'):
@@ -80,6 +84,13 @@ def create_app():
     @app.route("/")
     def index():
         return render_template("index.html")
+    
+    @app.route("/redirigir")
+    def redirigir():
+        if current_user.is_authenticated:
+            return redirect(url_for('auth.redireccionar_por_rol', user=current_user))
+        else:
+            return redirect(url_for('auth.login'))
     
     return app
 

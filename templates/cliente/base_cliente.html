@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonda Gourmet - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="cliente-container">
+
+        <header class="cliente-header">
+            <div class="logo">
+                <h1><a href="{{ url_for('cliente.cliente_menu') }}">FONDA GOURMET</a></h1>
+            </div>
+
+            <nav class="cliente-nav">
+                <a href="{{ url_for('cliente.cliente_menu') }}">Menú</a>
+
+                <a href="{{ url_for('cliente.ver_carrito') }}">
+                    Carrito
+                    {% if session.get('carrito') %}
+                    <span class="carrito-count">({{ session['carrito']|length }})</span>
+                    {% endif %}
+                </a>
+
+                <a href="{{ url_for('cliente.cliente_consultar_pedidos') }}">Mis pedidos</a>
+
+                <a href="{{ url_for('cliente.login') }}" class="btn-login">Iniciar sesión</a>
+                <a href="{{ url_for('cliente.logout') }}" class="btn-danger">Cerrar sesión</a>
+            </nav>
+        </header>
+
+        <main class="cliente-main">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="cliente-footer">
+            <p>&copy; 2026 Fonda Gourmet - Todos los derechos reservados</p>
+        </footer>
+
+    </div>
+
+</body>
+
+</html>

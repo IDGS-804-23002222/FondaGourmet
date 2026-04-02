@@ -11,21 +11,21 @@ from .services import (
 from models import db, Usuario, Persona
 from datetime import datetime
 
-@usuarios.route('/lista', methods=['GET'])
+@usuarios.route('/', methods=['GET'])
 @login_required
 @role_required(1)
-def listaUsuarios():
+def index():
     resultados, error = ver_usuarios()
     if error:
         current_app.logger.error(f"Error al obtener usuarios: {str(error)}")
         flash(error, 'danger')
         return redirect(url_for('dashboard.index'))
-    return render_template('usuarios/lista_usuarios.html', usuarios=resultados, name=current_user.username)
+    return render_template('usuarios/index.html', usuarios=resultados, name=current_user.username)
 
-@usuarios.route('/crearUsuario', methods=['GET', 'POST'])
+@usuarios.route('/crear', methods=['GET', 'POST'])
 @login_required
 @role_required(1)
-def crearUsuario():
+def crear():
     form = RegistroUsuarioForm()
 
     roles, error = obtener_roles_nombres()
@@ -40,19 +40,19 @@ def crearUsuario():
         if exito:
             current_app.logger.info(f"Usuario creado: {form.username.data}")   
             flash('Usuario creado correctamente', 'success')
-            return redirect(url_for('usuarios.listaUsuarios'))
+            return redirect(url_for('usuarios.index'))
         else:
             current_app.logger.error(f"Error al crear usuario: {str(error)}")
             flash(error, 'danger')
 
-    return render_template('usuarios/crear_usuario.html', form=form)
+    return render_template('usuarios/crear.html', form=form)
 
 
 
 @usuarios.route('/desactivar', methods=['POST'])
 @login_required
 @role_required(1)
-def desactivarUsuario():
+def desactivar():
     id_usuario = request.form.get('id_usuario')
 
     exito, error = desactivar_usuario(id_usuario)
@@ -64,12 +64,12 @@ def desactivarUsuario():
         current_app.logger.error(f"Error al desactivar usuario: {str(error)}")
         flash(error, 'danger')
 
-    return redirect(url_for('usuarios.listaUsuarios'))
+    return redirect(url_for('usuarios.index'))
 
 @usuarios.route('/activar', methods=['POST'])
 @login_required
 @role_required(1)
-def activarUsuario():
+def activar():
     id_usuario = request.form.get('id_usuario')
 
     exito, error = activar_usuario(id_usuario)
@@ -81,38 +81,38 @@ def activarUsuario():
         current_app.logger.error(f"Error al activar usuario: {str(error)}")
         flash(error, 'danger')
 
-    return redirect(url_for('usuarios.listaUsuarios'))
+    return redirect(url_for('usuarios.index'))
 
 @usuarios.route('/detalles')
 @login_required
 @role_required(1)
-def detallesUsuario():
+def detalles():
     id_usuario = request.args.get('id_usuario') 
     usuario, error = obtener_usuario(id_usuario)
 
     if error:
         current_app.logger.error(f"Error al obtener detalles del usuario: {str(error)}")
         flash(error, 'danger')
-        return redirect(url_for('usuarios.listaUsuarios'))
+        return redirect(url_for('usuarios.index'))
 
-    return render_template('usuarios/detalles_usuario.html', usuario=usuario)
+    return render_template('usuarios/detalles.html', usuario=usuario)
 
 @usuarios.route('/editar', methods=['GET', 'POST'])
 @login_required
 @role_required(1)
-def editarUsuario():
+def editar():
     form = EditarUsuarioForm()
     
     id_usuario = request.args.get('id_usuario') or request.form.get('id_usuario')
     if not id_usuario:
         flash('No se recibió el usuario a editar.', 'warning')
-        return redirect(url_for('usuarios.listaUsuarios'))
+        return redirect(url_for('usuarios.index'))
 
     usuario, error = obtener_usuario(id_usuario)
     if error:
         current_app.logger.error(f"Error al obtener usuario para edición: {str(error)}")
         flash(error, 'danger')
-        return redirect(url_for('usuarios.listaUsuarios'))
+        return redirect(url_for('usuarios.index'))
     
     roles, _ = obtener_roles_nombres()
     form.rol.choices = [(r, r) for r in roles]
@@ -133,9 +133,9 @@ def editarUsuario():
             if exito:
                 current_app.logger.info(f"Usuario actualizado: {form.username.data}")   
                 flash('Usuario actualizado correctamente', 'success')
-                return redirect(url_for('usuarios.listaUsuarios'))
+                return redirect(url_for('usuarios.index'))
             else:
                 current_app.logger.error(f"Error al actualizar usuario: {str(error)}")
                 flash(error, 'danger')
     
-    return render_template('usuarios/editar_usuario.html', form=form, usuario=usuario)
+    return render_template('usuarios/editar.html', form=form, usuario=usuario)

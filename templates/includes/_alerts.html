@@ -1,0 +1,18 @@
+<!-- Contenedor de alertas flotantes -->
+<div id="alerts-container" class="alerts-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, msg in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-lg rounded-3 mb-2" 
+             role="alert"
+             data-bs-autohide="true">
+            {{ msg }}
+            <button type="button" 
+                    class="btn-close" 
+                    data-bs-dismiss="alert" 
+                    aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>

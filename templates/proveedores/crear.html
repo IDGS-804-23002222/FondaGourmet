@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Crear Nuevo Proveedor{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-title">
+        <h1>Crear Nuevo Proveedor</h1>
+    </div>
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-person-fill"></i> Datos Personales
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group-half">
+                        {{ form.nombre.label(class="form-label") }}
+                        {{ form.nombre(class="form-control") }}
+                        {% for error in form.nombre.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-half">
+                        {{ form.apellido_p.label(class="form-label") }}
+                        {{ form.apellido_p(class="form-control") }}
+                        {% for error in form.apellido_p.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-half">
+                        {{ form.apellido_m.label(class="form-label") }}   <!-- Corregido: apellido_m en vez de repetir apellido_p -->
+                        {{ form.apellido_m(class="form-control") }}
+                        {% for error in form.apellido_m.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-full">
+                        {{ form.direccion.label(class="form-label") }}
+                        {{ form.direccion(class="form-control") }}
+                        {% for error in form.direccion.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-telephone-fill"></i> Información de Contacto
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group-half">
+                        {{ form.telefono.label(class="form-label") }}
+                        {{ form.telefono(class="form-control") }}
+                        {% for error in form.telefono.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-half">
+                        {{ form.correo.label(class="form-label") }}
+                        {{ form.correo(class="form-control") }}
+                        {% for error in form.correo.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                {{ form.submit(class="crear-btn") }}
+                <a type="button" href="{{ url_for('proveedores.index') }}" class="btn volver-btn">Cancelar</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonda Gourmet - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/components/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/components/sidebar.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-container">
+        {% block navbar %}{% endblock %}
+        <main class="main-content">
+            <header>
+                <div class="user-info">
+                    <span>Usuario: {{ session.get('usuario', 'Invitado') }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="logout">Cerrar sesión</a>
+                </div>
+            </header>
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

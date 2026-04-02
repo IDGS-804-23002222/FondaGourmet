@@ -185,10 +185,12 @@ def actualizar_usuario(id_usuario, form):
         })
 
         db.session.commit()
+        logger.info(f"Usuario actualizado: {form.get('username')}")
         return True, "Usuario actualizado"
 
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error al actualizar usuario: {str(e)}")
         return False, str(e)
     
 # Función auxiliar para obtener todos los roles (para llenar selects)
