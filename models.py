@@ -177,6 +177,10 @@ class Producto(db.Model):
         CheckConstraint("imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg))$'", name='check_formato_imagen'),
     )   
 
+
+
+
+
 class Receta(db.Model):
     __tablename__ = 'recetas'
     id_receta = db.Column(db.Integer, primary_key=True)
