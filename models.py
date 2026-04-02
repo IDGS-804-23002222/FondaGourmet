@@ -178,9 +178,7 @@ class Producto(db.Model):
     )   
 
 
-
-
-
+#Creacion de los prodcutos a concluido, pero pq guardamos en modo IMG?
 class Receta(db.Model):
     __tablename__ = 'recetas'
     id_receta = db.Column(db.Integer, primary_key=True)
