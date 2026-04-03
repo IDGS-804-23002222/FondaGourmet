@@ -1,7 +1,7 @@
 from flask import flash, redirect, url_for, current_app, request, render_template
 from flask_login import login_user
 from models import db, Usuario
-from sqlalchemy import text
+from sqlalchemy import text, or_
 from werkzeug.security import generate_password_hash
 from models import db, Usuario, Persona, Rol
 import logging
@@ -14,6 +14,7 @@ def ver_perfil(id_usuario):
             SELECT 
                 u.id_usuario,
                 u.username,
+                u.estado,
                 r.nombre as rol_nombre,
                 p.nombre,
                 p.apellido_p,
@@ -66,7 +67,8 @@ def crear_cliente(form):
     
 def actualizar_mi_cuenta(id_usuario, form):
     try:
-        password_hash = generate_password_hash(form.contrasena.data) if form.contrasena.data else None
+        password_raw = form.get('contrasena')
+        password_hash = generate_password_hash(password_raw) if password_raw else None
 
         db.session.execute(text("""
             CALL sp_actualizarMiCuenta(
@@ -87,7 +89,7 @@ def actualizar_mi_cuenta(id_usuario, form):
             })
         
         db.session.commit()
-        logger.info(f"Cuenta actualizada: {form.get('username').data}")    
+        logger.info(f"Cuenta actualizada: {form.get('username')}")
         return True, "Cuenta actualizada exitosamente"
     except Exception as e:
         db.session.rollback()
@@ -100,23 +102,24 @@ def validar_datos(form, id_usuario=None):
     telefono = form.telefono.data.strip()
 
     usuario_existente = Usuario.query.filter(
+        Usuario.id_usuario != (id_usuario or 0),
+        Usuario.username == username
+    ).first()
+
+    persona_existente = Persona.query.filter(
         or_(
-            Usuario.username == username,
-            Usuario.correo == correo,
-            Usuario.telefono == telefono
+            Persona.correo == correo,
+            Persona.telefono == telefono
         )
     ).first()
     
     if usuario_existente:
-        if id_usuario and usuario_existente.id_usuario == id_usuario:
-            return True, None 
-        if usuario_existente.username == username:
-            return False, "El nombre de usuario ya está en uso."
-        
-        if usuario_existente.correo == correo:
+        return False, "El nombre de usuario ya está en uso."
+
+    if persona_existente:
+        if persona_existente.correo == correo:
             return False, "El correo electrónico ya está registrado."
-        
-        if usuario_existente.telefono == telefono:
+        if persona_existente.telefono == telefono:
             return False, "El número de teléfono ya está registrado."
 
     return True, None

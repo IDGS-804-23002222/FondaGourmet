@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
 from wtforms import StringField, IntegerField, SubmitField, RadioField, BooleanField, DateField, SelectField, EmailField, FloatField, PasswordField, TextAreaField
 from wtforms import validators
 from models import Usuario, Persona
@@ -320,7 +321,7 @@ class RegistrarIngredienteForm(FlaskForm):
         validators.Length(min=2, max=50, message="El nombre del ingrediente debe tener entre 2 y 50 caracteres.")
     ])
     
-    unidad_medida = StringField('Unidad de medida', [
+    unidad_medida = SelectField('Unidad de medida', [
         validators.DataRequired(message="La unidad de medida es obligatoria."),
         validators.Length(min=1, max=20, message="La unidad de medida debe tener entre 1 y 20 caracteres.")
     ], choices=[
@@ -336,7 +337,7 @@ class RegistrarIngredienteForm(FlaskForm):
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
     ])
     
-    porcentaje_mermas = FloatField('Porcentaje de mermas', [
+    porcentaje_merma = FloatField('Porcentaje de mermas', [
         validators.DataRequired(message="El porcentaje de mermas es obligatorio."),
         validators.NumberRange(min=0, max=100, message="El porcentaje de mermas debe estar entre 0 y 100.")
     ])
@@ -362,7 +363,7 @@ class EditarIngredienteForm(FlaskForm):
         validators.Length(min=2, max=50)
     ])
     
-    unidad_medida = StringField('Unidad de medida', [
+    unidad_medida = SelectField('Unidad de medida', [
         validators.Optional(),
         validators.Length(min=1, max=20)
     ], choices=[
@@ -383,7 +384,7 @@ class EditarIngredienteForm(FlaskForm):
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo."  )
     ])
     
-    porcentaje_mermas = FloatField('Porcentaje de mermas', [
+    porcentaje_merma = FloatField('Porcentaje de mermas', [
         validators.Optional(),
         validators.NumberRange(min=0, max=100, message="El porcentaje de mermas debe estar entre 0 y 100.")
     ])
@@ -392,6 +393,9 @@ class EditarIngredienteForm(FlaskForm):
         validators.Optional(),
         validators.NumberRange(min=0.0001, message="El factor de conversión no puede ser cero.")  # 🔥 nunca 0
     ])
+
+    id_categoria = SelectField('Categoría', coerce=int, validators=[validators.Optional()])
+    id_proveedor = SelectField('Proveedor', coerce=int, validators=[validators.Optional()])
     
     submit = SubmitField('Actualizar ingrediente')
 
@@ -601,24 +605,7 @@ class DetalleVentaForm(FlaskForm):
 class CategoriaForm(FlaskForm):
     nombre = StringField('Nombre', [validators.DataRequired()])
     descripcion = TextAreaField('Descripción')
-    
-    submit = SubmitField('Guardar')
-    id_categoria = SelectField('Categoría', [
-        validators.DataRequired(message="Debe seleccionar una categoría.")
-    ], coerce=int)
-    
-    imagen = StringField('URL Imagen (opcional)', [
-        validators.Optional(),
-        validators.URL(message="Ingrese una URL válida.")
-    ])
-    
-    submit = SubmitField('Crear Producto')
-    
-    def __init__(self, *args, **kwargs):
-        super(CrearProductoForm, self).__init__(*args, **kwargs)
-        from models import Categoria
-        categorias = Categoria.query.filter_by(estado=True).all()
-        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+    submit = SubmitField('Guardar Categoría')
 
 
 class CrearProductoForm(FlaskForm):
@@ -651,9 +638,8 @@ class CrearProductoForm(FlaskForm):
         validators.DataRequired(message="Debe seleccionar una categoría.")
     ], coerce=int)
     
-    imagen = StringField('URL Imagen (opcional)', [
-        validators.Optional(),
-        validators.URL(message="Ingrese una URL válida.")
+    imagen = FileField('Imagen', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Solo se permiten imágenes JPG, JPEG, PNG o WEBP.')
     ])
     
     submit = SubmitField('Crear Producto')
@@ -695,9 +681,8 @@ class EditarProductoForm(FlaskForm):
         validators.Optional()
     ], coerce=int)
     
-    imagen = StringField('URL Imagen (opcional)', [
-        validators.Optional(),
-        validators.URL(message="Ingrese una URL válida.")
+    imagen = FileField('Reemplazar imagen', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Solo se permiten imágenes JPG, JPEG, PNG o WEBP.')
     ])
     
     submit = SubmitField('Actualizar Producto')

@@ -12,7 +12,7 @@
             <h1>Crear Nuevo Producto</h1>
         </div>
         
-        <form method="POST" novalidate>
+        <form method="POST" enctype="multipart/form-data" novalidate>
             {{ form.hidden_tag() }}
 
             <div class="form-section">
@@ -84,11 +84,11 @@
                 <div class="form-grid">
                     <div class="form-group-full">
                         {{ form.imagen.label(class="form-label") }}
-                        {{ form.imagen(class="form-control", placeholder="https://ejemplo.com/imagen.jpg") }}
+                        {{ form.imagen(class="form-control", accept=".jpg,.jpeg,.png,.webp") }}
                         {% for error in form.imagen.errors %}
                             <small class="text-danger">{{ error }}</small>
                         {% endfor %}
-                        <small class="text-gray-500">Ingrese una URL válida de imagen (HTTP/HTTPS)</small>
+                        <small class="text-gray-500">Selecciona una imagen local (JPG, JPEG, PNG o WEBP). Tamaño máximo: 3MB.</small>
                     </div>
                 </div>
             </div>

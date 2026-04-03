@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Ingredientes{% endblock %}
+
+{% block content %}
+<h1>Gestión de Ingredientes</h1>
+
+<div class="toolbar">
+    <button type="button" class="btn-primary" onclick="window.location.href='{{ url_for("ingredientes.crear") }}'">Nuevo ingrediente</button>
+    <form method="GET" action="{{ url_for('ingredientes.index') }}" style="display:flex; gap:10px; width:100%;">
+        <input type="text" name="filtro" class="search" placeholder="Buscar por nombre o categoría..." value="{{ request.args.get('filtro', '') }}">
+        <button type="submit" class="btn-secondary">Buscar</button>
+    </form>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Proveedor</th>
+            <th>Stock</th>
+            <th>Unidad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ingrediente in ingredientes %}
+        <tr>
+            <td>{{ ingrediente.id_materia }}</td>
+            <td>{{ ingrediente.nombre }}</td>
+            <td>{{ ingrediente.categoria_nombre }}</td>
+            <td>{{ ingrediente.proveedor_nombre }}</td>
+            <td>{{ ingrediente.stock_actual }}</td>
+            <td>{{ ingrediente.unidad_medida }}</td>
+            <td>
+                <span class="badge {{ 'active' if ingrediente.estado else 'inactive' }}">
+                    {{ 'Activo' if ingrediente.estado else 'Inactivo' }}
+                </span>
+            </td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='{{ url_for("ingredientes.detalle", id=ingrediente.id_materia) }}'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='{{ url_for("ingredientes.editar", id=ingrediente.id_materia) }}'">Editar</button>
+                {% if ingrediente.estado %}
+                <form method="POST" action="{{ url_for('ingredientes.desactivar') }}" style="display:inline;">
+                    <input type="hidden" name="id" value="{{ ingrediente.id_materia }}">
+                    <button type="submit" class="btn-delete">Desactivar</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('ingredientes.activar') }}" style="display:inline;">
+                    <input type="hidden" name="id" value="{{ ingrediente.id_materia }}">
+                    <button type="submit" class="btn-primary">Activar</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;">No hay ingredientes registrados.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

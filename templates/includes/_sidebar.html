@@ -1,7 +1,7 @@
  <div class="sidebar" id="sidebar">
 
         <ul class="nav flex-column mt-3">
-            {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre == 'Administrador' %}
+            {% if current_user.is_authenticated and current_user.id_rol == 1 %}
             <li class="nav-item">
                 <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.index' else '' }}" href="{{ url_for('dashboard.index') }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
@@ -18,7 +18,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre in ['Cajero'] %}
+            {% if current_user.is_authenticated and current_user.id_rol == 3 %}
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="bi bi-cart"></i> Compras
@@ -35,14 +35,14 @@
                 </a>
             </li>
             {% endif %}
-            {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre in ['Cocinero'] %}
+            {% if current_user.is_authenticated and current_user.id_rol == 2 %}
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="bi bi-gear"></i> Producción
                 </a>
             </li>
             {% endif %}
-            {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre in ['Administrador', 'Cocinero'] %}
+            {% if current_user.is_authenticated and current_user.id_rol in [1, 2] %}
             <li class="nav-item">
                 <a class="nav-link {{ 'active' if request.endpoint == 'productos.index' else '' }}" href="{{ url_for('productos.index') }}">
                     <i class="bi bi-egg-fried"></i> Productos
@@ -55,7 +55,7 @@
                 </a>
             </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'recetas.index' else '' }}" href="{{ url_for('recetas.index') }}">
                     <i class="bi bi-book"></i> Recetas
                 </a>
             </li>

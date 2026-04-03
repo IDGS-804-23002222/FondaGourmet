@@ -2,6 +2,9 @@ from models import db, Producto, Categoria
 from flask import current_app
 from sqlalchemy import text
 import logging
+import os
+
+from utils.file_uploads import save_image_file
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +18,19 @@ def crear_producto(form):
         if producto_existente:
             return False, "Ya existe un producto con ese nombre."
         
+        imagen_relativa = None
+        imagen_file = form.imagen.data
+        if imagen_file and getattr(imagen_file, 'filename', None):
+            upload_root = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
+            imagen_relativa, image_error = save_image_file(
+                imagen_file,
+                upload_root,
+                'productos',
+                current_app.config['ALLOWED_IMAGE_EXTENSIONS']
+            )
+            if image_error:
+                return False, image_error
+
         nuevo_producto = Producto(
             nombre=form.nombre.data,
             descripcion=form.descripcion.data if form.descripcion.data else None,
@@ -22,7 +38,7 @@ def crear_producto(form):
             stock_actual=form.stock_actual.data,
             stock_minimo=form.stock_minimo.data,
             id_categoria=form.id_categoria.data,
-            imagen=form.imagen.data if form.imagen.data else None,
+            imagen=imagen_relativa,
             estado=True
         )
         
@@ -129,8 +145,18 @@ def actualizar_producto(id_producto, form):
             producto.stock_minimo = form.stock_minimo.data
         if form.id_categoria.data:
             producto.id_categoria = form.id_categoria.data
-        if form.imagen.data:
-            producto.imagen = form.imagen.data
+        imagen_file = form.imagen.data
+        if imagen_file and getattr(imagen_file, 'filename', None):
+            upload_root = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
+            imagen_relativa, image_error = save_image_file(
+                imagen_file,
+                upload_root,
+                'productos',
+                current_app.config['ALLOWED_IMAGE_EXTENSIONS']
+            )
+            if image_error:
+                return False, image_error
+            producto.imagen = imagen_relativa
         
         db.session.commit()
         logger.info(f"Producto actualizado: {id_producto}")

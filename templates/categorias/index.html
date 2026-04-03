@@ -1,16 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Categorías{% endblock %}
+
 {% block content %}
 <h1>Gestión de Categorías</h1>
 <div class="toolbar">
-    <button type="button" class="btn-primary" onclick="window.location.href='/categorias/nueva'">Nueva categoría</button>
-    <input type="text" class="search" placeholder="Buscar categoría...">
-    <select class="filter">
-        <option value="todos">Todos los tipos</option>
-        <option value="producto">Productos</option>
-        <option value="ingrediente">Materia prima</option>
-        <option value="ambos">Ambos</option>
-    </select>
+    <button type="button" class="btn-primary" onclick="window.location.href='{{ url_for("categorias.crear") }}'">Nueva categoría</button>
+    <form method="GET" action="{{ url_for('categorias.index') }}" style="display:flex; gap:10px; width:100%;">
+        <input type="text" name="filtro" class="search" placeholder="Buscar categoría..." value="{{ request.args.get('filtro', '') }}">
+        <button type="submit" class="btn-secondary">Buscar</button>
+    </form>
 </div>
 
 <table class="data-table">
@@ -19,83 +17,40 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Descripción</th>
-            <th>Tipo</th>
             <th>Estado</th>
             <th>Acciones</th>
-        </thead>
+        </tr>
+    </thead>
     <tbody>
+        {% for categoria in categorias %}
         <tr>
-            <td>1</td>
-            <td>Platos fuertes</td>
-            <td>Platos principales del menú</td>
-            <td><span class="badge" style="background: var(--azul);">Productos</span></td>
-            <td><span class="badge active">Activo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/1'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/1'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/1'">Eliminar</button>
+            <td>{{ categoria.id_categoria }}</td>
+            <td>{{ categoria.nombre }}</td>
+            <td>{{ categoria.descripcion or 'Sin descripción' }}</td>
+            <td>
+                <span class="badge {{ 'active' if categoria.estado else 'inactive' }}">
+                    {{ 'Activo' if categoria.estado else 'Inactivo' }}
+                </span>
+            </td>
+            <td>
+                <button type="button" class="btn-view" onclick="window.location.href='{{ url_for("categorias.detalles", id_categoria=categoria.id_categoria) }}'">Ver</button>
+                <button type="button" class="btn-edit" onclick="window.location.href='{{ url_for("categorias.editar", id_categoria=categoria.id_categoria) }}'">Editar</button>
+                {% if categoria.estado %}
+                <form method="POST" action="{{ url_for('categorias.desactivar') }}" style="display:inline;">
+                    <input type="hidden" name="id_categoria" value="{{ categoria.id_categoria }}">
+                    <button type="submit" class="btn-delete">Desactivar</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('categorias.activar') }}" style="display:inline;">
+                    <input type="hidden" name="id_categoria" value="{{ categoria.id_categoria }}">
+                    <button type="submit" class="btn-primary">Activar</button>
+                </form>
+                {% endif %}
             </td>
         </tr>
-        <tr>
-            <td>2</td>
-            <td>Bebidas</td>
-            <td>Bebidas frías y calientes</td>
-            <td><span class="badge" style="background: var(--azul);">Productos</span></td>
-            <td><span class="badge active">Activo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/2'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/2'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/2'">Eliminar</button>
-            </td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>Postres</td>
-            <td>Postres y dulces</td>
-            <td><span class="badge" style="background: var(--azul);">Productos</span></td>
-            <td><span class="badge active">Activo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/3'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/3'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/3'">Eliminar</button>
-            </td>
-        </tr>
-        <tr>
-            <td>4</td>
-            <td>Lácteos</td>
-            <td>Productos lácteos para materia prima</td>
-            <td><span class="badge" style="background: var(--verde-menta);">Materia prima</span></td>
-            <td><span class="badge active">Activo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/4'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/4'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/4'">Eliminar</button>
-            </td>
-        </tr>
-        <tr>
-            <td>5</td>
-            <td>Verduras</td>
-            <td>Verduras y hortalizas</td>
-            <td><span class="badge" style="background: var(--verde-menta);">Materia prima</span></td>
-            <td><span class="badge active">Activo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/5'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/5'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/5'">Eliminar</button>
-            </td>
-        </tr>
-        <tr>
-            <td>6</td>
-            <td>Entradas</td>
-            <td>Entradas y aperitivos</td>
-            <td><span class="badge" style="background: var(--azul);">Productos</span></td>
-            <td><span class="badge inactive">Inactivo</span></td>
-            <td class="acciones">
-                <button type="button" class="btn-view" onclick="window.location.href='/categorias/ver/6'">Ver</button>
-                <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/6'">Editar</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/categorias/eliminar/6'">Eliminar</button>
-            </td>
-        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;">No hay categorías registradas.</td></tr>
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}

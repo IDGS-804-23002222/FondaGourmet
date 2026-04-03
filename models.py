@@ -172,10 +172,14 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
+<<<<<<< HEAD
         CheckConstraint(
     "imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg)|[a-zA-Z0-9_\\-\\./]+\\.(jpg|jpeg|png))$'", 
     name='check_formato_imagen'
 ),
+=======
+        CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
+>>>>>>> 9f0c14b9f20c8b8f7985474db2dc4ad269c4653b
     )   
 
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Detalles del Producto{% endblock %}
 
-{% block styles %}
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
 {% endblock %}
 
@@ -76,7 +76,7 @@
                 <div class="detail-item-full">
                     <span class="detail-label">Imagen</span>
                     <div class="detail-image-container">
-                        <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="detail-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2216%22 fill=%22%23999%22%3EImagen no disponible%3C/text%3E%3C/svg%3E'">
+                        <img src="{{ url_for('static', filename=producto.imagen) }}" alt="{{ producto.nombre }}" class="detail-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2216%22 fill=%22%23999%22%3EImagen no disponible%3C/text%3E%3C/svg%3E'">
                     </div>
                 </div>
                 {% endif %}
@@ -108,10 +108,13 @@
 <style>
 .details-card {
     background: white;
-    dark { background: #1f2937; }
     border-radius: 12px;
     padding: 24px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .details-card {
+    background: #1f2937;
 }
 
 .details-header {
@@ -150,10 +153,19 @@
     margin: 0;
 }
 
+.dark .detail-name {
+    color: #f9fafb;
+}
+
 .detail-subtitle {
     color: #6b7280;
     font-size: 14px;
     margin: 4px 0 0 0;
+}
+
+.dark .detail-subtitle,
+.dark .detail-value {
+    color: #d1d5db;
 }
 
 .badge {
@@ -189,6 +201,10 @@
     border-radius: 8px;
 }
 
+.dark .detail-item {
+    background: #111827;
+}
+
 .detail-item-full {
     grid-column: 1 / -1;
 }
@@ -199,6 +215,10 @@
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.dark .detail-label {
+    color: #9ca3af;
 }
 
 .detail-value {
