@@ -1,13 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Iniciar Sesión{% endblock %}
-{% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/login.css') }}">
-{% endblock %}
 {% block container %}
    <div class="login-container">
     <div class="login-box">
         <div class="login-logo">
-            <img src="{{ url_for('static', filename='imagen/logoFonda.jpg') }}" alt="Fonda Gourmet">
+            <img src="{{ url_for('static', filename='imagen/logoFonda.svg') }}" alt="Fonda Gourmet">
         </div>
         <div class="login-titles">
             <h2>Casa Gourmet</h2>
@@ -39,7 +36,4 @@
     </div>
                 
     </div>
-{% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/pages/login.js') }}"></script>
 {% endblock %}

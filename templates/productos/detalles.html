@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}Detalles del Producto{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-title">
+            <h1>Detalles del Producto</h1>
+        </div>
+
+        {% if producto %}
+        <div class="details-card">
+            <div class="details-header">
+                <div class="details-title-section">
+                    <div class="detail-avatar">
+                        {{ (producto.nombre[0] if producto.nombre else 'P') | upper }}
+                    </div>
+                    <div>
+                        <h2 class="detail-name">{{ producto.nombre }}</h2>
+                        <p class="detail-subtitle">Categoría: {{ producto.categoria_nombre }}</p>
+                    </div>
+                </div>
+                <div class="detail-badge">
+                    <span class="badge {% if producto.estado %}badge-success{% else %}badge-danger{% endif %}">
+                        {{ producto.estado_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Descripción</span>
+                    <span class="detail-value">
+                        {{ producto.descripcion if producto.descripcion else 'No disponible' }}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Precio</span>
+                    <span class="detail-value text-lg font-bold text-green-600">
+                        ${{ "%.2f"|format(producto.precio) }}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Stock Actual</span>
+                    <span class="detail-value">
+                        {{ producto.stock_actual | int }} unidades
+                        {% if producto.stock_actual <= producto.stock_minimo %}
+                        <span class="text-red-600 text-sm font-semibold">
+                            ⚠️ Bajo
+                        </span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Stock Mínimo</span>
+                    <span class="detail-value">
+                        {{ producto.stock_minimo | int }} unidades
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Fecha de Creación</span>
+                    <span class="detail-value">
+                        {{ producto.fecha_creacion.strftime('%d/%m/%Y %H:%M') if producto.fecha_creacion else 'N/A' }}
+                    </span>
+                </div>
+
+                {% if producto.imagen %}
+                <div class="detail-item-full">
+                    <span class="detail-label">Imagen</span>
+                    <div class="detail-image-container">
+                        <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="detail-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2216%22 fill=%22%23999%22%3EImagen no disponible%3C/text%3E%3C/svg%3E'">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="button-group">
+                <button type="button" onclick=window.location.href='{{ url_for("productos.editar", id_producto=producto.id_producto) }}'
+                        class="btn-edit crear-btn">
+                    <i class="bi bi-pencil"></i> Editar
+                </button>
+                <button type="button" onclick=window.location.href='{{ url_for("productos.index") }}'
+                        class="btn-back volver-btn">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            Producto no encontrado
+        </div>
+        <div class="button-group">
+            <a href="{{ url_for('productos.index') }}" class="btn volver-btn">Volver a productos</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.details-card {
+    background: white;
+    dark { background: #1f2937; }
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.details-title-section {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.detail-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.detail-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1f2937;
+    margin: 0;
+}
+
+.detail-subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 4px 0 0 0;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.detail-item-full {
+    grid-column: 1 / -1;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: #1f2937;
+    word-break: break-word;
+}
+
+.detail-image-container {
+    margin-top: 8px;
+}
+
+.detail-image {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+</style>
+{% endblock %}

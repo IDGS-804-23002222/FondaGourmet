@@ -172,9 +172,11 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
-        CheckConstraint("imagen REGEXP '^(https?://.*\\.(?:png|jpg|jpeg|gif|svg))$'", name='check_formato_imagen'),
+        CheckConstraint("imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg))$'", name='check_formato_imagen'),
     )   
 
+
+#Creacion de los prodcutos a concluido, pero pq guardamos en modo IMG?
 class Receta(db.Model):
     __tablename__ = 'recetas'
     id_receta = db.Column(db.Integer, primary_key=True)

@@ -16,6 +16,7 @@ from dashboard import dashboard
 from ventas import ventas
 from produccion import produccion
 from modules.proveedores import proveedores
+from modules.productos import productos
 from tienda import tienda
 from modules.usuarios import usuarios
 
