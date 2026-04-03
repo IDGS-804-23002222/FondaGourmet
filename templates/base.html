@@ -24,7 +24,7 @@
     
 {% include "includes/_alerts.html" %}
 
-{% if current_user.is_authenticated %}
+{% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre in ['Administrador', 'Cocinero', 'Cajero'] %}
    <div class="app-container">
     {% include "includes/_sidebar.html" %}
     <main class="main-content">

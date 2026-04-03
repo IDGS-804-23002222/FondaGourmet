@@ -85,3 +85,26 @@
 2026-04-02 19:12:04,952 WARNING: Intento de login fallido para usuario: karlabot
 2026-04-02 19:12:05,005 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
 2026-04-02 19:12:12,784 INFO: Login exitoso para usuario: karlabot
+2026-04-02 19:29:03,134 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:29:17,569 WARNING: Intento de login fallido para usuario: cliente123
+2026-04-02 19:29:17,637 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:29:22,523 WARNING: Intento de login fallido para usuario: cliente123
+2026-04-02 19:29:22,584 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:29:32,925 WARNING: Intento de login fallido para usuario: cliente
+2026-04-02 19:29:32,981 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:30:21,556 ERROR: Error al crear cuenta: Error al crear cliente: (pymysql.err.OperationalError) (1054, "Unknown column 'estado' in 'field list'")
+[SQL: 
+            CALL sp_crearCliente(
+                %(nombre)s, %(ap_p)s, %(ap_m)s,
+                %(telefono)s, %(correo)s, %(direccion)s,
+                %(username)s, %(password)s
+            )
+        ]
+[parameters: {'nombre': 'prueba', 'ap_p': 'prueba', 'ap_m': 'prueba', 'telefono': '4771119999', 'correo': 'prueba@gmail.com', 'direccion': 'pruebaaaa', 'username': 'cliente', 'password': 'scrypt:32768:8:1$lFKrQzLZ2DCpSKpq$6508d5df468d43b3843e37d0376219145f10ab1bf56df77267abd63fe13570e7ca18055135fcc09035e9a0d7b022c4330753f5d57392a7014ae60a69d986abc6'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-02 19:36:40,666 INFO: Cuenta creada para cliente: prueba1
+2026-04-02 19:36:40,741 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:37:50,253 WARNING: Intento de login fallido para usuario: prueba
+2026-04-02 19:37:50,318 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js
+2026-04-02 19:37:57,471 WARNING: Intento de login fallido para usuario: prueba
+2026-04-02 19:37:57,526 WARNING: 404: http://127.0.0.1:5000/static/js/auth/login.js

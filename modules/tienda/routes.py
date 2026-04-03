@@ -12,3 +12,7 @@ def index():
 @tienda.route('/menu')
 def menu():
     return render_template('tienda/menu.html')
+
+@tienda.route('/pedidos')
+def pedidos():
+    return render_template('tienda/pedidos.html')
