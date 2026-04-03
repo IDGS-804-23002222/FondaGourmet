@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Crear Ingrediente{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-title">
+            <h1>Registrar Ingrediente</h1>
+        </div>
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-grid">
+                <div class="form-group-half">{{ form.nombre.label(class="form-label") }}{{ form.nombre(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.unidad_medida.label(class="form-label") }}{{ form.unidad_medida(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.stock_minimo.label(class="form-label") }}{{ form.stock_minimo(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.porcentaje_merma.label(class="form-label") }}{{ form.porcentaje_merma(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.factor_conversion.label(class="form-label") }}{{ form.factor_conversion(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.id_categoria.label(class="form-label") }}{{ form.id_categoria(class="form-control") }}</div>
+                <div class="form-group-half">{{ form.id_proveedor.label(class="form-label") }}{{ form.id_proveedor(class="form-control") }}</div>
+            </div>
+            <div class="button-group">
+                {{ form.submit(class="crear-btn") }}
+                <a href="{{ url_for('ingredientes.index') }}" class="btn volver-btn">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

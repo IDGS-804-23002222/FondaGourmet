@@ -1,91 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Detalle de Categoría{% endblock %}
+
 {% block content %}
 <div class="form-page">
-    <div class="form-header">
-        <h1>Detalle de Categoría</h1>
-        <p>Información completa de la categoría ID: {{ id }}</p>
-    </div>
-    
     <div class="form-container">
+        <div class="form-title"><h1>Detalle de Categoría</h1></div>
         <div class="form-grid">
-            <div class="form-group-half">
-                <label>ID</label>
-                <div class="info-value">{{ id }}</div>
-            </div>
-            <div class="form-group-half">
-                <label>Nombre</label>
-                <div class="info-value">Platos fuertes</div>
-            </div>
-            <div class="form-group-half">
-                <label>Tipo</label>
-                <div class="info-value"><span class="badge" style="background: var(--azul);">Productos</span></div>
-            </div>
-            <div class="form-group-half">
-                <label>Estado</label>
-                <div class="info-value"><span class="badge active">Activo</span></div>
-            </div>
-            <div class="form-group-half">
-                <label>Fecha creación</label>
-                <div class="info-value">Fecha de ejemplo</div>
-            </div>
-            <div class="form-group-half">
-                <label>Última modificación</label>
-                <div class="info-value">Fecha de ejemplo</div>
-            </div>
-            <div class="form-group-full">
-                <label>Descripción</label>
-                <div class="info-value">Platos principales del menú que incluyen desayunos, comidas y cenas tradicionales mexicanas.</div>
-            </div>
+            <div class="form-group-half"><label>ID</label><div class="info-value">{{ categoria.id_categoria }}</div></div>
+            <div class="form-group-half"><label>Nombre</label><div class="info-value">{{ categoria.nombre }}</div></div>
+            <div class="form-group-half"><label>Estado</label><div class="info-value">{{ 'Activo' if categoria.estado else 'Inactivo' }}</div></div>
+            <div class="form-group-half"><label>Fecha de creación</label><div class="info-value">{{ categoria.fecha_creacion.strftime('%d/%m/%Y %H:%M') if categoria.fecha_creacion else 'N/A' }}</div></div>
+            <div class="form-group-full"><label>Descripción</label><div class="info-value">{{ categoria.descripcion or 'Sin descripción' }}</div></div>
         </div>
-        
-        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Productos en esta categoría</h3>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Producto Ejemplo 1</td>
-                    <td>$0.00</td>
-                    <td><span class="badge active">Activo</span></td>
-                    <td class="acciones">
-                        <button type="button" class="btn-edit" onclick="window.location.href='/productos/editar/1'">Editar producto</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Producto Ejemplo 2</td>
-                    <td>$0.00</td>
-                    <td><span class="badge active">Activo</span></td>
-                    <td class="acciones">
-                        <button type="button" class="btn-edit" onclick="window.location.href='/productos/editar/2'">Editar producto</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Producto Ejemplo 3</td>
-                    <td>$0.00</td>
-                    <td><span class="badge inactive">Inactivo</span></td>
-                    <td class="acciones">
-                        <button type="button" class="btn-edit" onclick="window.location.href='/productos/editar/3'">Editar producto</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div class="form-actions" style="margin-top: 25px;">
-            <button type="button" class="btn-edit" onclick="window.location.href='/categorias/editar/{{ id }}'">Editar categoría</button>
-            <button type="button" class="btn-secondary" onclick="window.location.href='/categorias'">Volver</button>
+        <div class="button-group" style="margin-top:20px;">
+            <a href="{{ url_for('categorias.editar', id_categoria=categoria.id_categoria) }}" class="btn btn-edit">Editar</a>
+            <a href="{{ url_for('categorias.index') }}" class="btn volver-btn">Volver</a>
         </div>
     </div>
 </div>
-
-
 {% endblock %}

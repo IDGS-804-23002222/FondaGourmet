@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Recetas{% endblock %}
+
+{% block content %}
+<h1>Recetas</h1>
+
+<table class="data-table">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Producto</th>
+			<th>Estado</th>
+			<th>Fecha</th>
+			<th>Ingredientes</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for receta in recetas %}
+		<tr>
+			<td>{{ receta.id_receta }}</td>
+			<td>{{ receta.producto_nombre }}</td>
+			<td>{{ 'Activa' if receta.estado else 'Inactiva' }}</td>
+			<td>{{ receta.fecha_creacion.strftime('%d/%m/%Y %H:%M') if receta.fecha_creacion else 'N/A' }}</td>
+			<td>
+				{% if receta.detalles %}
+					{% for detalle in receta.detalles %}
+						<div>{{ detalle.materia_nombre }} - {{ detalle.cantidad }}</div>
+					{% endfor %}
+				{% else %}
+					Sin ingredientes
+				{% endif %}
+			</td>
+		</tr>
+		{% else %}
+		<tr><td colspan="5" style="text-align:center;">No hay recetas registradas.</td></tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

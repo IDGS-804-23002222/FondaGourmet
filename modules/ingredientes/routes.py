@@ -9,16 +9,17 @@ from .services import (
     filtrar_ingredientes,
     desactivar_ingrediente,
     activar_ingrediente,
-    actualizar_ingrediente
+    actualizar_ingrediente,
+    obtener_ingrediente,
 )
-from models import Categoria, Proveedor
+from models import Categoria, Proveedor, MateriaPrima
 
 
 @ingredientes.route('/', methods=['GET', 'POST'])
 @login_required
 @role_required(1)
 def index():
-    filtro = request.form.get('filtro')
+    filtro = request.args.get('filtro')
 
     if filtro:
         ingredientes_list, error = filtrar_ingredientes(filtro)
@@ -61,11 +62,26 @@ def crear():
 @login_required
 @role_required(1)
 def editar(id):
-    form = ActualizarIngredienteForm()
+    form = EditarIngredienteForm()
+
+    ingrediente, error = obtener_ingrediente(id)
+    if error:
+        flash(error, 'danger')
+        return redirect(url_for('ingredientes.index'))
 
     # cargar selects
     form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in Categoria.query.all()]
     form.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in Proveedor.query.all()]
+
+    if request.method == 'GET':
+        form.nombre.data = ingrediente.get('nombre')
+        form.unidad_medida.data = ingrediente.get('unidad_medida')
+        form.stock_actual.data = ingrediente.get('stock_actual')
+        form.stock_minimo.data = ingrediente.get('stock_minimo')
+        form.porcentaje_merma.data = ingrediente.get('porcentaje_merma')
+        form.factor_conversion.data = ingrediente.get('factor_conversion')
+        form.id_categoria.data = ingrediente.get('id_categoria')
+        form.id_proveedor.data = ingrediente.get('id_proveedor')
 
     if request.method == 'POST' and form.validate_on_submit():
         exito, msg = actualizar_ingrediente(id, form)
@@ -76,7 +92,7 @@ def editar(id):
         else:
             flash(msg, 'danger')
 
-    return render_template('ingredientes/editar.html', form=form)
+    return render_template('ingredientes/editar.html', form=form, ingrediente=ingrediente)
 
 @ingredientes.route('/desactivar', methods=['POST'])
 @login_required

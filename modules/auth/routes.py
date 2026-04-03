@@ -2,7 +2,8 @@ from . import auth
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, login_user, logout_user, current_user
 from models import db, Usuario
-from forms import LoginForm, RegistroClienteForm
+from forms import LoginForm, RegistroClienteForm, EditarPerfilForm
+from modules.cuenta.services import crear_cliente, actualizar_mi_cuenta, ver_perfil, cargar_datos_usuario
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -71,20 +72,18 @@ def crearCuenta():
             current_app.logger.error(f"Error al crear cuenta: {str(error)}")
             flash(error, 'danger')
 
-    return render_template('auth/crear_cuenta.html', form=form)
+    return render_template('cuenta/crear.html', form=form)
 
 @auth.route('/miPerfil')
 @login_required
 def mi_perfil():
-    usuario = current_user
+    usuario, error = ver_perfil(current_user.id_usuario)
     if not usuario:
         current_app.logger.error("Usuario no encontrado en la base de datos.")
         flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
         return redirect(url_for('dashboard.index'))
-    
-    # Aquí podrías agregar más lógica para cargar información adicional del perfil si es necesario
-    
-    return render_template('auth/mi_perfil.html', usuario=usuario)
+
+    return render_template('cuenta/perfil.html', usuario=usuario)
 
 @auth.route('/editarPerfil', methods=['GET', 'POST'])
 @login_required
@@ -95,18 +94,33 @@ def editar_perfil():
         flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    form = RegistroClienteForm(obj=usuario)
+    form = EditarPerfilForm()
+
+    datos_usuario, error = cargar_datos_usuario(usuario.id_usuario, form)
+    if not datos_usuario:
+        current_app.logger.error(f"Error al cargar datos del perfil: {str(error)}")
+        flash("No fue posible cargar tus datos para edición.", "danger")
+        return redirect(url_for('cuenta.perfil'))
+
+    if request.method == 'GET':
+        form.nombre.data = datos_usuario.get('nombre')
+        form.apellido_p.data = datos_usuario.get('apellido_p')
+        form.apellido_m.data = datos_usuario.get('apellido_m')
+        form.telefono.data = datos_usuario.get('telefono')
+        form.correo.data = datos_usuario.get('correo')
+        form.direccion.data = datos_usuario.get('direccion')
+        form.username.data = datos_usuario.get('username')
     
     if form.validate_on_submit():
-        exito, error = actualizar_cliente(usuario.id_usuario, form)
+        exito, error = actualizar_mi_cuenta(usuario.id_usuario, request.form)
         if exito:
             current_app.logger.info(f"Perfil actualizado para cliente: {form.username.data}")
             flash('Perfil actualizado correctamente.', 'success')
-            return redirect(url_for('auth.mi_perfil'))
+            return redirect(url_for('cuenta.perfil'))
         else:
             flash(error, 'danger')  
-    
-        return render_template('auth/editar_perfil.html', form=form, usuario=usuario)
+
+    return render_template('cuenta/editar.html', form=form, usuario=datos_usuario)
 
 @auth.route('/logout')
 @login_required
