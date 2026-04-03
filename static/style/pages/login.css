@@ -5,6 +5,7 @@
     min-height: 80vh;
     background: linear-gradient(135deg, var(--crema) 0%, #e8dfcf 100%);
     padding: 20px;
+    margin: 20px;
 }
 
 .login-box {

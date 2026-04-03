@@ -1,7 +1,7 @@
 from . import ingredientes
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from forms import RegistroIngredienteForm, ActualizarIngredienteForm
+from forms import RegistrarIngredienteForm, EditarIngredienteForm
 from utils.security import role_required
 from .services import (
     crear_ingrediente,
@@ -40,7 +40,7 @@ def index():
 @login_required
 @role_required(1)
 def crear():
-    form = RegistroIngredienteForm()
+    form = RegistrarIngredienteForm()
 
     # cargar selects
     form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in Categoria.query.all()]

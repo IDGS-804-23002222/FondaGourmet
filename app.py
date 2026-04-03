@@ -12,12 +12,12 @@ from modules.auth import auth
 from modules.categorias import categorias
 from modules.cuenta import cuenta
 from modules.ingredientes import ingredientes
-from dashboard import dashboard
-from ventas import ventas
-from produccion import produccion
+from modules.dashboard import dashboard
+from modules.ventas import ventas
+from modules.produccion import produccion
 from modules.proveedores import proveedores
 from modules.productos import productos
-from tienda import tienda
+from modules.tienda import tienda
 from modules.usuarios import usuarios
 
 migrate = Migrate()
@@ -61,6 +61,7 @@ def create_app():
     app.register_blueprint(produccion, url_prefix='/produccion')
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
+    app.register_blueprint(productos, url_prefix='/productos')
     app.register_blueprint(proveedores, url_prefix='/proveedores')
     app.register_blueprint(ingredientes, url_prefix='/ingredientes')
     

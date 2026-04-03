@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 static/
 node_modules/
+static/vendor/
+static/bootstrap/
