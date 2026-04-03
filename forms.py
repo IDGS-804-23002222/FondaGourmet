@@ -288,7 +288,6 @@ class EditarProveedorForm(FlaskForm):
     
     submit= SubmitField('Actualizar proveedor')
 
-<<<<<<< HEAD
 class RegistrarCategoriaForm(FlaskForm):
     nombre = StringField('Nombre de categoría', [
         validators.DataRequired(message="El nombre de la categoría es obligatorio."),
@@ -395,11 +394,6 @@ class EditarIngredienteForm(FlaskForm):
     ])
     
     submit = SubmitField('Actualizar ingrediente')
-
-class RegistrarProductoForm(FlaskForm):
-    nombre = StringField('Nombre del producto', [
-        validators.DataRequired(message="El nombre del producto es obligatorio."),
-        validators.Length(min=2, max=50, message="El nombre del producto debe tener entre 2 y 50 caracteres.")
 
 
 class RegistrarCompraIngredienteForm(FlaskForm):
