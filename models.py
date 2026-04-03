@@ -172,7 +172,10 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
-        CheckConstraint("imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg))$'", name='check_formato_imagen'),
+        CheckConstraint(
+    "imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg)|[a-zA-Z0-9_\\-\\./]+\\.(jpg|jpeg|png))$'", 
+    name='check_formato_imagen'
+),
     )   
 
 
@@ -300,12 +303,13 @@ class Pedido(db.Model):
     fecha = db.Column(db.DateTime, nullable=False)
     estado = db.Column(db.String(50), nullable=False, default='Pendiente')
     id_cliente = db.Column(db.Integer, db.ForeignKey('clientes.id_cliente'), nullable=False)
-    
+    total = db.Column(db.Float, nullable=False)
     cliente = db.relationship('Cliente', back_populates='pedidos')
     detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Completado')", name='check_estado_pedido'),
+        CheckConstraint('total >= 0', name='check_total_pedido_no_negativo'),
     )
     
 class DetallePedido(db.Model):

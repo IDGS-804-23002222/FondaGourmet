@@ -1,5 +1,6 @@
 from models import db, Producto, Categoria
 from flask import current_app
+from sqlalchemy import text
 import logging
 
 logger = logging.getLogger(__name__)
@@ -212,4 +213,13 @@ def buscar_productos(termino):
         
     except Exception as e:
         logger.error(f"Error al buscar productos: {str(e)}")
+        return None, str(e)
+
+def obtener_categorias():
+    try:
+        logger.info("Obteniendo categorías")
+        resultados = db.session.execute(text("SELECT * FROM v_categorias")).fetchall()
+        return resultados, None
+    except Exception as e:
+        logger.error(f"Error al obtener categorías: {str(e)}")
         return None, str(e)

@@ -1,80 +1,278 @@
-from models import db, Usuario, Persona, Cliente, Rol
-from werkzeug.security import generate_password_hash, check_password_hash
+from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido
 from flask import current_app, flash
+from flask_login import current_user
 from datetime import datetime
+import logging
 
-class AuthService:
+logger = logging.getLogger(__name__)
 
-    @staticmethod
-    def validar_login(username: str, contrasena: str, correo: str = None):
-        """Valida usuario + contraseña + correo (opcional)"""
-        user = Usuario.query.filter_by(username=username).first()
-        if not user or not user.check_password(contrasena) or not user.estado:
-            current_app.logger.warning(f"Intento fallido para username: {username}")
-            return None, "Usuario o contraseña incorrectos."
+def obtener_menu():
+    """Obtiene productos activos para el menú"""
+    try:
+        productos = Producto.query.filter_by(estado=True).all()
 
-        # Si se pasa correo, verificamos que coincida con la persona
-        if correo:
-            persona = Persona.query.filter_by(correo=correo).first()
-            if not persona or persona.id_persona != getattr(user.empleado or user.cliente, 'id_persona', None):
-                return None, "Datos de usuario y correo no coinciden."
+        resultado = []
+        for p in productos:
+            resultado.append({
+                "id": p.id_producto,
+                "nombre": p.nombre,
+                "descripcion": p.descripcion,
+                "precio": p.precio,
+                "imagen": p.imagen  # base64
+            })
 
-        current_app.logger.info(f"Login exitoso para: {username}")
-        return user, None
+        return resultado, None
 
-    @staticmethod
-    def crear_cliente(form):
-        """Crea persona + usuario + cliente (lógica completa)"""
-        try:
-            # Verificar duplicados
-            if Persona.query.filter(
-                (Persona.correo == form.correo.data) | 
-                (Persona.telefono == form.telefono.data)
-            ).first():
-                return False, "El correo o teléfono ya existe."
+    except Exception as e:
+        logger.error(f"Error al obtener menú: {str(e)}")
+        return None, str(e)
 
-            if Usuario.query.filter_by(username=form.username.data).first():
-                return False, "El nombre de usuario ya existe."
+def obtener_o_crear_carrito():
+    try:
+        cliente = current_user.cliente
+        
+        logger.info(f"Obteniendo carrito para cliente: {cliente.id_cliente}")
+        carrito = Carrito.query.filter_by(id_cliente=cliente.id_cliente, estado='Abierto').first()
 
-            # Crear Persona
-            persona = Persona(
-                nombre=form.nombre.data,
-                apellido_p=form.apellido_p.data,
-                apellido_m=form.apellido_m.data,
-                telefono=form.telefono.data,
-                correo=form.correo.data,
-                direccion=form.direccion.data
+        logger.info(f"Carrito encontrado: {carrito is not None}")
+        if not carrito:
+            carrito = Carrito(
+                id_cliente=cliente.id_cliente,
+                total=0,
+                fecha_creacion=datetime.utcnow(),
+                estado='Abierto'
             )
-            db.session.add(persona)
-            db.session.flush()   # para obtener el id
-
-            # Crear Usuario (Cliente)
-            rol_cliente = Rol.query.filter_by(nombre='Cliente').first()
-            if not rol_cliente:
-                return False, "Rol 'Cliente' no encontrado en la base de datos."
-
-            usuario = Usuario(
-                username=form.username.data,
-                id_rol=rol_cliente.id_rol,
-                estado=True,
-                fecha_creacion=datetime.now()
-            )
-            usuario.set_password(form.contrasena.data)
-            db.session.add(usuario)
+            db.session.add(carrito)
             db.session.flush()
+            logger.info(f"Nuevo carrito creado: {carrito.id_carrito}")
+        return carrito, None
+    except Exception as e:
+        logger.error(f"Error al obtener o crear carrito: {str(e)}")
+        return None, str(e)    
 
-            # Crear Cliente
-            cliente = Cliente(
-                id_persona=persona.id_persona,
-                id_usuario=usuario.id_usuario
+def agregar_producto_carrito(id_producto, cantidad = 1):
+    try:
+        logger.info(f"Agregando producto al carrito: id_producto={id_producto}, cantidad={cantidad}")
+        carrito, error = obtener_o_crear_carrito()
+        if error:
+            logger.error(f"Error al obtener o crear carrito: {str(error)}")
+            return False, error
+        
+        producto = Producto.query.get(id_producto)
+        if not producto:
+            logger.error(f"Producto no encontrado: {id_producto}")
+            return False, "Producto no encontrado"
+        elif not producto.estado:
+            logger.error(f"Producto no disponible: {id_producto}")  
+            return False, "Producto no disponible"
+        
+        detalle = DetalleCarrito.query.filter_by(
+            id_carrito=carrito.id_carrito, 
+            id_producto=id_producto
+            ).first()
+
+        if detalle:
+            cantidad += cantidad
+            detalle.subtotal = cantidad * producto.precio
+        else:
+            detalle = DetalleCarrito(
+                id_carrito=carrito.id_carrito,
+                id_producto=id_producto,
+                cantidad=cantidad,
+                subtotal=producto.precio*cantidad
             )
-            db.session.add(cliente)
-            db.session.commit()
+            db.session.add(detalle)
+        
+        carrito.total = sum(d.subtotal for d in carrito.detalles if d.id_carrito == carrito.id_carrito)
+        
+        db.session.commit()
+        logger.info(f"Producto agregado al carrito: {producto.nombre} (Cantidad: {cantidad})")
+        return True, "Producto agregado al carrito"
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al agregar producto al carrito: {str(e)}")
+        return False, str(e)
+    
 
-            current_app.logger.info(f"Cliente creado exitosamente: {form.username.data}")
-            return True, None
+        # Obtener cliente
+        cliente = usuario.cliente
+        if not cliente:
+            logger.error(f"Usuario sin cliente asociado: {usuario.id_usuario}")
+            return False, "El usuario no tiene cliente asociado"
 
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Error creando cliente: {str(e)}")
-            return False, f"Error al crear la cuenta: {str(e)}"
+        # Obtener o crear carrito
+        carrito = cliente.carrito
+        if not carrito:
+            carrito = Carrito(
+                id_cliente=cliente.id_cliente,
+                total=0
+            )
+            db.session.add(carrito)
+            db.session.flush()  # para obtener ID
+
+        # Buscar si ya existe el producto
+        detalle = None
+        for d in carrito.detalles:
+            if d.id_producto == id_producto:
+                detalle = d
+                break
+
+        if detalle:
+            detalle.cantidad += 1
+            detalle.subtotal = detalle.cantidad * producto.precio
+        else:
+            nuevo_detalle = DetalleCarrito(
+                id_producto=id_producto,
+                cantidad=1,
+                subtotal=producto.precio
+            )
+            carrito.detalles.append(nuevo_detalle)
+
+        # Recalcular total
+        carrito.total = sum(d.subtotal for d in carrito.detalles)
+
+        db.session.commit()
+        logger.info("Producto agregado al carrito correctamente")
+
+        return True, "Producto agregado al carrito"
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al agregar al carrito: {str(e)}")
+        return False, str(e)
+    
+def obtener_carrito():
+    try:
+        logger.info(f"Obteniendo carrito para usuario: {current_user.id_usuario}")
+        carrito, error = obtener_o_crear_carrito()
+        if error:
+            logger.error(f"Error al obtener carrito: {str(error)}")
+            return None, error
+
+        data = {
+            "id": carrito.id_carrito,
+            "total": carrito.total,
+            "productos": []
+        }
+
+        for d in carrito.detalles:
+            data["productos"].append({
+                "id_detalle": d.id_detalle,
+                "producto": d.producto.nombre,
+                "precio": d.producto.precio,
+                "cantidad": d.cantidad,
+                "subtotal": d.subtotal
+            })
+
+        logger.info(f"Carrito obtenido: {data}")
+        return data, None
+
+    except Exception as e:
+        logger.error(f"Error al obtener carrito: {str(e)}")
+        return None, str(e)
+    
+
+    
+def reducir_cantidad_carrito(id_detalle):
+    try:
+        logger.info(f"Reduciendo cantidad del carrito: id_detalle={id_detalle}")    
+        detalle = DetalleCarrito.query.get(id_detalle)
+        if not detalle:
+            logger.error(f"Detalle de carrito no encontrado: {id_detalle}")
+            return False, "Detalle no encontrado"
+
+        carrito = detalle.carrito
+
+        if detalle.cantidad > 1:
+            detalle.cantidad -= 1
+            detalle.subtotal = detalle.cantidad * detalle.producto.precio
+        else:
+            db.session.delete(detalle)
+
+        carrito.total = sum(d.subtotal for d in carrito.detalles if d.id_detalle != id_detalle  or detalle.cantidad > 1)
+
+        db.session.commit()
+        logger.info(f"Cantidad reducida del carrito: id_detalle={id_detalle}")
+        return True, "Cantidad reducida"
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al reducir cantidad del carrito: {str(e)}")
+        return False, str(e)
+
+def agregar_cantidad_carrito(id_detalle):
+    try:
+        logger.info(f"Aumentando cantidad del carrito: id_detalle={id_detalle}")    
+        detalle = DetalleCarrito.query.get(id_detalle)
+        if not detalle:
+            logger.error(f"Detalle de carrito no encontrado: {id_detalle}")
+            return False, "Detalle no encontrado"
+
+        carrito = detalle.carrito
+
+        detalle.cantidad += 1
+        detalle.subtotal = detalle.cantidad * detalle.producto.precio
+
+        carrito.total = sum(d.subtotal for d in carrito.detalles)
+
+        db.session.commit()
+        logger.info(f"Cantidad aumentada del carrito: id_detalle={id_detalle}")
+        return True, "Cantidad aumentada"
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al aumentar cantidad del carrito: {str(e)}")
+        return False, str(e)
+    
+def finalizar_pedido():
+    try:
+        cliente = current_user.cliente
+
+        # Obtener carrito abierto
+        carrito = Carrito.query.filter_by(
+            id_cliente=cliente.id_cliente,
+            estado='Abierto'
+        ).first()
+
+        if not carrito:
+            return False, "Carrito no encontrado"
+
+        if not carrito.detalles:
+            return False, "El carrito está vacío"
+
+        # Crear pedido
+        pedido = Pedido(
+            id_cliente=cliente.id_cliente,
+            total=carrito.total,
+            fecha=datetime.utcnow(),
+            estado='Pendiente'
+        )
+        db.session.add(pedido)
+        db.session.flush()  # para obtener ID
+
+        # Pasar productos del carrito al pedido
+        for detalle in carrito.detalles:
+            detalle_pedido = DetallePedido(
+                id_pedido=pedido.id_pedido,
+                id_producto=detalle.id_producto,
+                cantidad=detalle.cantidad,
+                subtotal=detalle.subtotal
+            )
+            db.session.add(detalle_pedido)
+
+        # Vaciar carrito (opción 1: eliminar detalles)
+        for detalle in carrito.detalles:
+            db.session.delete(detalle)
+
+        carrito.total = 0
+
+        # (Opcional) cerrar carrito
+        carrito.estado = 'Cerrado'
+
+        db.session.commit()
+
+        return True, "Pedido generado correctamente"
+
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e)

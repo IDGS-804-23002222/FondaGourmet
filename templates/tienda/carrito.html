@@ -1,0 +1,86 @@
+{% extends "tienda/base_cliente.html" %}
+{% block title %}Carrito{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/tienda.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/clientes.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<h1 class="carrito-title">Mi Carrito</h1>
+
+{% if carrito.productos %}
+
+<div class="carrito-card">
+    <table class="data-table carrito-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for p in carrito.productos %}
+            <tr>
+                <td>{{ p.producto }}</td>
+
+                <td>${{ "%.2f"|format(p.precio) }}</td>
+
+                <td>
+                 {{ p.cantidad }}
+</td>
+
+
+                <td>${{ "%.2f"|format(p.subtotal) }}</td>
+                    <td>
+                     <a href="{{url_for('tienda.aumentar_cantidad', id=p.id_detalle)}}" class="btn btn-primary">
+                         <i class="bi bi-plus"></i>
+                     </a>
+                     </button>
+                                     <a href="{{url_for('tienda.reducir_cantidad', id=p.id_detalle)}}" class="btn btn-secondary">
+                                         <i class="bi bi-dash"></i>
+                                     </a>
+                    </button>
+                    </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td colspan="3" class="total-label"><strong>Total:</strong></td>
+                <td class="total-value">
+                    <strong>${{ "%.2f"|format(carrito.total) }}</strong>
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="carrito-actions">
+    <a href="{{ url_for('tienda.menu') }}" class="btn-secondary">
+        Seguir comprando
+    </a>
+
+    <a href="{{ url_for('tienda.finalizar_compra') }}" class="btn-primary">
+        Finalizar compra
+    </a>
+</div>
+
+{% else %}
+
+<p class="carrito-vacio">
+    Tu carrito está vacío.
+    <a href="{{ url_for('tienda.menu') }}" class="link-menu">Ver el menú</a>
+</p>
+
+{% endif %}
+
+{% endblock %}

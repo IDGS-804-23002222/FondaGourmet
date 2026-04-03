@@ -1,0 +1,68 @@
+{% extends "tienda/base_cliente.html" %}
+{% block title %}Mis pedidos{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/clientes.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">Mis Pedidos</h1>
+
+{% if pedidos %}
+
+<div class="pedidos-wrapper">
+    <table class="data-table pedidos-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for p in pedidos %}
+            <tr>
+                <td>#{{ p.id }}</td>
+
+                <td>
+                    {{ p.fecha.strftime('%d/%m/%Y %H:%M') if p.fecha else '' }}
+                </td>
+
+                <td>${{ "%.2f"|format(p.total) }}</td>
+
+                <td>
+                    {% if p.estado == "Pendiente" %}
+                        <span class="badge-pendiente">Pendiente</span>
+                    {% elif p.estado == "Completado" %}
+                        <span class="badge-completado">Completado</span>
+                    {% elif p.estado == "Cancelado" %}
+                        <span class="badge-cancelado">Cancelado</span>
+                    {% else %}
+                        <span class="badge">{{ p.estado }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=p.id) }}">
+    Ver detalles
+</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+
+<p class="text-center">
+    No tienes pedidos aún 🧾
+</p>
+
+{% endif %}
+
+{% endblock %}

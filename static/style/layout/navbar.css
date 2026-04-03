@@ -135,3 +135,7 @@
             margin-right: 10px;
             width: 20px;
         }
+
+    .navbar-collapse {
+    transition: all 0.3s ease;
+}

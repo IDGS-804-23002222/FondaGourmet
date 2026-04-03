@@ -5,7 +5,7 @@ from forms import CrearProductoForm, EditarProductoForm
 from utils.security import role_required
 from .services import (
     crear_producto, obtener_productos, desactivar_producto,
-    activar_producto, obtener_producto, actualizar_producto, buscar_productos
+    activar_producto, obtener_producto, actualizar_producto, buscar_productos, obtener_categorias
 )
 
 
@@ -29,6 +29,12 @@ def index():
 def crear():
     """Crear un nuevo producto"""
     form = CrearProductoForm()
+    categorias, error = obtener_categorias()
+    if error:
+        current_app.logger.error(f"Error al obtener categorías: {str(error)}")
+        flash(error, 'danger')
+        return redirect(url_for('productos.index'))
+    form.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
     
     if form.validate_on_submit():
         exito, error = crear_producto(form)

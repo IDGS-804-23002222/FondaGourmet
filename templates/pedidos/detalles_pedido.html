@@ -1,0 +1,45 @@
+{% extends "tienda/base_cliente.html" %}
+{% block title %}Detalle pedido{% endblock %}
+
+{% block content %}
+
+<div class="pedido-detalle-card">
+
+    <h1 class="pedido-title">Pedido #{{ pedido.id_pedido }}</h1>
+
+    <ul class="info-list">
+        <li><strong>Fecha:</strong> {{ pedido.fecha }}</li>
+        <li><strong>Estado:</strong> {{ pedido.estado }}</li>
+    </ul>
+
+    <h3 class="subtitulo">Productos</h3>
+
+    <table class="data-table detalle-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for d in pedido.detalles %}
+            <tr>
+                <td>{{ d.producto.nombre }}</td>
+                <td>${{ d.producto.precio }}</td>
+                <td>{{ d.cantidad }}</td>
+                <td>${{ d.subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="pedido-total">
+        Total: ${{ pedido.total }}
+    </h2>
+
+</div>
+
+{% endblock %}

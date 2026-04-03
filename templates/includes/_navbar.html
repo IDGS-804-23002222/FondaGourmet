@@ -14,32 +14,9 @@
 </button>
 
         {% if current_user.is_authenticated %}
-                     
-            {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre == 'Cliente' %}
-            <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
-            <ul class="navbar-nav gap-lg-3">
-            <li class="nav-item">
-                <a class="nav-link {{ 'active' if request.endpoint == 'tienda.index' else '' }}" href="{{ url_for('tienda.index') }}">
-                    <i class="bi bi-home"></i> Inicio
-                </a>
-            </li>
-             <li class="nav-item">
-                <a class="nav-link {{ 'active' if request.endpoint == 'tienda.menu' else '' }}" href="{{ url_for('tienda.menu') }}">
-                    <i class="bi bi-card-list"></i> Menú
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ 'active' if request.endpoint == 'tienda.pedidos' else '' }}" href="{{ url_for('tienda.pedidos') }}">
-                    <i class="bi bi-receipt"></i> Mis Pedidos
-                </a>
-            </li>
-            </ul>
-            </div>
-            {% endif %}
-
             <div class="dropdown">
                 <li class="nav-item dropdown">
-                <a class="btn btn-dark dropdown-toggle"
+                <a class="btn btn-green dropdown-toggle"
                         data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle"></i>
                     {{ current_user.username }}
@@ -52,10 +29,7 @@
                     <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Cerrar sesión</a></li>
                 </ul>
             </div>
-            
-
-        {% else %}
-            
+        {% else %}       
 <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
             <ul class="navbar-nav gap-lg-3">
 
@@ -80,7 +54,6 @@
                         Iniciar sesión
                     </a>
                 </li>
-
             </ul>
             </div>
         {% endif %}

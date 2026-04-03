@@ -14,6 +14,7 @@ from modules.cuenta import cuenta
 from modules.ingredientes import ingredientes
 from modules.dashboard import dashboard
 from modules.ventas import ventas
+from modules.pedidos import pedidos
 from modules.produccion import produccion
 from modules.proveedores import proveedores
 from modules.productos import productos
@@ -64,6 +65,7 @@ def create_app():
     app.register_blueprint(productos, url_prefix='/productos')
     app.register_blueprint(proveedores, url_prefix='/proveedores')
     app.register_blueprint(ingredientes, url_prefix='/ingredientes')
+    app.register_blueprint(pedidos, url_prefix='/pedidos')
     
     # Configurar logging
     if not os.path.exists('logs'):
