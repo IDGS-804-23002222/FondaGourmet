@@ -9,6 +9,7 @@ def _to_dict(categoria):
         'id_categoria': categoria.id_categoria,
         'nombre': categoria.nombre,
         'descripcion': categoria.descripcion,
+        'tipo_categoria': categoria.tipo_categoria,
         'estado': categoria.estado,
         'fecha_creacion': categoria.fecha_creacion,
     }
@@ -23,6 +24,7 @@ def crear_categoria(form):
         categoria = Categoria(
             nombre=form.nombre.data,
             descripcion=form.descripcion.data or None,
+            tipo_categoria=form.tipo_categoria.data or 'platillo',
             estado=True,
         )
         db.session.add(categoria)
@@ -83,6 +85,10 @@ def actualizar_categoria(id_categoria, form):
             categoria.nombre = form.nombre.data
 
         categoria.descripcion = form.descripcion.data or None
+        
+        if hasattr(form, 'tipo_categoria') and form.tipo_categoria.data:
+            categoria.tipo_categoria = form.tipo_categoria.data
+        
         db.session.commit()
         return True, None
     except Exception as e:

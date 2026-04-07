@@ -1,0 +1,153 @@
+{# Macros para componentes visuales de ingredientes y recetas #}
+
+{% macro mostrar_ingredientes_producto(producto) %}
+<div class="ingredientes-container">
+    <div class="ingredientes-header">
+        <h3>Ingredientes del Producto</h3>
+        <span class="badge bg-primary">{{ producto.recetas[0].detalles | length if producto.recetas and producto.recetas[0].detalles else 0 }} ingredientes</span>
+    </div>
+    
+    {% if producto.recetas and producto.recetas[0].detalles %}
+        <div class="ingredientes-grid">
+            {% for detalle in producto.recetas[0].detalles %}
+                <div class="ingrediente-card {% if loop.index % 4 == 1 %}verde{% elif loop.index % 4 == 2 %}rojo{% elif loop.index % 4 == 3 %}amarillo{% else %}azul{% endif %}">
+                    <div class="ingrediente-nombre">{{ detalle.materia_prima.nombre }}</div>
+                    <div class="ingrediente-cantidad">
+                        <strong>{{ "%.2f"|format(detalle.cantidad) }}</strong>
+                        <span>{{ detalle.materia_prima.unidad_medida }}</span>
+                    </div>
+                    <div class="ingrediente-precio">
+                        Precio: ${{ "%.2f"|format(detalle.materia_prima.precio) }} c/u
+                    </div>
+                    <span class="ingrediente-badge">{{ detalle.materia_prima.categoria.nombre }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Este producto aún no tiene una receta asignada
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro mostrar_rendimiento_receta(receta) %}
+<div class="rendimiento-container">
+    <div class="rendimiento-label">Rendimiento de la Receta</div>
+    <div class="rendimiento-valor" data-rendimiento-valor>{{ "%.1f"|format(receta.rendimiento or 0) }}%</div>
+    <div class="rendimiento-bar">
+        <div class="rendimiento-bar-fill" data-rendimiento-fill style="width: {{ receta.rendimiento or 0 }}%"></div>
+    </div>
+    <div class="rendimiento-descripcion">
+        {% if receta.rendimiento >= 80 %}
+            ✅ Excelente rendimiento
+        {% elif receta.rendimiento >= 60 %}
+            📊 Rendimiento bueno
+        {% elif receta.rendimiento >= 40 %}
+            ⚠️ Rendimiento aceptable
+        {% else %}
+            ❌ Bajo rendimiento - Revisar ingredientes
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro tabla_ingredientes_receta(receta) %}
+<div class="receta-tabla-container">
+    <table class="receta-tabla">
+        <thead>
+            <tr>
+                <th>Ingrediente</th>
+                <th>Cantidad</th>
+                <th>Categoría</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody data-ingredientes-lista>
+            {% if receta.detalles %}
+                {% for detalle in receta.detalles %}
+                    <tr>
+                        <td class="ingrediente-nombre-tabla">{{ detalle.materia_prima.nombre }}</td>
+                        <td class="ingrediente-cantidad-tabla">
+                            {{ "%.2f"|format(detalle.cantidad) }} {{ detalle.materia_prima.unidad_medida }}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ detalle.materia_prima.categoria.nombre }}</span>
+                        </td>
+                        <td>${{ "%.2f"|format(detalle.materia_prima.precio) }}</td>
+                        <td>
+                            <strong>${{ "%.2f"|format(detalle.cantidad * detalle.materia_prima.precio) }}</strong>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay ingredientes en esta receta</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% macro selector_ingredientes_visual(ingredientes_disponibles) %}
+<div class="ingredientes-selector">
+    <label class="form-label"><strong>Selecciona los Ingredientes:</strong></label>
+    <div class="ingredientes-lista">
+        {% for ingrediente in ingredientes_disponibles %}
+            <div class="ingredientes-opcion">
+                <input type="checkbox" 
+                       id="ing_{{ ingrediente.id_materia }}"
+                       data-id="{{ ingrediente.id_materia }}"
+                       data-nombre="{{ ingrediente.nombre }}"
+                       data-unidad="{{ ingrediente.unidad_medida }}"
+                       class="form-check-input">
+                <label for="ing_{{ ingrediente.id_materia }}" class="ingredientes-opcion-label">
+                    <div class="ingredientes-opcion-checkbox"></div>
+                    <div class="ingredientes-opcion-text">
+                        <div class="ingredientes-opcion-nombre">{{ ingrediente.nombre }}</div>
+                        <div class="ingredientes-opcion-unidad">{{ ingrediente.unidad_medida }}</div>
+                    </div>
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="receta-info-box">
+    <i class="fas fa-info-circle"></i>
+    <div class="receta-info-text">
+        Selecciona los ingredientes que utilizarás en esta receta. Los ingredientes seleccionados se mostrarán en el formulario para que especifiques las cantidades.
+    </div>
+</div>
+
+<!-- Contenedor para ingredientes seleccionados -->
+<div data-seleccionados-list style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 20px;">
+    <p class="text-muted">Selecciona ingredientes para comenzar</p>
+</div>
+{% endmacro %}
+
+{% macro carta_ingrediente(ingrediente, mostrar_acciones=false, index=none) %}
+<div class="ingrediente-card">
+    <div class="ingrediente-nombre">{{ ingrediente.nombre }}</div>
+    <div class="ingrediente-cantidad">
+        <i class="fas fa-weight"></i>
+        <span><strong>{{ "%.2f"|format(ingrediente.stock_actual) }}</strong> en stock</span>
+    </div>
+    {% if ingrediente.precio %}
+        <div class="ingrediente-precio">
+            💰 Precio: ${{ "%.2f"|format(ingrediente.precio) }}
+        </div>
+    {% endif %}
+    <span class="ingrediente-badge">{{ ingrediente.categoria.nombre }}</span>
+    
+    {% if mostrar_acciones and index is not none %}
+        <div style="margin-top: 10px;">
+            <button class="btn-remover-ingrediente" data-remover-ingrediente data-index="{{ index }}">
+                <i class="fas fa-trash"></i> Remover
+            </button>
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}

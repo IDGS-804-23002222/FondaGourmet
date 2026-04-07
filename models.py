@@ -110,13 +110,18 @@ class Proveedor(db.Model):
 class Categoria(db.Model):
     __tablename__ = 'categorias'
     id_categoria = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), unique=True, nullable=False)
+    nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
+    tipo_categoria = db.Column(db.String(20), default='platillo', nullable=False)  # 'platillo' | 'ingrediente'
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     
     materias_primas = db.relationship('MateriaPrima', back_populates='categoria', lazy=True)
     productos = db.relationship('Producto', back_populates='categoria', lazy=True)
+    
+    __table_args__ = (
+        CheckConstraint("tipo_categoria IN ('platillo', 'ingrediente')", name='check_tipo_categoria'),
+    )
     
 class MateriaPrima(db.Model):
     __tablename__ = 'materias_primas'
@@ -125,6 +130,7 @@ class MateriaPrima(db.Model):
     unidad_medida = db.Column(db.String(20), nullable=False)
     stock_actual = db.Column(db.Float, default=0, nullable=False)
     stock_minimo = db.Column(db.Float, nullable=False)
+    precio = db.Column(db.Float, default=0, nullable=False)
     porcentaje_merma = db.Column(db.Float, default=0, nullable=False)
     factor_conversion = db.Column(db.Float, default=1, nullable=False)
     estado = db.Column(db.Boolean, default=True)
@@ -172,14 +178,7 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
-<<<<<<< HEAD
-        CheckConstraint(
-    "imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg)|[a-zA-Z0-9_\\-\\./]+\\.(jpg|jpeg|png))$'", 
-    name='check_formato_imagen'
-),
-=======
         CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
->>>>>>> 9f0c14b9f20c8b8f7985474db2dc4ad269c4653b
     )   
 
 
@@ -188,11 +187,23 @@ class Receta(db.Model):
     __tablename__ = 'recetas'
     id_receta = db.Column(db.Integer, primary_key=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
+    rendimiento = db.Column(db.Float, default=0, nullable=False)  # Porcentaje de rendimiento (0-100)
+    nota = db.Column(db.Text)  # Notas opcionales sobre la receta
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     
     detalles = db.relationship('RecetaDetalle', back_populates='receta', cascade="all, delete-orphan")
     producto = db.relationship('Producto', back_populates='recetas')
+    
+    def calcular_rendimiento_automatico(self):
+        """Calcula el rendimiento basado en el total de ingredientes"""
+        if not self.detalles:
+            return 0
+        # Rendimiento simple: si hay 2 kg de ingredientes, es 100% de rendimiento
+        # Si hay 1 kg, es 50%, etc. Se puede customizar según sea necesario
+        total_ingredientes = sum(d.cantidad for d in self.detalles)
+        # Por ahora, asumimos 100% si hay ingredientes
+        return 100.0 if total_ingredientes > 0 else 0
 
 class RecetaDetalle(db.Model):
     __tablename__ = 'receta_detalle'

@@ -5,30 +5,79 @@
 <div class="form-page">
     <div class="form-container">
         <div class="form-title">
-            <h1>Registrar Nueva Categoría</h1>
+            <h1>🏷️ Registrar Nueva Categoría</h1>
+            <p class="text-muted">Crea una nouvelle catégorie para organizar tus productos o ingredientes</p>
         </div>
 
         <form method="POST" novalidate>
             {{ form.hidden_tag() }}
             <div class="form-grid">
+                <!-- Nombre de la categoría -->
                 <div class="form-group-full">
-                    {{ form.nombre.label(class="form-label") }}
-                    {{ form.nombre(class="form-control") }}
-                    {% for error in form.nombre.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+                    {{ form.nombre.label(class="form-label font-weight-bold") }}
+                    {{ form.nombre(class="form-control form-control-lg", placeholder="Ej: Verduras, Tacos, Postres") }}
+                    {% for error in form.nombre.errors %}<small class="text-danger"><i class="fas fa-exclamation-circle"></i> {{ error }}</small>{% endfor %}
                 </div>
 
+                <!-- Tipo de categoría (Platillo o Ingrediente) -->
                 <div class="form-group-full">
-                    {{ form.descripcion.label(class="form-label") }}
-                    {{ form.descripcion(class="form-control") }}
-                    {% for error in form.descripcion.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+                    {{ form.tipo_categoria.label(class="form-label font-weight-bold") }}
+                    <div class="tipo-selector">
+                        <select name="tipo_categoria" class="form-control form-control-lg" required>
+                            <option value="">-- Selecciona el tipo --</option>
+                            <option value="platillo" {% if form.tipo_categoria.data == 'platillo' %}selected{% endif %}>
+                                🍽️ Platillo/Producto (Tacos, Ensaladas, Postres)
+                            </option>
+                            <option value="ingrediente" {% if form.tipo_categoria.data == 'ingrediente' %}selected{% endif %}>
+                                🥬 Ingrediente (Verdura, Fruta, Lácteos)
+                            </option>
+                        </select>
+                    </div>
+                    {% for error in form.tipo_categoria.errors %}<small class="text-danger"><i class="fas fa-exclamation-circle"></i> {{ error }}</small>{% endfor %}
+                </div>
+
+                <!-- Descripción -->
+                <div class="form-group-full">
+                    {{ form.descripcion.label(class="form-label font-weight-bold") }}
+                    {{ form.descripcion(class="form-control form-control-lg", rows="4", placeholder="Describe la categoría (opcional)") }}
+                    {% for error in form.descripcion.errors %}<small class="text-danger"><i class="fas fa-exclamation-circle"></i> {{ error }}</small>{% endfor %}
+                </div>
+
+                <!-- Info box -->
+                <div class="form-group-full">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Recuerda:</strong>
+                        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                            <li><strong>Platillo:</strong> Usa para categorías de productos/platos (Tacos, Ensaladas, Postres)</li>
+                            <li><strong>Ingrediente:</strong> Usa para categorías de materias primas (Verdura, Fruta, Lácteos)</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
             <div class="button-group">
-                {{ form.submit(class="crear-btn") }}
-                <a href="{{ url_for('categorias.index') }}" class="btn volver-btn">Cancelar</a>
+                {{ form.submit(class="btn btn-success btn-lg", value="✓ Crear Categoría") }}
+                <a href="{{ url_for('categorias.index') }}" class="btn btn-secondary btn-lg">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+.tipo-selector select {
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.tipo-selector select:focus {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-title p {
+    font-size: 14px;
+    margin-top: 8px;
+}
+</style>
 {% endblock %}

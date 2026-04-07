@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido
 from flask import current_app, flash
 from flask_login import current_user
@@ -277,5 +276,3 @@ def finalizar_pedido():
     except Exception as e:
         db.session.rollback()
         return False, str(e)
-=======
->>>>>>> 9f0c14b9f20c8b8f7985474db2dc4ad269c4653b
