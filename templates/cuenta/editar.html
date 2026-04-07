@@ -1,4 +1,8 @@
-{% extends "base.html" %}
+{% if current_user.is_authenticated and current_user.id_rol == 4 %}
+{% extends 'tienda/base_cliente.html' %}
+{% else %}
+{% extends 'base.html' %}
+{% endif %}
 {% block title %}Editar mi cuenta{% endblock %}
 
 {% block head %}

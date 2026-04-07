@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Pedidos{% endblock %}
+
+{% block content %}
+<h1>Pedidos de Clientes</h1>
+
+<div class="toolbar">
+    <input type="date" class="search" placeholder="Buscar orden...">
+</div>
+
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>No. Pedido</th>
+            <th>Productos</th>
+            <th>Cantidad solicitada</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+            <td>#{{ pedido.id_pedido }}</td>
+
+            <td>
+                <ul class="mb-0">
+                    {% for producto in pedido.productos %}
+                        <li>
+                            {{ producto.nombre }} 
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+     <td>
+    <ul>
+        {% for producto in pedido.productos %}
+            <li>
+                <span class="badge bg-info">x{{ producto.cantidad }}</span>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+</td>
+<td>
+    <ul>
+        {% for producto in pedido.productos %}
+            <li>
+                <span class="badge 
+                    {% if producto.stock_actual < producto.cantidad %}
+                        bg-danger
+                    {% else %}
+                        bg-success
+                    {% endif %}
+                ">
+                    Stock: {{ producto.stock_actual }}
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+</td>
+<td>
+    {% if pedido.stock_suficiente %}
+        <span class="badge bg-success">
+            ✔ Listo para completar
+        </span>
+    {% else %}
+        <span class="badge bg-danger">
+            ⚠ Requiere producción
+        </span>
+    {% endif %}
+</td>
+
+            <td>
+                <span class="badge bg-warning text-dark">
+                    {{ pedido.estado }}
+                </span>
+            </td>
+
+            <td>{{ pedido.fecha }}</td>
+
+            <td>
+    {% if pedido.stock_suficiente %}
+        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
+                class="btn btn-success">
+            Completar
+        </button>
+    {% else %}
+        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
+                class="btn btn-warning">
+            Enviar a producción
+        </button>
+    {% endif %}
+</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+function procesarPedido(id) {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    Swal.fire({
+        title: 'Procesar pedido',
+        text: 'Se completará si hay stock o se enviará a producción automáticamente',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("pedidos.procesar") }}';
+
+            form.innerHTML = `
+                <input type="hidden" name="csrf_token" value="${token}">
+                <input type="hidden" name="id_pedido" value="${id}">
+            `;
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+</script>
+{% endblock %}

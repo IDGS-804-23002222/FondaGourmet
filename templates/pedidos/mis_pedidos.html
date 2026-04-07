@@ -46,10 +46,14 @@
                     {% endif %}
                 </td>
 
-                <td>
-                    <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=p.id) }}">
-    Ver detalles
-</a>
+                <td class="px-4 md:px-6 py-4">
+                    <div class="flex items-center justify-center gap-1.5 md:gap-2">
+                    <button onclick=window.location.href='{{ url_for("pedidos.ver_detalles_pedido", id_pedido=p.id) }}'
+                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
+                                title="Ver detalles">
+                            <i class="bi bi-eye text-lg"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             {% endfor %}

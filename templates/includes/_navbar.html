@@ -9,10 +9,14 @@
             <span class="brand-text">Casa Gourmet</span>
         </a>
 
-       <button class="navbar-toggler" id="mobileMenuToggle" type="button">
+    <button class="navbar-toggler" type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarMenu"
+        aria-controls="navbarMenu"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
 </button>
-
         {% if current_user.is_authenticated %}
             <div class="dropdown">
                 <li class="nav-item dropdown">

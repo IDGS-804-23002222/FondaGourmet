@@ -1,39 +1,101 @@
 {% extends "base.html" %}
-
+{% block title %}Ventas{% endblock %}
 {% block content %}
-<div class="container">
-    <h1 class="display-5 mb-4">Dashboard de Ventas</h1>
-    
-    <div class="alert alert-success">
-        <h4>✅ ¡Login exitoso!</h4>
-        <p>Ya estás dentro del sistema. Aquí irán las gráficas de ventas diarias, productos más vendidos y presentaciones.</p>
-    </div>
-
-    <div class="row text-center">
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Ventas del día</h5>
-                    <h2>$0.00</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Productos más vendidos</h5>
-                    <h2>0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5>Producción pendiente</h5>
-                    <h2>0</h2>
-                </div>
-            </div>
-        </div>
-    </div>
+<h1>Gestión de Ventas</h1>
+<div class="toolbar">
+    <input type="text" class="search" placeholder="Buscar venta...">
+    <select id="filtroEstado" class="filter">
+        <option value="todos">Todos los estados</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+        <option value="pendiente">Pendientes</option>
+    </select>
+    <a type="button" class="btn btn-primary" href="{{ url_for('ventas.nueva') }}">Nueva venta</a>
 </div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>No. Venta</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Método de pago</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+        {% if ventas %}
+        {% for v in ventas %}
+
+        <tr>
+            <td>{{ v.id_venta }}</td>
+            <td>{{ v.fecha }}</td>
+            <td>${{ "%.2f"|format(v.total) }}</td>
+            <td>{{ v.metodo_pago }}</td>
+              <td class="px-4 md:px-6 py-4">
+                    <div class="flex items-center justify-center gap-1.5 md:gap-2">
+                    <button onclick=window.location.href='{{ url_for("ventas.detalles", id_venta=v.id_venta) }}'
+                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
+                                title="Ver detalles">
+                            <i class="bi bi-eye text-lg"></i>
+                        </button>
+                        <button onclick=window.location.href='{{ url_for("ventas.editar", id_venta=v.id_venta) }}'
+                                class="btn-edit p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all hover:scale-105"
+                                title="Editar">
+                            <i class="bi bi-pencil text-lg"></i>
+                        </button>
+                        <button onclick="eliminarVenta('{{ v.id_venta }}', '{{ v.id_venta }}')"
+                                class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
+                                title="Desactivar">
+                            <i class="bi bi-ban text-lg"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+           <tr>
+            {% endfor %}
+        {%else%}
+                <td colspan="6" class="px-6 py-20 text-center">
+                    <div class="flex flex-col items-center gap-4">
+                        <i class="bi bi-box-seam text-7xl text-gray-300 dark:text-gray-600"></i>
+                        <p class="text-xl font-medium text-gray-500 dark:text-gray-400">No hay ventas registradas</p>
+                        <a href="{{ url_for('ventas.nueva') }}" 
+                           class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
+                            <i class="bi bi-plus-circle"></i>
+                            Crear primer producto
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+    let actionData = {};
+
+function eliminarVenta(id, nombre) {
+    actionData = { id: id, action: 'eliminar' };
+     document.getElementById('modalTitle').textContent = 'Eliminar Venta';
+    document.getElementById('modalMessage').textContent = `¿Eliminar la venta "${nombre}"?`;
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+   function confirmAction() {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = actionData.action === 'eliminar' 
+        ? '{{ url_for("ventas.eliminar") }}'
+        : '{{ url_for("productos.activar") }}';
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'id_venta';
+    input.value = actionData.id;
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 {% endblock %}

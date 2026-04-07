@@ -172,14 +172,7 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
-<<<<<<< HEAD
-        CheckConstraint(
-    "imagen REGEXP '^(https?://.*\\.(png|jpg|jpeg|gif|svg)|[a-zA-Z0-9_\\-\\./]+\\.(jpg|jpeg|png))$'", 
-    name='check_formato_imagen'
-),
-=======
         CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
->>>>>>> 9f0c14b9f20c8b8f7985474db2dc4ad269c4653b
     )   
 
 
@@ -207,7 +200,8 @@ class RecetaDetalle(db.Model):
 class Produccion(db.Model):
     __tablename__ = 'producciones'
     id_produccion = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.DateTime, nullable=False)
+    fecha_solicitud = db.Column(db.DateTime, nullable=False)
+    fecha_completada = db.Column(db.DateTime)
     estado = db.Column(db.String(50), nullable=False, default='Solicitada')
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
@@ -224,7 +218,7 @@ class DetalleProduccion(db.Model):
     id_detalle = db.Column(db.Integer, primary_key=True)
     cantidad = db.Column(db.Float, nullable=False)
     id_produccion = db.Column(db.Integer, db.ForeignKey('producciones.id_produccion'), nullable=False)
-    id_materia = db.Column(db.Integer, db.ForeignKey('materias_primas.id_materia'), nullable=False)
+    id_materia = db.Column(db.Integer, db.ForeignKey('materias_primas.id_materia'), nullable=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
 
     produccion = db.relationship('Produccion', back_populates='detalles')
@@ -274,6 +268,7 @@ class Venta(db.Model):
     fecha = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
     metodo_pago = db.Column(db.String(50), nullable=False)
+    estado = db.Column(db.String(50), nullable=False)
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
 
@@ -281,6 +276,7 @@ class Venta(db.Model):
     detalles = db.relationship('DetalleVenta', back_populates='venta', cascade="all, delete-orphan")
     
     __table_args__ = (
+        CheckConstraint("estado IN ('Pendiente', 'Completada', 'Cancelada')", name='check_estado_venta'),
         CheckConstraint("metodo_pago IN ('Efectivo', 'Tarjeta', 'Transferencia')", name='check_metodo_pago_venta'),
         CheckConstraint('total >= 0', name='check_total_venta_no_negativo'),
     )
@@ -312,7 +308,7 @@ class Pedido(db.Model):
     detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan")
 
     __table_args__ = (
-        CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Completado')", name='check_estado_pedido'),
+        CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Completado', 'Cancelado')", name='check_estado_pedido'),
         CheckConstraint('total >= 0', name='check_total_pedido_no_negativo'),
     )
     

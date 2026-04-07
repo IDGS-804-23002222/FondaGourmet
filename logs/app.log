@@ -49,3 +49,61 @@
 2026-04-02 23:23:46,701 ERROR: Error al obtener proveedores: (pymysql.err.OperationalError) (1305, 'PROCEDURE fonda.sp_verProveedores does not exist')
 [SQL: CALL sp_verProveedores()]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-03 14:54:01,127 INFO: Login exitoso para usuario: cliente1
+2026-04-03 14:54:01,219 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:14,698 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:23,223 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:27,156 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:29,373 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:34,078 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:35,437 INFO: Producto agregado: 2
+2026-04-03 14:54:35,505 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:36,732 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:40,780 INFO: Cantidad aumentada del carrito: 12
+2026-04-03 14:54:40,837 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:42,589 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:44,428 INFO: Producto agregado: 7
+2026-04-03 14:54:44,479 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:45,552 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:47,084 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:49,773 INFO: Producto agregado: 4
+2026-04-03 14:54:49,827 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:50,929 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:52,555 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:54:55,477 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:55:08,240 INFO: Login exitoso para usuario: cliente1
+2026-04-03 14:55:08,318 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:55:55,854 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:57:14,460 INFO: Cuenta creada para cliente: cliente2
+2026-04-03 14:57:18,644 INFO: Login exitoso para usuario: cliente2
+2026-04-03 14:57:18,731 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:57:26,497 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:57:33,694 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:57:39,628 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:57:45,886 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:59:58,025 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 14:59:58,039 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:02:48,006 ERROR: Usuario no encontrado en la base de datos.
+2026-04-03 15:02:48,449 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:02:48,493 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:03:20,676 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:03:20,710 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:03:28,782 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:03:28,805 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:03:36,600 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:03:36,633 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:04:17,306 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:04:17,341 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 15:05:09,744 ERROR: Error al actualizar perfil: Error al actualizar cuenta: (pymysql.err.OperationalError) (1318, 'Incorrect number of arguments for PROCEDURE fonda.sp_actualizarMiCuenta; expected 11, got 9')
+[SQL: 
+            CALL sp_actualizarMiCuenta(
+                %(id_usuario)s, %(nombre)s, %(ap_p)s, %(ap_m)s,
+                %(telefono)s, %(correo)s, %(direccion)s,
+                %(username)s, %(password)s    
+                )
+                ]
+[parameters: {'id_usuario': 15, 'nombre': 'clientepruebaedit', 'ap_p': 'cliente', 'ap_m': 'cliente', 'telefono': '4771029384', 'correo': 'cliente2@gmail.com', 'direccion': 'cliente 2 casa', 'username': 'cliente2', 'password': 'scrypt:32768:8:1$q81QHDp4U63rD6Pi$dc8d3d054384bb643989db6ba5bcbd0a55ac6a4d8da6b95be081213206ce214bbe010f29e4605900e493099d129c1b09063ecfaca2b1745e3d640d5ae9a5a4d9'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-03 15:05:09,833 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-03 15:05:09,859 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-03 20:07:05,734 INFO: Pedido 1 completado exitosamente

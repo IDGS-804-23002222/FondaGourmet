@@ -35,7 +35,7 @@ def menu():
     
 @tienda.route('/carrito')
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def carrito():
     carrito, error = obtener_carrito()
 
@@ -48,7 +48,7 @@ def carrito():
 
 @tienda.route('/agregar/<int:id>', methods=['GET'])
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def agregar_carrito(id):
     exito, mensaje = agregar_producto_carrito(id)
 
@@ -63,7 +63,7 @@ def agregar_carrito(id):
 
 @tienda.route('/reducir/<int:id>', methods=['GET'])
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def reducir_cantidad(id):
     exito, mensaje = reducir_cantidad_carrito(id)
 
@@ -79,7 +79,7 @@ def reducir_cantidad(id):
 
 @tienda.route('/aumentar/<int:id>', methods=['GET'])
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def aumentar_cantidad(id):
     exito, mensaje = agregar_cantidad_carrito(id)
 
@@ -95,7 +95,7 @@ def aumentar_cantidad(id):
 
 @tienda.route('/actualizar_cantidad/', methods=['POST'])
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def actualizar_cantidad(id):
     accion = request.json.get('accion')
 
@@ -133,7 +133,7 @@ def actualizar_cantidad(id):
 
 @tienda.route('/finalizar')
 @login_required
-@role_required(4)
+@role_required(3, 4)
 def finalizar_compra():
 
     exito, mensaje = finalizar_pedido()

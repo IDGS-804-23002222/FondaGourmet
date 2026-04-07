@@ -29,7 +29,7 @@ def redireccionar_por_rol(user):
         1: 'dashboard.index',
         2: 'produccion.index',
         3: 'ventas.index',  
-        4: 'tienda.index'
+        4: 'tienda.menu'
     }
     
     endpoint = rutas.get(user.id_rol, 'tienda.index')

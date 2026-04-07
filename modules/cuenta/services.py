@@ -12,22 +12,22 @@ def ver_perfil(id_usuario):
     try:
         result = db.session.execute(text("""
             SELECT 
-                u.id_usuario,
-                u.username,
-                u.estado,
-                r.nombre as rol_nombre,
-                p.nombre,
-                p.apellido_p,
-                p.apellido_m,
-                p.correo,
-                p.telefono,
-                p.direccion
-            FROM usuarios u
-            INNER JOIN roles r ON u.id_rol = r.id_rol
-            LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
-            LEFT JOIN personas p ON e.id_persona = p.id_persona
-            LEFT JOIN clientes c ON u.id_usuario = c.id_usuario
-            WHERE u.id_usuario = :id_usuario
+    u.id_usuario,
+    u.username,
+    u.estado,
+    r.nombre as rol_nombre,
+    p.nombre,
+    p.apellido_p,
+    p.apellido_m,
+    p.correo,
+    p.telefono,
+    p.direccion
+FROM usuarios u
+INNER JOIN roles r ON u.id_rol = r.id_rol
+LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
+LEFT JOIN clientes c ON u.id_usuario = c.id_usuario
+LEFT JOIN personas p ON p.id_persona = COALESCE(e.id_persona, c.id_persona)
+WHERE u.id_usuario = :id_usuario
         """), {"id_usuario": id_usuario})   
         usuario = result.mappings().first()
         return usuario, None
@@ -67,34 +67,37 @@ def crear_cliente(form):
     
 def actualizar_mi_cuenta(id_usuario, form):
     try:
-        password_raw = form.get('contrasena')
-        password_hash = generate_password_hash(password_raw) if password_raw else None
+        password_hash = None
+
+        if form.contrasena.data:
+            password_hash = generate_password_hash(form.contrasena.data)
 
         db.session.execute(text("""
             CALL sp_actualizarMiCuenta(
                 :id_usuario, :nombre, :ap_p, :ap_m,
                 :telefono, :correo, :direccion,
-                :username, :password    
-                )
-                """), {
-                "id_usuario": id_usuario,
-                "nombre": form.get('nombre') or None,
-                "ap_p": form.get('apellido_p') or None,
-                "ap_m": form.get('apellido_m') or None,
-                "telefono": form.get('telefono') or None,
-                "correo": form.get('correo') or None,
-                "direccion": form.get('direccion') or None,
-                "username": form.get('username') or None,
-                "password": password_hash or None
-            })
-        
+                :username, :password
+            )
+        """), {
+            "id_usuario": id_usuario,
+            "nombre": form.nombre.data,
+            "ap_p": form.apellido_p.data,
+            "ap_m": form.apellido_m.data,
+            "telefono": form.telefono.data,
+            "correo": form.correo.data,
+            "direccion": form.direccion.data,
+            "username": form.username.data,
+            "password": password_hash
+        })
+
         db.session.commit()
-        logger.info(f"Cuenta actualizada: {form.get('username')}")
-        return True, "Cuenta actualizada exitosamente"
+        return True, "Perfil actualizado correctamente"
+
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error al actualizar cuenta: {str(e)}")
-        return False, str("Error al actualizar cuenta: " + str(e))    
+        return False, str(e)
+
     
 def validar_datos(form, id_usuario=None):
     username = form.username.data.strip()
@@ -138,11 +141,11 @@ def cargar_datos_usuario(id_usuario, form):
                  p.telefono,
                 p.direccion
             FROM usuarios u
-            INNER JOIN roles r ON u.id_rol = r.id_rol
-            LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
-            LEFT JOIN personas p ON e.id_persona = p.id_persona
-            LEFT JOIN clientes c ON u.id_usuario = c.id_usuario
-            WHERE u.id_usuario = :id_usuario
+INNER JOIN roles r ON u.id_rol = r.id_rol
+LEFT JOIN empleados e ON u.id_usuario = e.id_usuario
+LEFT JOIN clientes c ON u.id_usuario = c.id_usuario
+LEFT JOIN personas p ON p.id_persona = COALESCE(e.id_persona, c.id_persona)
+WHERE u.id_usuario = :id_usuario
         """), {"id_usuario": id_usuario})
         
         usuario = result.mappings().first()

@@ -1,39 +1,69 @@
 {% extends "base.html" %}
-
+{% block title %}Producción{% endblock %}
 {% block content %}
-<div class="container">
-    <h1 class="display-5 mb-4">Dashboard de Ventas</h1>
-    
-    <div class="alert alert-success">
-        <h4>✅ ¡Login exitoso!</h4>
-        <p>Ya estás dentro del sistema. Aquí irán las gráficas de ventas diarias, productos más vendidos y presentaciones.</p>
-    </div>
-
-    <div class="row text-center">
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Ventas del día</h5>
-                    <h2>$0.00</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Productos más vendidos</h5>
-                    <h2>0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5>Producción pendiente</h5>
-                    <h2>0</h2>
-                </div>
-            </div>
-        </div>
-    </div>
+<h1>Historial de Producción</h1>
+<div class="toolbar">
+    <input type="text" class="search" placeholder="Buscar orden...">
+    <select class="filter">
+        <option value="todas">Todas las órdenes</option>
+        <option value="solicitada">Solicitadas</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+    </select>
+    <button type="button" class="btn-primary" onclick="window.location.href='/produccion/nueva'">Nueva orden</button>
 </div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>No. orden</th>
+            <th>Responsable</th>
+            <th>Estado</th>
+            <th>Fecha Solicitud</th>
+            <th>Fecha Producción</th>
+            <th>Acciones</th>
+        </thead>
+    <tbody>
+{% for p in producciones %}
+<tr>
+    <td>{{ p.id_produccion }}</td>
+    <td>
+        {{ p.usuario }}
+    </td>
+    <td>
+        <span class="badge  
+        {% if p.estado == 'Solicitada' %}
+            bg-warning
+        {% elif p.estado == 'En Proceso' %}
+            bg-info
+        {% elif p.estado == 'completada' %}
+            bg-success
+        {% elif p.estado == 'cancelada' %}
+            bg-danger
+        {% endif %}
+                ">
+            {{ p.estado }}
+        </span>
+    </td>
+
+    <td>{{ p.fecha_solicitud }}</td>
+    <td>{{ p.fecha_completada or 'Sin completar' }}</td>
+    <td>
+        {% if p.estado == 'solicitada' %}
+            <a href="{{ url_for('produccion.iniciar', id=p.id_produccion) }}" class="btn-primary">Iniciar</a>
+        {% elif p.estado == 'en_proceso' %}
+            <a href="{{ url_for('produccion.completar', id=p.id_produccion) }}" class="btn-completar">Completar</a>
+        {% endif %}
+
+        {% if p.estado != 'completada' %}
+            <a href="{{ url_for('produccion.cancelar', id=p.id_produccion) }}" class="btn-delete">Cancelar</a>
+        {% endif %}
+
+        <a href="#" class="btn-view">Ver</a>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
 {% endblock %}

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Nueva Venta{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <h1>Registrar Nueva Venta</h1>
+        <p>Complete los datos de la venta</p>
+    </div>
+    
+    <div class="form-container">
+        <form>
+            <div class="form-grid">
+                    <input type="text" id="usuario" value="{{ current_user.id_usuario }}" hidden>
+                <div class="form-group-half">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" id="currentDate">
+                </div>
+                
+                <div class="form-group-half">
+                    <label for="pago">Método de pago</label>
+                    <select id="pago" name="pago">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                    </select>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Detalles de la venta</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                     </tr>
+                </thead>
+                <tbody id="detalleVenta">
+                    {% if productos %}
+                        <tr>
+    <td>
+        <select class="producto">
+            <option value="">Seleccione producto</option>
+            {% for p in productos %}
+            <option value="{{ p.id_producto }}" data-precio="{{ p.precio }}">
+                {{ p.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </td>
+    <td><input type="number" class="cantidad" value="1" min="1"></td>
+    <td><input type="number" class="precio" readonly></td>
+    <td class="subtotal">0.00</td>
+    <td>
+        <button type="button" onclick="eliminarFila(this)" class="btn-delete">X</button>
+    </td>
+</tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                     <tr style="font-weight: bold; background: #f0f0f0;">
+                        <td colspan="3" style="text-align: right;">Total:</td>
+                        <td id="totalVenta">0.00</td>
+                        <td></td>
+                     </tr>
+                </tfoot>
+                
+            </table>
+            
+            <button type="button" class="btn-secondary" onclick="agregarFila()">Agregar producto</button>
+            
+            <div class="form-actions" style="margin-top: 25px;">
+                <button type="button" onclick="registrarVenta()" class="btn-primary btn-large">Registrar venta</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='{{url_for(ventas.index)}}'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const now = new Date();
+    const dateElement = document.getElementById('currentDate');
+    dateElement.value = now.toISOString().split('T')[0];
+
+function agregarFila() {
+    const tbody = document.getElementById("detalleVenta");
+
+    const fila = `
+    <tr>
+        <td>
+            <select class="producto">
+                <option value="">Seleccione producto</option>
+                {% for p in productos %}
+                <option value="{{ p.id_producto }}" data-precio="{{ p.precio }}">
+                    {{ p.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><input type="number" class="cantidad" value="1" min="1"></td>
+        <td><input type="number" class="precio" readonly></td>
+        <td class="subtotal">0.00</td>
+        <td><button type="button" onclick="eliminarFila(this)">X</button></td>
+    </tr>
+    `;
+
+    tbody.insertAdjacentHTML('beforeend', fila);
+}
+
+function eliminarFila(btn) {
+    btn.closest("tr").remove();
+    calcularTotal();
+}
+
+document.addEventListener("change", e => {
+    if (e.target.classList.contains("producto")) {
+        const precio = e.target.selectedOptions[0].dataset.precio;
+        const fila = e.target.closest("tr");
+        fila.querySelector(".precio").value = precio;
+        calcularSubtotal(fila);
+    }
+});
+
+document.addEventListener("input", e => {
+    if (e.target.classList.contains("cantidad")) {
+        const fila = e.target.closest("tr");
+        calcularSubtotal(fila);
+    }
+});
+
+function calcularSubtotal(fila) {
+    const cantidad = fila.querySelector(".cantidad").value;
+    const precio = fila.querySelector(".precio").value;
+    const subtotal = cantidad * precio;
+
+    fila.querySelector(".subtotal").textContent = subtotal.toFixed(2);
+
+    calcularTotal();
+}
+
+function calcularTotal() {
+    let total = 0;
+
+    document.querySelectorAll(".subtotal").forEach(td => {
+        total += parseFloat(td.textContent) || 0;
+    });
+
+    document.getElementById("totalVenta").textContent = total.toFixed(2);
+}
+
+function registrarVenta() {
+const productos = [];
+
+document.querySelectorAll("#detalleVenta tr").forEach(fila => {
+    const id_producto = fila.querySelector(".producto").value;
+    const cantidad = parseFloat(fila.querySelector(".cantidad").value) || 0;
+
+    if (id_producto && cantidad > 0) {
+        productos.push({
+            id_producto: parseInt(id_producto),
+            cantidad: cantidad
+        });
+    }
+});
+   
+    if (productos.length === 0) {
+        Swal.fire("Error", "Agrega al menos un producto", "error");
+        return;
+    }
+
+    const metodo_pago = document.getElementById("pago").value;
+
+    if (!metodo_pago) {
+        Swal.fire("Error", "Selecciona método de pago", "error");
+        return;
+    }
+
+    fetch("/ventas/guardar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            metodo_pago: metodo_pago,
+            productos: productos
+        })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("Error en servidor");
+        }
+        return res.json();
+    })
+    .then(data => {
+        Swal.fire({
+            icon: data.success ? "success" : "error",
+            title: data.message
+        }).then(() => {
+            if (data.success) window.location.href = "/index";
+        });
+    })
+    .catch(err => {
+        Swal.fire("Error", err.message, "error");
+    });
+}
+</script>
+{% endblock %}

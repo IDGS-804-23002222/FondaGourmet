@@ -21,12 +21,11 @@
 <body>
 
 {% include "includes/_navbar.html" %}
-
+{% include "includes/_alerts.html" %}
 {% if current_user.is_authenticated and current_user.id_rol in [1, 2, 3] %}
    <div class="app-container">
     {% include "includes/_sidebar.html" %}
     <main class="main-content">
-        {% include "includes/_alerts.html" %}
         {% block content %}{% endblock %}
     </main>
 </div>

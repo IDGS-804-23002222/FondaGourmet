@@ -11,16 +11,22 @@ from .services import (
 
 @productos.route('/', methods=['GET'])
 @login_required
-@role_required(1)
+@role_required(1, 2, 3)
 def index():
     """Listar todos los productos"""
+    categorias, error = obtener_categorias()
+    if error:
+        current_app.logger.error(f"Error al obtener categorías: {str(error)}")
+        flash(error, 'danger')
+        return redirect(url_for('dashboard.index'))
+    
     resultados, error = obtener_productos()
     if error:
         current_app.logger.error(f"Error al obtener productos: {str(error)}")
         flash(error, 'danger')
         return redirect(url_for('dashboard.index'))
     
-    return render_template('productos/index.html', productos=resultados, name=current_user.username)
+    return render_template('productos/index.html', productos=resultados, name=current_user.username, categorias=categorias)
 
 
 @productos.route('/crear', methods=['GET', 'POST'])
@@ -131,7 +137,7 @@ def activar():
 
 @productos.route('/detalles')
 @login_required
-@role_required(1)
+@role_required(1, 2)
 def detalles():
     """Ver detalles de un producto"""
     id_producto = request.args.get('id_producto')

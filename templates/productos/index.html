@@ -7,27 +7,26 @@
 
 {% block content %}
     <h1>Gestión de Productos</h1>
-    
-<div class="button-group">
-   <button type="button" class="crear-btn" onclick=window.location.href='{{ url_for("productos.crear") }}'>Nuevo Producto</button>
-   <button type="button" class="volver-btn" onclick=window.location.href='{{ url_for("auth.redirigir") }}'>Volver</button>
-</div>
 
 <div class="toolbar">
-    <input type="text" id="searchInput" 
-    class="px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-600 
-                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-800
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           cursor-pointer text-sm min-w-[140px]" placeholder="Buscar por nombre o categoría...">
-     <select id="statusFilter" 
-                    class="px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-600 
-                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-800
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           cursor-pointer text-sm min-w-[140px]">
+    <input type="text" id="searchInput" class="search" placeholder="Buscar por nombre o categoría...">
+     <select id="statusFilter" class="filter">
                 <option value="all">Todos los estados</option>
                 <option value="active">Activos</option>
                 <option value="inactive">Inactivos</option>
             </select>
+                 <select id="categoriaFilter" class="filter">
+                <option value="all">Todas las categorías</option>
+                {% for categoria in categorias %}
+                <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                {% endfor %}
+            </select>
+            <div class="button-group">
+    {% if current_user.id_rol == 1 %}
+   <button type="button" class="btn btn-primary" onclick=window.location.href='{{ url_for("productos.crear") }}'>Nuevo Producto</button>
+   {% endif %}
+   <button type="button" class="btn btn-secondary" onclick=window.location.href='{{ url_for("auth.redirigir") }}'>Volver</button>
+</div>
 </div>
 
 <table class="userTable data-table" id="productTable">
@@ -59,10 +58,12 @@
     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-gray-600 dark:bg-gray-800">
         {% if productos %}
             {% for producto in productos %}
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-all duration-300 product-row"
-                data-nombre="{{ producto.nombre }}"
-                data-categoria="{{ producto.categoria_nombre }}"
-                data-estado="{% if producto.estado %}active{% else %}inactive{% endif %}">
+            <tr 
+            class="product-row"
+    data-nombre="{{ producto.nombre }}"
+    data-categoria="{{ producto.categoria_nombre }}"
+    data-categoria-id="{{ producto.id_categoria }}"
+    data-estado="{% if producto.estado %}active{% else %}inactive{% endif %}">
                 
                 <td class="px-4 md:px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -120,15 +121,17 @@
 
                 <td class="px-4 md:px-6 py-4">
                     <div class="flex items-center justify-center gap-1.5 md:gap-2">
+                    <button onclick=window.location.href='{{ url_for("productos.detalles", id_producto=producto.id_producto) }}'
+                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
+                                title="Ver detalles">
+                            <i class="bi bi-eye text-lg"></i>
+                        </button>
+
+                        {% if current_user.id_rol == 1 %}
                         <button onclick=window.location.href='{{ url_for("productos.editar", id_producto=producto.id_producto) }}'
                                 class="btn-edit p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all hover:scale-105"
                                 title="Editar">
                             <i class="bi bi-pencil text-lg"></i>
-                        </button>
-                        <button onclick=window.location.href='{{ url_for("productos.detalles", id_producto=producto.id_producto) }}'
-                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Ver detalles">
-                            <i class="bi bi-eye text-lg"></i>
                         </button>
                         {% if producto.estado %}
                         <button onclick="desactivarProducto('{{ producto.id_producto }}', '{{ producto.nombre }}')"
@@ -143,6 +146,12 @@
                             <i class="bi bi-check-circle text-lg"></i>
                         </button>
                         {% endif %}
+                        {% endif %}
+                        {% if current_user.id_rol==3 %}
+                        <a href="{{ url_for('ventas.agregar_carrito', id=producto.id_producto) }}" class="btn btn-success btn-add">
+                Agregar al carrito
+            </a>
+            {%endif%}
                     </div>
                 </td>
             </tr>
@@ -255,5 +264,64 @@ function sortTable(columnIndex) {
     // Puedes implementar lógica de ordenamiento aquí si lo necesitas
     console.log('Ordenar por columna:', columnIndex);
 }
+
+function setupPagination() {
+    const rowsPerPage = 10;
+    const rows = document.querySelectorAll('.product-row');
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    
+    document.getElementById('totalCount').textContent = totalRows;
+    
+    if (totalPages <= 1) return; // No mostrar paginación si hay 1 o menos páginas
+    
+    const paginationContainer = document.getElementById('pagination');
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = 'px-3 py-1 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400';
+        pageButton.addEventListener('click', () => {
+            const start = (i - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            rows.forEach((row, index) => {
+                row.style.display = index >= start && index < end ? '' : 'none';
+            });
+            document.getElementById('showingStart').textContent = start + 1;
+            document.getElementById('showingEnd').textContent = Math.min(end, totalRows);
+        });
+        paginationContainer.appendChild(pageButton);
+    }
+}
+setupPagination();
+
+function setupFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const categoriaFilter = document.getElementById('categoriaFilter');
+    
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const categoriaValue = categoriaFilter.value;
+        
+        document.querySelectorAll('.product-row').forEach(row => {
+            const nombre = row.getAttribute('data-nombre').toLowerCase();
+            const categoria = row.getAttribute('data-categoria').toLowerCase();
+            const estado = row.getAttribute('data-estado');
+            
+            const matchesSearch = nombre.includes(searchTerm) || categoria.includes(searchTerm);
+            const matchesStatus = statusValue === 'all' || statusValue === estado;
+            const matchesCategoria = categoriaValue === 'all' || row.getAttribute('data-categoria-id') === categoriaValue;
+            
+            row.style.display = (matchesSearch && matchesStatus && matchesCategoria) ? '' : 'none';
+        });
+    }
+    
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    categoriaFilter.addEventListener('change', applyFilters);
+}
+setupFilters();
+
 </script>
 {% endblock %}

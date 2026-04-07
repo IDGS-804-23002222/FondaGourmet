@@ -4,6 +4,7 @@
     background: white;
     margin-top: 15px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    justify-content: center;
 }
 
 .data-table th, .data-table td {
@@ -15,4 +16,5 @@
 .data-table th {
     background-color: var(--verde);
     color: white;
+    text-align: center;
 }

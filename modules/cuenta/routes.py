@@ -35,19 +35,14 @@ def crear():
 @cuenta.route('/editar', methods=['GET', 'POST'])
 @login_required
 def editar():
-    usuario = current_user
-    if not usuario:
-        current_app.logger.error("Usuario no encontrado en la base de datos.")
-        flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
-        return redirect(url_for('auth.redirigir'))
-    
     form = EditarPerfilForm()
-    usuario, error = cargar_datos_usuario(usuario.id_usuario, form)
+
+    usuario, error = cargar_datos_usuario(current_user.id_usuario, form)
+
     if not usuario:
-        current_app.logger.error("Error al cargar datos del usuario para edición.")
-        flash("Error al cargar tu perfil. Por favor, intenta nuevamente.", "danger")
-        return redirect(url_for('auth.redirigir'))    
-    
+        flash("Error al cargar datos", "danger")
+        return redirect(url_for('auth.redirigir'))
+
     if request.method == 'GET':
         form.nombre.data = usuario.get('nombre')
         form.apellido_p.data = usuario.get('apellido_p')
@@ -56,14 +51,15 @@ def editar():
         form.correo.data = usuario.get('correo')
         form.direccion.data = usuario.get('direccion')
         form.username.data = usuario.get('username')
-        
-    if request.method == 'POST' and form.validate_on_submit():
-        exito, error = actualizar_mi_cuenta(usuario.id_usuario, form=request.form)
+
+    if form.validate_on_submit():
+        exito, msg = actualizar_mi_cuenta(current_user.id_usuario, form)
+
         if exito:
-            current_app.logger.info(f"Perfil actualizado para cliente: {form.username.data}")
-            flash('Perfil actualizado correctamente.', 'success')
+            flash(msg, "success")
             return redirect(url_for('cuenta.perfil'))
+        
         else:
-            current_app.logger.error(f"Error al actualizar perfil: {str(error)}")
-            flash('Error al actualizar el perfil. Por favor, intenta nuevamente.', 'danger')
-    return render_template('cuenta/editar.html', form=form, usuario=usuario)
+            flash(msg, "danger")
+
+    return render_template('cuenta/editar.html', form=form)
