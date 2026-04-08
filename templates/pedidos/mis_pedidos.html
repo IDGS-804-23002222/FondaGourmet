@@ -16,7 +16,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Fecha</th>
+                <th>Fecha Pedido</th>
+                <th>Fecha Entrega</th>
                 <th>Total</th>
                 <th>Estado</th>
                 <th></th>
@@ -29,18 +30,27 @@
                 <td>#{{ p.id }}</td>
 
                 <td>
-                    {{ p.fecha.strftime('%d/%m/%Y %H:%M') if p.fecha else '' }}
+                    {{ p.fecha.strftime('%d/%m/%Y') if p.fecha else '' }}
+                </td>
+                <td>
+                    {% if p.fecha_entrega %}
+                        {{ p.fecha_entrega.strftime('%d/%m/%Y') }}
+                    {% else %}
+                        <span class="text-gray-500 italic">No definida</span>
+                    {% endif %}
                 </td>
 
                 <td>${{ "%.2f"|format(p.total) }}</td>
 
                 <td>
                     {% if p.estado == "Pendiente" %}
-                        <span class="badge-pendiente">Pendiente</span>
-                    {% elif p.estado == "Completado" %}
-                        <span class="badge-completado">Completado</span>
+                        <span class="badge badge-pendiente">Pendiente</span>
+                        {% elif p.estado == "En Proceso" %}
+                        <span class="badge badge-en-proceso">En Proceso</span>
+                        {% elif p.estado == "Completado" %}
+                        <span class="badge badge-completado">Completado</span>
                     {% elif p.estado == "Cancelado" %}
-                        <span class="badge-cancelado">Cancelado</span>
+                        <span class="badge badge-cancelado">Cancelado</span>
                     {% else %}
                         <span class="badge">{{ p.estado }}</span>
                     {% endif %}
@@ -53,6 +63,13 @@
                                 title="Ver detalles">
                             <i class="bi bi-eye text-lg"></i>
                         </button>
+                        {% if p.estado == "Pendiente" %}
+<button onclick="cancelarPedido('{{ p.id }}')"
+    class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
+    title="Cancelar pedido">
+    <i class="bi bi-trash text-lg"></i>
+</button>
+{% endif %}
                     </div>
                 </td>
             </tr>
@@ -69,4 +86,30 @@
 
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+function cancelarPedido(id) {
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "¿Quieres cancelar este pedido?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, cancelar",
+        cancelButtonText: "No, mantener"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/pedidos/cancelar/${id}`, {
+            method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+            Swal.fire("¡Éxito!", data.message, "success");
+            location.reload();
+        });
+    }
+    });
+}    
+</script>
 {% endblock %}

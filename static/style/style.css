@@ -799,6 +799,15 @@ button, .btn-primary, .btn-secondary, .btn-edit, .btn-delete, .btn-danger, .btn-
     font-size: 13px;
 }
 
+.badge-en-proceso {
+    background: #f39c12;
+    padding: 5px 12px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+}
+
 .badge-cancelado {
     background: #b84040;
     padding: 5px 12px;

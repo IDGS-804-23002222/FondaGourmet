@@ -1,6 +1,7 @@
 from models import db, Pedido, DetallePedido, Produccion, Producto, DetalleProduccion
 from flask import current_app
 from sqlalchemy import text
+from datetime import timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,6 @@ def obtener_pedidos():
                 p.estado,
                 pr.nombre AS nombre_producto,
                 pr.stock_actual,
-                p.requiere_produccion
                 d.cantidad
             FROM pedidos p
             JOIN detalle_pedido d ON p.id_pedido = d.id_pedido
@@ -66,9 +66,11 @@ def obtener_pedido(id_cliente):
         pedidos = Pedido.query.filter_by(id_cliente=id_cliente).order_by(Pedido.fecha.desc()).all()
         resultado = []
         for p in pedidos:
+            fecha_entrega = p.fecha + timedelta(days=3) if p.fecha else None
             resultado.append({
                 'id': p.id_pedido,
                 'fecha': p.fecha,
+                'fecha_entrega': fecha_entrega,
                 'total': p.total,
                 'requiere_produccion':p.requiere_produccion,
                 'estado': p.estado

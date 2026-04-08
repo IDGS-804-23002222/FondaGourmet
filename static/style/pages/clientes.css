@@ -482,6 +482,9 @@
 .badge-pendiente {
     background: #c7832f;
 }
+.badge-en-proceso {
+    background: #f39c12;
+}
 
 .badge-cancelado {
     background: #b84040;
