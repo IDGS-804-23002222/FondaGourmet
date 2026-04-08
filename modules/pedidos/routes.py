@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from utils.security import role_required
 from models import db, Pedido, DetallePedido, Producto
 from .services import (
-    obtener_pedidos, obtener_pedido, obtener_detalles_pedido, solicitar_produccion, completar_pedido, cancelar_pedido
+    obtener_pedidos, obtener_pedido, obtener_detalles_pedido, completar_pedido, cancelar_pedido
 )
 
 @pedidos.route('/')
@@ -71,19 +71,6 @@ def procesar():
 
     return redirect(url_for('pedidos.index'))
     
-@pedidos.route('/solicitar_produccion/<int:id>')
-@login_required
-@role_required(3)
-def solicitar_produccion(id):          
-    exito, msg = solicitar_produccion(id)
-    if exito:
-        current_app.logger.info(f"Producción solicitada para pedido {id} exitosamente")
-        flash(msg, "success")
-    else:
-        current_app.logger.error(f"Error al solicitar producción para pedido {id}: {msg}")
-        flash(msg, "danger")
-    return redirect(url_for('pedidos.index'))
-
 @pedidos.route('/cancelar/<int:id_pedido>', methods=['POST'])
 def cancelar(id_pedido):
     success, message = cancelar_pedido(id_pedido)

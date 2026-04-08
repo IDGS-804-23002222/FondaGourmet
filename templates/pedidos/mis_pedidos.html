@@ -16,8 +16,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Fecha Pedido</th>
-                <th>Fecha Entrega</th>
+                <th>Fecha Creación</th>
+                <th>Fecha</th>
                 <th>Total</th>
                 <th>Estado</th>
                 <th></th>
@@ -32,13 +32,15 @@
                 <td>
                     {{ p.fecha.strftime('%d/%m/%Y') if p.fecha else '' }}
                 </td>
-                <td>
-                    {% if p.fecha_entrega %}
-                        {{ p.fecha_entrega.strftime('%d/%m/%Y') }}
-                    {% else %}
-                        <span class="text-gray-500 italic">No definida</span>
-                    {% endif %}
-                </td>
+              <td>
+    {% if p.estado == "Completado" %}
+        {{ p.fecha_entrega.strftime('%d/%m/%Y') if p.fecha_entrega else 'No definida' }}
+    {% elif p.estado == "En Proceso" %}
+        {{ p.fecha_estimada.strftime('%d/%m/%Y') if p.fecha_estimada else 'No definida' }}
+    {% else %}
+        <span class="text-gray-500 italic">No definida</span>
+    {% endif %}
+</td>
 
                 <td>${{ "%.2f"|format(p.total) }}</td>
 

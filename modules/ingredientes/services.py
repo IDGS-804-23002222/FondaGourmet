@@ -186,3 +186,21 @@ def obtener_categorias_ingrediente_por_proveedor(id_proveedor):
     ).all()
 
     return [{'id_categoria_ingrediente': c.id_categoria_ingrediente, 'nombre': c.nombre} for c in categoria_match]
+
+def verificar_stock_minimo(id_ingrediente):
+    try:
+        materias_bajas = MateriaPrima.query.filter(MateriaPrima.stock_actual < MateriaPrima.stock_minimo).all()
+
+        alertas = []
+        
+        for m in materias_bajas:
+            alertas.append({
+                'id_materia': m.id_materia,
+                'nombre': m.nombre,
+                'stock_actual': m.stock_actual,
+                'stock_minimo': m.stock_minimo,
+                'unidad_medida': m.unidad_medida
+            })
+        return alertas
+    except Exception as e:
+        return []

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Compras{% endblock %}
+
+{% block content %}
+<h1>Compras a Proveedores</h1>
+
+<div class="toolbar">
+    <input type="date" class="search" placeholder="Buscar por fecha...">
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>No. Compra</th>
+            <th>Fecha Solicitud</th>
+            <th>Fecha Entrega</th>
+            <th>Productos</th>
+            <th>Cantidad solicitada</th>
+            <th>Stock actual</th>
+            <th>Estado Compra</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for compra in compras %}
+        <tr>
+            <td>#{{ compra.id_compra }}</td>
+            <td>{{ compra.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{{ compra.fecha_entrega.strftime('%d/%m/%Y') if compra.fecha_entrega else 'Sin fecha' }}</td>
+            <td>
+                <ul>
+                    {% for m in compra.materias_primas %}
+                        <li>{{ m.nombre }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    {% for m in compra.materias_primas %}
+                        <li>
+                            <span class="badge bg-info">
+                                x{{ m.cantidad }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    {% for m in compra.materias_primas %}
+                        <li>
+                            <span class="badge 
+                                {% if m.stock_actual < m.cantidad %}
+                                    bg-danger
+                                {% else %}
+                                    bg-success
+                                {% endif %}
+                            ">
+                                {{ m.stock_actual }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                {% if compra.estado == "Completado" %}
+                    <span class="badge bg-success">
+                        Completada
+                    </span>
+
+                {% elif compra.estado == "En Camino" %}
+                    <span class="badge bg-info">
+                        En camino
+                    </span>
+                {% elif compra.estado== "Completada" %}
+                    <span class="badge bg-primary">
+                        Completada
+                    </span>
+                {% elif compra.estado == "Cancelado" %}
+                    <span class="badge bg-danger">
+                        Cancelada
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        {{ compra.estado }}
+                    </span>
+                {% endif %}
+            </td>
+<!-- ACCIONES -->
+            <td>
+                {% if compra.estado != "Completado" and compra.estado != "Cancelado" %}
+                    <button onclick="window.location.href='{{ url_for('compras.ver', id=compra.id_compra) }}'" 
+                                class="btn btn-success">
+                            Completar
+                    </button>
+                {% else %}
+                    <span class="text-muted">Sin acciones</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

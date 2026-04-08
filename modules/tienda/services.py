@@ -219,6 +219,7 @@ def finalizar_pedido():
             id_cliente=cliente.id_cliente,
             total=carrito.total,
             fecha=datetime.utcnow(),
+            fecha_entrega=None,
             estado='Pendiente'
         )
         db.session.add(pedido)

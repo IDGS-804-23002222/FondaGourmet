@@ -19,7 +19,7 @@ from models import CategoriaIngrediente, Proveedor, MateriaPrima
 
 @ingredientes.route('/', methods=['GET', 'POST'])
 @login_required
-@role_required(1)
+@role_required(1,2)
 def index():
     filtro = request.args.get('filtro')
 

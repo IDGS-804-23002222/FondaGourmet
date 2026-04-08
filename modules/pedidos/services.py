@@ -1,7 +1,7 @@
 from models import db, Pedido, DetallePedido, Produccion, Producto, DetalleProduccion
 from flask import current_app
 from sqlalchemy import text
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,18 +9,20 @@ logger = logging.getLogger(__name__)
 def obtener_pedidos():
     try:
         result = db.session.execute(text("""
-            SELECT 
-                p.id_pedido,
-                p.fecha,
-                p.estado,
-                pr.nombre AS nombre_producto,
-                pr.stock_actual,
-                d.cantidad
-            FROM pedidos p
-            JOIN detalle_pedido d ON p.id_pedido = d.id_pedido
-            JOIN productos pr ON d.id_producto = pr.id_producto
-            ORDER BY p.fecha ASC
-        """))
+    SELECT
+        p.id_pedido,
+        p.fecha,
+        p.fecha_entrega,
+        p.estado,
+        pr.nombre AS nombre_producto,
+        pr.stock_actual,
+        d.cantidad
+    FROM pedidos p
+    JOIN detalle_pedido d ON p.id_pedido = d.id_pedido
+    JOIN productos pr ON d.id_producto = pr.id_producto
+    WHERE p.estado IN ('Pendiente', 'En Proceso', 'Completado', 'Producido')
+    ORDER BY p.fecha ASC
+"""))
 
         pedidos_dict = {}
 
@@ -32,6 +34,7 @@ def obtener_pedidos():
                 pedidos_dict[id_pedido] = {
                     'id_pedido': id_pedido,
                     'fecha': row['fecha'],
+                    'fecha_entrega': row['fecha_entrega'],
                     'estado': row['estado'],
                     'productos': [], 
                     'stock_suficiente': True
@@ -64,19 +67,28 @@ def obtener_pedido(id_cliente):
             return None, "ID de cliente no proporcionado."
         
         pedidos = Pedido.query.filter_by(id_cliente=id_cliente).order_by(Pedido.fecha.desc()).all()
+        
         resultado = []
         for p in pedidos:
-            fecha_entrega = p.fecha + timedelta(days=3) if p.fecha else None
+            fecha_estimada = p.fecha + timedelta(days=3) if p.fecha else None
+            
             resultado.append({
                 'id': p.id_pedido,
                 'fecha': p.fecha,
-                'fecha_entrega': fecha_entrega,
+                'fecha_estimada': fecha_estimada,
+                'fecha_entrega': p.fecha_entrega,
                 'total': p.total,
-                'requiere_produccion':p.requiere_produccion,
-                'estado': p.estado
+                'requiere_produccion': p.requiere_produccion,
+                'estado': p.estado,
+                # Pre-format the dates for the template (safest approach)
+                'fecha_str': p.fecha.strftime('%d/%m/%Y') if p.fecha else '',
+                'fecha_entrega_str': p.fecha_entrega.strftime('%d/%m/%Y') if p.fecha_entrega else '',
+                'fecha_estimada_str': fecha_estimada.strftime('%d/%m/%Y') if fecha_estimada else ''
             })
+        
         logger.info(f"Pedidos obtenidos: {len(resultado)} para cliente: {id_cliente}")
         return resultado, None
+        
     except Exception as e:
         logger.error(f"Error al obtener pedidos: {str(e)}")
         return None, str(e)
@@ -98,44 +110,7 @@ def obtener_detalles_pedido(id_pedido):
     except Exception as e:
         logger.error(f"Error al obtener detalles del pedido: {str(e)}")
         return None, str(e)
-    
-def solicitar_produccion(id_pedido):
-    try:
-        pedido = Pedido.query.get(id_pedido)
-        if not pedido:
-            return False, "Pedido no encontrado"
         
-        if pedido.estado != "Pendiente":
-            return False, f"El pedido no se puede iniciar desde el estado '{pedido.estado}'"
-        
-        pedido.estado = "En proceso"
-        
-        db.session.commit()
-        
-        prod = Produccion(
-            id_pedido=id_pedido,
-            fecha_solicitud=pedido.fecha,
-            estado="Solicitada",
-            id_usuario=pedido.cliente.usuario.id_usuario
-        )
-        db.session.add(prod)
-        
-        for detalle in pedido.detalles:
-            det_prod = DetalleProduccion(
-                id_produccion=prod.id_produccion,
-                id_producto=detalle.id_producto,
-                cantidad=detalle.cantidad,
-                id_materia=None
-            )
-            db.session.add(det_prod)
-            
-        db.session.commit()
-            
-        return True, "Pedido iniciado"
-    except Exception as e:
-        db.session.rollback()
-        return False, str(e)
-    
 def completar_pedido(id_pedido):
     try:
         pedido = Pedido.query.get(id_pedido)
@@ -187,7 +162,6 @@ def completar_o_producir(id_pedido, id_usuario):
 
         necesita_produccion = False
 
-        # 🔍 VALIDAR STOCK
         for detalle in pedido.detalles:
             producto = Producto.query.get(detalle.id_producto)
 
@@ -202,6 +176,7 @@ def completar_o_producir(id_pedido, id_usuario):
                 producto.stock_actual -= detalle.cantidad
 
             pedido.estado = "Completado"
+            pedido.fecha_entrega = datetime.now()
             pedido.requiere_produccion = False  # 🔥 CLAVE
 
             db.session.commit()
@@ -212,7 +187,9 @@ def completar_o_producir(id_pedido, id_usuario):
         produccion = Produccion(
             fecha_solicitud=datetime.now(),
             estado="Solicitada",
-            id_usuario=id_usuario
+            fecha_necesaria=datetime.now() + timedelta(days=3),
+            id_usuario=id_usuario,
+            id_pedido=id_pedido
         )
 
         db.session.add(produccion)

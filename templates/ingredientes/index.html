@@ -5,11 +5,11 @@
 <h1>Gestión de Ingredientes</h1>
 
 <div class="toolbar">
-    <button type="button" class="btn-primary" onclick="window.location.href='{{ url_for("ingredientes.crear") }}'">Nuevo ingrediente</button>
     <form method="GET" action="{{ url_for('ingredientes.index') }}" style="display:flex; gap:10px; width:100%;">
         <input type="text" name="filtro" class="search" placeholder="Buscar por nombre o categoría..." value="{{ request.args.get('filtro', '') }}">
         <button type="submit" class="btn-secondary">Buscar</button>
     </form>
+    <button type="button" class="btn-primary" onclick="window.location.href='{{ url_for("ingredientes.crear") }}'">Nuevo ingrediente</button>
 </div>
 
 <table class="data-table">

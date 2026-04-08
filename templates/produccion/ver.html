@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Orden de Producción{% endblock %}
+{% block content %}
+{% if produccion.estado != 'Completada' %}
+<h1 class="section-title">Orden de Producción #{{ produccion.id_produccion }}</h1>
+
+<div class="pedidos-wrapper">
+    <table class="data-table pedidos-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Cantidad Solicitada</th>
+                <th>Ingredientes necesarios</th>
+                <th>Estado ingredientes</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for p in produccion.filas %}
+            <tr>
+                <td>#{{ p.id_detalle }}</td>
+                <td>{{ p.producto }}{{p.unidad_medida}}</td>
+                <td>{{ p.cantidad }}</td>
+                <td>
+    <ul>
+    {% for ing in p.ingredientes %}
+        <li style="color: {{ 'red' if ing.faltante else 'green' }}">
+            {{ ing.nombre }} →
+            Req: {{ ing.requerido }} {{ ing.unidad }},
+            Stock: {{ ing.stock }}
+        </li>
+    {% endfor %}
+    </ul>
+</td>
+
+<td>
+    {% if p.ingredientes|selectattr("faltante")|list|length > 0 %}
+        <span class="badge bg-danger">Faltan ingredientes</span>
+    {% else %}
+        <span class="badge bg-success">Ingredientes completos</span>
+    {% endif %}
+    </td>
+    <td>
+        {% if p.ingredientes|selectattr("faltante")|list|length == 0 and produccion.estado == 'En Proceso' %}
+        <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-primary">Completar</a>
+        {% elif p.ingredientes|selectattr("faltante")|list|length > 0 and produccion.estado == 'Solicitada' %}
+            <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-primary">Solicitar compra</a>
+        {% endif %}
+        <a href="{{ url_for('produccion.index')}}" class="btn btn-delete">Volver</a>
+    </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="pedido-detalle-card">
+
+    <h1 class="pedido-title">Orden de Producción #{{ produccion.id_produccion }}</h1>
+
+    <ul class="info-list">
+        <li><strong>Fecha Solicitada: {{ produccion.fecha.strftime('%d/%m/%Y') if produccion.fecha else '' }}</strong></li>
+        <li><strong>Fecha Completada: {{ produccion.fecha_completada.strftime('%d/%m/%Y') if produccion.fecha_completada else '' }}</strong></li>
+        <li><strong class="badge bg-success">Estado: {{ produccion.estado }}</strong></li>
+    </ul>
+
+    <h3 class="subtitulo">Detalles Orden</h3>
+
+    <table class="data-table detalle-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Cantidad Solicitada</th>
+                <th>Ingredientes necesarios</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for p in produccion.filas %}
+            <tr>
+                <td>{{ p.id_detalle }}</td>
+                <td>{{ p.producto }}</td>
+                <td>{{ p.cantidad }}</td>
+                <td>
+    <ul>
+    {% for ing in p.ingredientes %}
+        <li style="color: {{ 'green' }}">
+            {{ ing.nombre }} →
+            Utilizado: {{ ing.requerido }} {{ ing.unidad }}
+        </li>
+    {% endfor %}
+    </ul>
+</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

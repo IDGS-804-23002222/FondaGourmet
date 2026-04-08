@@ -47,7 +47,7 @@ def crear_producto(form):
 
         receta = Receta(
             id_producto=nuevo_producto.id_producto,
-            rendimiento=100,
+            rendimiento=1,
             estado=True,
         )
         db.session.add(receta)

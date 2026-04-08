@@ -252,13 +252,15 @@ class Produccion(db.Model):
     id_produccion = db.Column(db.Integer, primary_key=True)
     fecha_solicitud = db.Column(db.DateTime, nullable=False)
     fecha_completada = db.Column(db.DateTime)
+    fecha_necesaria = db.Column(db.DateTime, nullable=False)
     estado = db.Column(db.String(50), nullable=False, default='Solicitada')
+    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido'))
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
-    
+    pedido=db.relationship('Pedido', back_populates='produccion', uselist=False)
     detalles = db.relationship('DetalleProduccion', back_populates='produccion', cascade="all, delete-orphan")
     usuario = db.relationship('Usuario', back_populates='producciones')
-
+    
     __table_args__ = (
         CheckConstraint("estado IN ('Solicitada', 'En Proceso', 'Completada')", name='check_estado_produccion'),
     )
@@ -280,8 +282,10 @@ class Compra(db.Model):
     id_compra = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
-    metodo_pago = db.Column(db.String(50), nullable=False)
-    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
+    fecha_entrega = db.Column(db.DateTime)
+    metodo_pago = db.Column(db.String(50))
+    estado = db.Column(db.String(50), nullable=False, default='Solicitada')
+    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'))
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
 
@@ -290,6 +294,7 @@ class Compra(db.Model):
     usuario = db.relationship('Usuario', back_populates='compras')
 
     __table_args__ = (
+        CheckConstraint("estado IN ('Solicitada', 'En Camino', 'Completada', 'Cancelada')", name='check_estado_compra'),
         CheckConstraint("metodo_pago IN ('Efectivo', 'Tarjeta', 'Transferencia')", name='check_metodo_pago_compra'),
         CheckConstraint('total >= 0', name='check_total_compra_no_negativo'),
     )
@@ -351,15 +356,17 @@ class Pedido(db.Model):
     __tablename__ = 'pedidos'
     id_pedido = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
+    fecha_entrega = db.Column(db.DateTime)
     estado = db.Column(db.String(50), nullable=False, default='Pendiente')
-    id_cliente = db.Column(db.Integer, db.ForeignKey('clientes.id_cliente'), nullable=False)
+    id_cliente = db.Column(db.Integer, db.ForeignKey('clientes.id_cliente'), nullable=False, default=1)
     requiere_produccion = db.Column(db.Boolean, default=False)
     total = db.Column(db.Float, nullable=False)
     cliente = db.relationship('Cliente', back_populates='pedidos')
+    produccion = db.relationship('Produccion', back_populates='pedido', uselist=False)
     detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan")
 
     __table_args__ = (
-        CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Completado', 'Cancelado')", name='check_estado_pedido'),
+        CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Producido', 'Completado', 'Cancelado')", name='check_estado_pedido'),
         CheckConstraint('total >= 0', name='check_total_pedido_no_negativo'),
     )
     

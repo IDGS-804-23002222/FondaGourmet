@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Compra{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">Compra #{{ compra.id }}</h1>
+
+<div class="card mb-4">
+<form method="POST" action="{{ url_for('compras.actualizar', id=compra.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+<p><strong>Fecha entrega:</strong></p>
+<input type="date" name="fecha_entrega"
+       value="{{ compra.fecha_entrega.strftime('%Y-%m-%d') if compra.fecha_entrega else '' }}">
+
+<p><strong>Método de pago:</strong></p>
+<select name="metodo_pago">
+    <option value="Efectivo" {% if compra.metodo_pago == 'Efectivo' %}selected{% endif %}>Efectivo</option>
+    <option value="Tarjeta" {% if compra.metodo_pago == 'Tarjeta' %}selected{% endif %}>Tarjeta</option>
+    <option value="Transferencia" {% if compra.metodo_pago == 'Transferencia' %}selected{% endif %}>Transferencia</option>
+</select>
+
+<br><br>
+<button type="submit" class="btn btn-success">Guardar cambios</button>
+</form>
+    <p><strong>Total:</strong> ${{ compra.total }}</p>
+</div>
+
+<div class="pedidos-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Materia Prima</th>
+                <th>Cantidad Comprada</th>
+                <th>Stock Actual</th>
+                <th>Precio Unitario</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+
+        <tbody>
+{% for m in compra.materias_primas %}
+<tr>
+    <td>{{ m.nombre }}</td>
+    <td>{{ m.cantidad }}</td>
+
+    <td>
+        <span class="{% if m.stock_actual < m.cantidad %}text-danger{% else %}text-success{% endif %}">
+            {{ m.stock_actual }}
+        </span>
+    </td>
+
+    <td>
+        <input type="number" step="0.01"
+               name="precio_{{ m.id_detalle }}"
+               value="{{ m.precio_unitario }}">
+    </td>
+
+    <td>
+        {% if compra.estado != 'Completada' %}
+        <form method="POST" action="{{ url_for('compras.completar', id=compra.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-success">Completar</button>
+        </form>
+        {% else %}
+            <span class="text-success">✔ Recibido</span>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('compras.index') }}" class="btn btn-secondary mt-3">Volver</a>
+
+{% endblock %}

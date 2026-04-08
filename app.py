@@ -14,6 +14,7 @@ from modules.cuenta import cuenta
 from modules.ingredientes import ingredientes
 from modules.dashboard import dashboard
 from modules.recetas import recetas
+from modules.compras import compras
 from modules.caja import caja
 from modules.ventas import ventas
 from modules.pedidos import pedidos
@@ -65,6 +66,7 @@ def create_app():
     app.register_blueprint(caja, url_prefix='/caja')
     app.register_blueprint(ventas, url_prefix='/ventas')
     app.register_blueprint(produccion, url_prefix='/produccion')
+    app.register_blueprint(compras, url_prefix='/compras')
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
     app.register_blueprint(productos, url_prefix='/productos')
