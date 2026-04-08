@@ -17,7 +17,7 @@
                 <div class="form-group-half">{{ form.precio.label(class="form-label") }}{{ form.precio(class="form-control") }}{% for error in form.precio.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
                 <div class="form-group-half">{{ form.porcentaje_merma.label(class="form-label") }}{{ form.porcentaje_merma(class="form-control") }}{% for error in form.porcentaje_merma.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
                 <div class="form-group-half">{{ form.factor_conversion.label(class="form-label") }}{{ form.factor_conversion(class="form-control") }}{% for error in form.factor_conversion.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.id_categoria.label(class="form-label") }}{{ form.id_categoria(class="form-control") }}{% for error in form.id_categoria.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
+                <div class="form-group-half">{{ form.id_categoria_ingrediente.label(class="form-label") }}{{ form.id_categoria_ingrediente(class="form-control", id="id_categoria_ingrediente") }}{% for error in form.id_categoria_ingrediente.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
                 <div class="form-group-half">{{ form.id_proveedor.label(class="form-label") }}{{ form.id_proveedor(class="form-control") }}{% for error in form.id_proveedor.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
             </div>
             <div class="button-group">
@@ -27,4 +27,56 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const proveedorSelect = document.getElementById('id_proveedor');
+    const categoriaSelect = document.getElementById('id_categoria_ingrediente');
+
+    if (!proveedorSelect || !categoriaSelect) return;
+
+    const resetCategorias = () => {
+        categoriaSelect.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Selecciona un proveedor primero';
+        categoriaSelect.appendChild(opt);
+    };
+
+    resetCategorias();
+
+    proveedorSelect.addEventListener('change', async function() {
+        if (!this.value) {
+            resetCategorias();
+            return;
+        }
+        try {
+            const response = await fetch(`/ingredientes/categorias-por-proveedor/${this.value}`);
+            if (!response.ok) return;
+            const data = await response.json();
+
+            if (Array.isArray(data.categorias) && data.categorias.length) {
+                categoriaSelect.innerHTML = '';
+                data.categorias.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = String(cat.id_categoria_ingrediente);
+                    opt.textContent = cat.nombre;
+                    categoriaSelect.appendChild(opt);
+                });
+            } else {
+                resetCategorias();
+                return;
+            }
+
+            if (data.id_categoria_ingrediente_sugerida) {
+                categoriaSelect.value = String(data.id_categoria_ingrediente_sugerida);
+            }
+        } catch (err) {
+            console.error('No se pudo cargar categorías por proveedor:', err);
+        }
+    });
+});
+</script>
 {% endblock %}

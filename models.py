@@ -101,11 +101,46 @@ class Proveedor(db.Model):
     __tablename__ = 'proveedores'
     id_proveedor = db.Column(db.Integer, primary_key=True)
     id_persona = db.Column(db.Integer, db.ForeignKey('personas.id_persona'), nullable=False)
+    id_categoria_proveedor = db.Column(db.Integer, db.ForeignKey('categorias_proveedor.id_categoria_proveedor'), nullable=False)
     estado = db.Column(db.Boolean, default=True)
     
     persona = db.relationship('Persona', back_populates='proveedor')
+    categoria_proveedor = db.relationship('CategoriaProveedor', back_populates='proveedores')
     materias_primas = db.relationship('MateriaPrima', back_populates='proveedor', lazy=True)
     compras = db.relationship('Compra', back_populates='proveedor', lazy=True)
+
+
+class CategoriaProveedor(db.Model):
+    __tablename__ = 'categorias_proveedor'
+    id_categoria_proveedor = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    descripcion = db.Column(db.Text)
+    estado = db.Column(db.Boolean, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+
+    proveedores = db.relationship('Proveedor', back_populates='categoria_proveedor', lazy=True)
+
+
+class CategoriaIngrediente(db.Model):
+    __tablename__ = 'categorias_ingrediente'
+    id_categoria_ingrediente = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    descripcion = db.Column(db.Text)
+    estado = db.Column(db.Boolean, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+
+    materias_primas = db.relationship('MateriaPrima', back_populates='categoria_ingrediente', lazy=True)
+
+
+class CategoriaPlatillo(db.Model):
+    __tablename__ = 'categorias_platillo'
+    id_categoria_platillo = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    descripcion = db.Column(db.Text)
+    estado = db.Column(db.Boolean, default=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+
+    productos = db.relationship('Producto', back_populates='categoria_platillo', lazy=True)
       
 class Categoria(db.Model):
     __tablename__ = 'categorias'
@@ -115,9 +150,6 @@ class Categoria(db.Model):
     tipo_categoria = db.Column(db.String(20), default='platillo', nullable=False)  # 'platillo' | 'ingrediente'
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
-    
-    materias_primas = db.relationship('MateriaPrima', back_populates='categoria', lazy=True)
-    productos = db.relationship('Producto', back_populates='categoria', lazy=True)
     
     __table_args__ = (
         CheckConstraint("tipo_categoria IN ('platillo', 'ingrediente')", name='check_tipo_categoria'),
@@ -136,10 +168,10 @@ class MateriaPrima(db.Model):
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
 
-    id_categoria = db.Column(db.Integer, db.ForeignKey('categorias.id_categoria'), nullable=False)
+    id_categoria_ingrediente = db.Column(db.Integer, db.ForeignKey('categorias_ingrediente.id_categoria_ingrediente'), nullable=False)
     id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
 
-    categoria = db.relationship('Categoria', back_populates='materias_primas')
+    categoria_ingrediente = db.relationship('CategoriaIngrediente', back_populates='materias_primas')
     proveedor = db.relationship('Proveedor', back_populates='materias_primas')
     detalle_recetas = db.relationship('RecetaDetalle', back_populates='materia_prima', lazy=True)
     detalle_compras = db.relationship('DetalleCompra', back_populates='materia_prima', lazy=True)
@@ -165,9 +197,9 @@ class Producto(db.Model):
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     
-    id_categoria = db.Column(db.Integer, db.ForeignKey('categorias.id_categoria'), nullable=False)
+    id_categoria_platillo = db.Column(db.Integer, db.ForeignKey('categorias_platillo.id_categoria_platillo'), nullable=False)
    
-    categoria = db.relationship('Categoria', back_populates='productos')
+    categoria_platillo = db.relationship('CategoriaPlatillo', back_populates='productos')
     recetas = db.relationship('Receta', back_populates='producto', lazy=True)
     detalle_ventas = db.relationship('DetalleVenta', back_populates='producto', lazy=True)
     detalle_producciones = db.relationship('DetalleProduccion', back_populates='producto', lazy=True)

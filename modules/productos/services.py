@@ -1,6 +1,6 @@
-from models import db, Producto, Categoria
+import json
+from models import db, Producto, CategoriaPlatillo, MateriaPrima, Receta, RecetaDetalle
 from flask import current_app
-from sqlalchemy import text
 import logging
 import os
 
@@ -37,12 +37,43 @@ def crear_producto(form):
             precio=form.precio.data,
             stock_actual=form.stock_actual.data,
             stock_minimo=form.stock_minimo.data,
-            id_categoria=form.id_categoria.data,
+            id_categoria_platillo=form.id_categoria_platillo.data,
             imagen=imagen_relativa,
             estado=True
         )
         
         db.session.add(nuevo_producto)
+        db.session.flush()
+
+        receta = Receta(
+            id_producto=nuevo_producto.id_producto,
+            rendimiento=100,
+            estado=True,
+        )
+        db.session.add(receta)
+        db.session.flush()
+
+        detalles = []
+        payload = (form.ingredientes_json.data or '').strip()
+        if payload:
+            try:
+                detalles = json.loads(payload)
+            except json.JSONDecodeError as exc:
+                raise ValueError("El detalle de receta tiene un formato inválido.") from exc
+
+        for detalle in detalles:
+            id_materia = int(detalle.get('id_materia', 0))
+            cantidad = float(detalle.get('cantidad', 0))
+            materia = MateriaPrima.query.get(id_materia)
+            if not materia or cantidad <= 0:
+                raise ValueError("La receta contiene ingredientes inválidos.")
+
+            db.session.add(RecetaDetalle(
+                id_receta=receta.id_receta,
+                id_materia=id_materia,
+                cantidad=cantidad
+            ))
+
         db.session.commit()
         logger.info(f"Producto creado exitosamente: {form.nombre.data}")
         return True, "Producto creado exitosamente"
@@ -72,8 +103,8 @@ def obtener_productos(filtro_estado=None):
                 'precio': prod.precio,
                 'stock_actual': prod.stock_actual,
                 'stock_minimo': prod.stock_minimo,
-                'categoria_nombre': prod.categoria.nombre if prod.categoria else 'N/A',
-                'id_categoria': prod.id_categoria,
+                'categoria_nombre': prod.categoria_platillo.nombre if prod.categoria_platillo else 'N/A',
+                'id_categoria_platillo': prod.id_categoria_platillo,
                 'imagen': prod.imagen,
                 'estado': prod.estado,
                 'fecha_creacion': prod.fecha_creacion,
@@ -102,8 +133,8 @@ def obtener_producto(id_producto):
             'precio': producto.precio,
             'stock_actual': producto.stock_actual,
             'stock_minimo': producto.stock_minimo,
-            'categoria_nombre': producto.categoria.nombre if producto.categoria else 'N/A',
-            'id_categoria': producto.id_categoria,
+            'categoria_nombre': producto.categoria_platillo.nombre if producto.categoria_platillo else 'N/A',
+            'id_categoria_platillo': producto.id_categoria_platillo,
             'imagen': producto.imagen,
             'estado': producto.estado,
             'fecha_creacion': producto.fecha_creacion,
@@ -143,8 +174,8 @@ def actualizar_producto(id_producto, form):
             producto.stock_actual = form.stock_actual.data
         if form.stock_minimo.data is not None:
             producto.stock_minimo = form.stock_minimo.data
-        if form.id_categoria.data:
-            producto.id_categoria = form.id_categoria.data
+        if form.id_categoria_platillo.data:
+            producto.id_categoria_platillo = form.id_categoria_platillo.data
         imagen_file = form.imagen.data
         if imagen_file and getattr(imagen_file, 'filename', None):
             upload_root = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
@@ -227,8 +258,8 @@ def buscar_productos(termino):
                 'precio': prod.precio,
                 'stock_actual': prod.stock_actual,
                 'stock_minimo': prod.stock_minimo,
-                'categoria_nombre': prod.categoria.nombre if prod.categoria else 'N/A',
-                'id_categoria': prod.id_categoria,
+                'categoria_nombre': prod.categoria_platillo.nombre if prod.categoria_platillo else 'N/A',
+                'id_categoria_platillo': prod.id_categoria_platillo,
                 'imagen': prod.imagen,
                 'estado': prod.estado,
                 'fecha_creacion': prod.fecha_creacion,
@@ -243,8 +274,8 @@ def buscar_productos(termino):
 
 def obtener_categorias():
     try:
-        logger.info("Obteniendo categorías")
-        resultados = db.session.execute(text("SELECT * FROM v_categorias")).fetchall()
+        logger.info("Obteniendo categorías de platillo")
+        resultados = CategoriaPlatillo.query.filter_by(estado=True).order_by(CategoriaPlatillo.nombre.asc()).all()
         return resultados, None
     except Exception as e:
         logger.error(f"Error al obtener categorías: {str(e)}")

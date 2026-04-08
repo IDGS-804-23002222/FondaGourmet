@@ -5,3 +5,6 @@ static/
 node_modules/
 static/vendor/
 static/bootstrap/
+logs/
+*.log
+*.db

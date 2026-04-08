@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
-from wtforms import StringField, IntegerField, SubmitField, RadioField, BooleanField, DateField, SelectField, EmailField, FloatField, PasswordField, TextAreaField
+from wtforms import StringField, IntegerField, SubmitField, RadioField, BooleanField, DateField, SelectField, EmailField, FloatField, PasswordField, TextAreaField, HiddenField
 from wtforms import validators
 from models import Usuario, Persona
 from wtforms.validators import ValidationError, DataRequired, Email, Length, EqualTo, Regexp, Optional
@@ -166,8 +166,44 @@ class RegistroProveedorForm(FlaskForm):
     direccion = StringField('Dirección', [
         validators.Length(min=5, max=100, message="La dirección debe tener entre 5 y 100 caracteres.")
         ])
+
+    id_categoria_proveedor = SelectField('Categoría de proveedor', coerce=int, validators=[
+        validators.Optional()
+    ])
+
+    usar_categoria_nueva = BooleanField('Crear nueva categoría de proveedor')
+    nombre_nueva_categoria = StringField('Nombre nueva categoría', [
+        validators.Optional(),
+        validators.Length(min=2, max=100, message="La nueva categoría debe tener entre 2 y 100 caracteres.")
+    ])
     
     submit = SubmitField('Registrar proveedor')
+
+    def __init__(self, *args, **kwargs):
+        super(RegistroProveedorForm, self).__init__(*args, **kwargs)
+        from models import CategoriaProveedor
+        categorias = CategoriaProveedor.query.filter_by(estado=True).order_by(CategoriaProveedor.nombre.asc()).all()
+        self.id_categoria_proveedor.choices = [(c.id_categoria_proveedor, c.nombre) for c in categorias]
+
+    def validate_nombre_nueva_categoria(self, field):
+        if self.usar_categoria_nueva.data and not (field.data or '').strip():
+            raise ValidationError('Debes capturar el nombre de la nueva categoría o desmarcar el check.')
+
+    def validate(self, extra_validators=None):
+        if not super(RegistroProveedorForm, self).validate(extra_validators=extra_validators):
+            return False
+
+        usar_nueva = bool(self.usar_categoria_nueva.data)
+        nombre_nueva = (self.nombre_nueva_categoria.data or '').strip()
+
+        if usar_nueva and nombre_nueva:
+            return True
+
+        if not usar_nueva and self.id_categoria_proveedor.data:
+            return True
+
+        self.id_categoria_proveedor.errors.append('La categoría de proveedor es obligatoria o marca el check para crear una nueva.')
+        return False
     
 
 class EditarUsuarioForm(FlaskForm):
@@ -285,8 +321,44 @@ class EditarProveedorForm(FlaskForm):
                                     validators.Optional(),  
                                     validators.Length(min=5, max=100, message="La dirección debe tener entre 5 y 100 caracteres.")
     ])
+
+    id_categoria_proveedor = SelectField('Categoría de proveedor', coerce=int, validators=[
+        validators.Optional()
+    ])
+
+    usar_categoria_nueva = BooleanField('Crear nueva categoría de proveedor')
+    nombre_nueva_categoria = StringField('Nombre nueva categoría', [
+        validators.Optional(),
+        validators.Length(min=2, max=100, message="La nueva categoría debe tener entre 2 y 100 caracteres.")
+    ])
     
     submit= SubmitField('Actualizar proveedor')
+
+    def __init__(self, *args, **kwargs):
+        super(EditarProveedorForm, self).__init__(*args, **kwargs)
+        from models import CategoriaProveedor
+        categorias = CategoriaProveedor.query.filter_by(estado=True).order_by(CategoriaProveedor.nombre.asc()).all()
+        self.id_categoria_proveedor.choices = [(c.id_categoria_proveedor, c.nombre) for c in categorias]
+
+    def validate_nombre_nueva_categoria(self, field):
+        if self.usar_categoria_nueva.data and not (field.data or '').strip():
+            raise ValidationError('Debes capturar el nombre de la nueva categoría o desmarcar el check.')
+
+    def validate(self, extra_validators=None):
+        if not super(EditarProveedorForm, self).validate(extra_validators=extra_validators):
+            return False
+
+        usar_nueva = bool(self.usar_categoria_nueva.data)
+        nombre_nueva = (self.nombre_nueva_categoria.data or '').strip()
+
+        if usar_nueva and nombre_nueva:
+            return True
+
+        if not usar_nueva and self.id_categoria_proveedor.data:
+            return True
+
+        self.id_categoria_proveedor.errors.append('La categoría de proveedor es obligatoria o marca el check para crear una nueva.')
+        return False
 
 class RegistrarCategoriaForm(FlaskForm):
     nombre = StringField('Nombre de categoría', [
@@ -365,7 +437,7 @@ class RegistrarIngredienteForm(FlaskForm):
         validators.NumberRange(min=0.0001, message="El factor de conversión no puede ser cero.")
     ])
         
-    id_categoria = SelectField('Categoría', coerce=int, validators=[
+    id_categoria_ingrediente = SelectField('Categoría ingrediente', coerce=int, validators=[
         validators.DataRequired(message="La categoría es obligatoria.")
     ])
     
@@ -377,10 +449,10 @@ class RegistrarIngredienteForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(RegistrarIngredienteForm, self).__init__(*args, **kwargs)
-        from models import Categoria, Proveedor
-        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='ingrediente').all()
+        from models import CategoriaIngrediente, Proveedor
+        categorias = CategoriaIngrediente.query.filter_by(estado=True).order_by(CategoriaIngrediente.nombre.asc()).all()
         proveedores = Proveedor.query.all()
-        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        self.id_categoria_ingrediente.choices = [(cat.id_categoria_ingrediente, cat.nombre) for cat in categorias]
         self.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in proveedores]
     
 class EditarIngredienteForm(FlaskForm):
@@ -425,17 +497,17 @@ class EditarIngredienteForm(FlaskForm):
         validators.NumberRange(min=0.0001, message="El factor de conversión no puede ser cero.")  # 🔥 nunca 0
     ])
 
-    id_categoria = SelectField('Categoría', coerce=int, validators=[validators.Optional()])
+    id_categoria_ingrediente = SelectField('Categoría ingrediente', coerce=int, validators=[validators.Optional()])
     id_proveedor = SelectField('Proveedor', coerce=int, validators=[validators.Optional()])
     
     submit = SubmitField('Actualizar ingrediente')
     
     def __init__(self, *args, **kwargs):
         super(EditarIngredienteForm, self).__init__(*args, **kwargs)
-        from models import Categoria, Proveedor
-        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='ingrediente').all()
+        from models import CategoriaIngrediente, Proveedor
+        categorias = CategoriaIngrediente.query.filter_by(estado=True).order_by(CategoriaIngrediente.nombre.asc()).all()
         proveedores = Proveedor.query.all()
-        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        self.id_categoria_ingrediente.choices = [(cat.id_categoria_ingrediente, cat.nombre) for cat in categorias]
         self.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in proveedores]
 
 
@@ -548,7 +620,7 @@ class MateriaPrimaForm(FlaskForm):
         validators.NumberRange(min=0.0001)
     ])
 
-    id_categoria = SelectField('Categoría', coerce=int)
+    id_categoria_ingrediente = SelectField('Categoría ingrediente', coerce=int)
     id_proveedor = SelectField('Proveedor', coerce=int)
 
     submit = SubmitField('Guardar')
@@ -569,7 +641,7 @@ class ProductoForm(FlaskForm):
     
     imagen = StringField('URL Imagen')
     
-    id_categoria = SelectField('Categoría', coerce=int)
+    id_categoria_platillo = SelectField('Categoría platillo', coerce=int)
 
     submit = SubmitField('Guardar Producto')
 
@@ -673,9 +745,11 @@ class CrearProductoForm(FlaskForm):
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
     ])
     
-    id_categoria = SelectField('Categoría', [
+    id_categoria_platillo = SelectField('Categoría platillo', [
         validators.DataRequired(message="Debe seleccionar una categoría.")
     ], coerce=int)
+
+    ingredientes_json = HiddenField('Ingredientes receta')
     
     imagen = FileField('Imagen', validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Solo se permiten imágenes JPG, JPEG, PNG o WEBP.')
@@ -685,9 +759,9 @@ class CrearProductoForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(CrearProductoForm, self).__init__(*args, **kwargs)
-        from models import Categoria
-        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='platillo').all()
-        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        from models import CategoriaPlatillo
+        categorias = CategoriaPlatillo.query.filter_by(estado=True).order_by(CategoriaPlatillo.nombre.asc()).all()
+        self.id_categoria_platillo.choices = [(cat.id_categoria_platillo, cat.nombre) for cat in categorias]
 
 
 class EditarProductoForm(FlaskForm):
@@ -716,7 +790,7 @@ class EditarProductoForm(FlaskForm):
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
     ])
     
-    id_categoria = SelectField('Categoría', [
+    id_categoria_platillo = SelectField('Categoría platillo', [
         validators.Optional()
     ], coerce=int)
     
@@ -728,6 +802,6 @@ class EditarProductoForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(EditarProductoForm, self).__init__(*args, **kwargs)
-        from models import Categoria
-        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='platillo').all()
-        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        from models import CategoriaPlatillo
+        categorias = CategoriaPlatillo.query.filter_by(estado=True).order_by(CategoriaPlatillo.nombre.asc()).all()
+        self.id_categoria_platillo.choices = [(cat.id_categoria_platillo, cat.nombre) for cat in categorias]

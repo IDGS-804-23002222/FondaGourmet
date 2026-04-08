@@ -1,4 +1,4 @@
-from models import db, MateriaPrima, Categoria, Proveedor
+from models import db, MateriaPrima, CategoriaIngrediente, Proveedor
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,9 +21,9 @@ def _to_dict(materia):
         'porcentaje_merma': materia.porcentaje_merma,
         'factor_conversion': materia.factor_conversion,
         'estado': materia.estado,
-        'categoria_nombre': materia.categoria.nombre if materia.categoria else 'N/A',
+        'categoria_nombre': materia.categoria_ingrediente.nombre if materia.categoria_ingrediente else 'N/A',
         'proveedor_nombre': _proveedor_nombre(materia.proveedor),
-        'id_categoria': materia.id_categoria,
+        'id_categoria_ingrediente': materia.id_categoria_ingrediente,
         'id_proveedor': materia.id_proveedor,
     }
 
@@ -42,7 +42,7 @@ def crear_ingrediente(form):
             precio=form.precio.data,
             porcentaje_merma=form.porcentaje_merma.data,
             factor_conversion=form.factor_conversion.data,
-            id_categoria=form.id_categoria.data,
+            id_categoria_ingrediente=form.id_categoria_ingrediente.data,
             id_proveedor=form.id_proveedor.data,
             estado=True,
         )
@@ -69,9 +69,9 @@ def obtener_ingredientes():
 def filtrar_ingredientes(filtro):
     try:
         term = f"%{filtro}%"
-        materias = MateriaPrima.query.join(Categoria).filter(
+        materias = MateriaPrima.query.join(CategoriaIngrediente, MateriaPrima.id_categoria_ingrediente == CategoriaIngrediente.id_categoria_ingrediente).filter(
             (MateriaPrima.nombre.ilike(term)) |
-            (Categoria.nombre.ilike(term))
+            (CategoriaIngrediente.nombre.ilike(term))
         ).order_by(MateriaPrima.nombre.asc()).all()
         return [_to_dict(m) for m in materias], None
     except Exception as e:
@@ -117,8 +117,8 @@ def actualizar_ingrediente(id_ingrediente, form):
             materia.porcentaje_merma = form.porcentaje_merma.data
         if form.factor_conversion.data is not None:
             materia.factor_conversion = form.factor_conversion.data
-        if form.id_categoria.data:
-            materia.id_categoria = form.id_categoria.data
+        if form.id_categoria_ingrediente.data:
+            materia.id_categoria_ingrediente = form.id_categoria_ingrediente.data
         if form.id_proveedor.data:
             materia.id_proveedor = form.id_proveedor.data
 
@@ -156,3 +156,33 @@ def activar_ingrediente(id_ingrediente):
         db.session.rollback()
         logger.error(f"Error al activar ingrediente: {str(e)}")
         return False, str(e)
+
+
+def sugerir_categoria_ingrediente_por_proveedor(id_proveedor):
+    proveedor = Proveedor.query.get(id_proveedor)
+    if not proveedor or not proveedor.categoria_proveedor:
+        return None
+
+    nombre_categoria_proveedor = proveedor.categoria_proveedor.nombre.strip().lower()
+    categoria = CategoriaIngrediente.query.filter(
+        db.func.lower(CategoriaIngrediente.nombre) == nombre_categoria_proveedor
+    ).first()
+
+    if categoria:
+        return categoria.id_categoria_ingrediente
+
+    categoria_default = CategoriaIngrediente.query.order_by(CategoriaIngrediente.nombre.asc()).first()
+    return categoria_default.id_categoria_ingrediente if categoria_default else None
+
+
+def obtener_categorias_ingrediente_por_proveedor(id_proveedor):
+    proveedor = Proveedor.query.get(id_proveedor)
+    if not proveedor or not proveedor.categoria_proveedor:
+        return []
+
+    nombre_categoria_proveedor = proveedor.categoria_proveedor.nombre.strip().lower()
+    categoria_match = CategoriaIngrediente.query.filter(
+        db.func.lower(CategoriaIngrediente.nombre) == nombre_categoria_proveedor
+    ).all()
+
+    return [{'id_categoria_ingrediente': c.id_categoria_ingrediente, 'nombre': c.nombre} for c in categoria_match]

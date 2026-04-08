@@ -69,6 +69,29 @@
                             <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
+
+                    <div class="form-group-half">
+                        {{ form.id_categoria_proveedor.label(class="form-label") }}
+                        {{ form.id_categoria_proveedor(class="form-control") }}
+                        {% for error in form.id_categoria_proveedor.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-full">
+                        <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                            {{ form.usar_categoria_nueva() }}
+                            Crear nueva categoría personalizada
+                        </label>
+                    </div>
+
+                    <div class="form-group-half" id="nueva_categoria_wrap" style="display:none;">
+                        {{ form.nombre_nueva_categoria.label(class="form-label") }}
+                        {{ form.nombre_nueva_categoria(class="form-control", placeholder="Ej: Especias") }}
+                        {% for error in form.nombre_nueva_categoria.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -83,4 +106,21 @@
 {% endblock %}
 {% block scripts %} 
 <script src="{{ url_for('static', filename='js/pages/proveedores.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const check = document.getElementById('usar_categoria_nueva');
+    const wrap = document.getElementById('nueva_categoria_wrap');
+    const select = document.getElementById('id_categoria_proveedor');
+    if (!check || !wrap || !select) return;
+
+    const toggle = () => {
+        const activa = check.checked;
+        wrap.style.display = activa ? '' : 'none';
+        select.disabled = activa;
+    };
+
+    check.addEventListener('change', toggle);
+    toggle();
+});
+</script>
 {% endblock %}

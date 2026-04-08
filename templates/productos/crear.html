@@ -37,14 +37,54 @@
                     </div>
 
                     <div class="form-group-half">
-                        {{ form.id_categoria.label(class="form-label") }}
-                        {{ form.id_categoria(class="form-control") }}
-                        {% for error in form.id_categoria.errors %}
+                        {{ form.id_categoria_platillo.label(class="form-label") }}
+                        {{ form.id_categoria_platillo(class="form-control") }}
+                        {% for error in form.id_categoria_platillo.errors %}
                             <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-journal-plus"></i> Receta automática
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group-half">
+                        <label class="form-label" for="id_materia_select">Materia prima</label>
+                        <select id="id_materia_select" class="form-control">
+                            <option value="">Selecciona una materia prima</option>
+                            {% for materia in materias_primas %}
+                                <option value="{{ materia.id_materia }}">{{ materia.nombre }} ({{ materia.unidad_medida }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-half">
+                        <label class="form-label" for="cantidad_materia">Cantidad</label>
+                        <input id="cantidad_materia" type="number" min="0.01" step="0.01" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="form-group-full">
+                        <button type="button" id="agregar_materia_btn" class="btn-secondary">Agregar materia prima</button>
+                    </div>
+                    <div class="form-group-full">
+                        <table class="data-table" id="tabla_receta">
+                            <thead>
+                                <tr>
+                                    <th>Materia prima</th>
+                                    <th>Cantidad</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="fila_vacia_receta"><td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {{ form.ingredientes_json(id='ingredientes_json') }}
 
             <div class="form-section">
                 <h3 class="section-title">
@@ -101,4 +141,76 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ingredientes = [];
+    const selectMateria = document.getElementById('id_materia_select');
+    const cantidadInput = document.getElementById('cantidad_materia');
+    const agregarBtn = document.getElementById('agregar_materia_btn');
+    const tablaBody = document.querySelector('#tabla_receta tbody');
+    const campoJson = document.getElementById('ingredientes_json');
+
+    function syncJson() {
+        campoJson.value = JSON.stringify(ingredientes);
+    }
+
+    function renderTabla() {
+        tablaBody.innerHTML = '';
+        if (!ingredientes.length) {
+            tablaBody.innerHTML = '<tr id="fila_vacia_receta"><td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td></tr>';
+            syncJson();
+            return;
+        }
+
+        ingredientes.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td><button type="button" class="btn-delete" data-index="${index}">Quitar</button></td>
+            `;
+            tablaBody.appendChild(tr);
+        });
+
+        tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = Number(this.dataset.index);
+                ingredientes.splice(idx, 1);
+                renderTabla();
+            });
+        });
+
+        syncJson();
+    }
+
+    agregarBtn.addEventListener('click', function() {
+        const idMateria = Number(selectMateria.value);
+        const nombreMateria = selectMateria.options[selectMateria.selectedIndex]?.text || '';
+        const cantidad = Number(cantidadInput.value);
+
+        if (!idMateria || !cantidad || cantidad <= 0) {
+            return;
+        }
+
+        const existente = ingredientes.find(i => i.id_materia === idMateria);
+        if (existente) {
+            existente.cantidad = Number((existente.cantidad + cantidad).toFixed(2));
+        } else {
+            ingredientes.push({
+                id_materia: idMateria,
+                nombre: nombreMateria,
+                cantidad: Number(cantidad.toFixed(2))
+            });
+        }
+
+        cantidadInput.value = '';
+        renderTabla();
+    });
+
+    renderTabla();
+});
+</script>
 {% endblock %}
