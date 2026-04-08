@@ -6,21 +6,22 @@
     <div class="welcome-section mb-5">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <h1 class="display-4 fw-bold mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">
-                    ¡Bienvenido, {{ current_user.username }}! 👋
+                <p class="welcome-kicker mb-2">Panel comercial</p>
+                <h1 class="display-5 fw-bold mb-2 welcome-title">
+                    Bienvenido, {{ current_user.username }}
                 </h1>
-                <p class="text-muted fs-5">Aquí encontrarás el resumen de tus ventas y actividades del día.</p>
+                <p class="welcome-subtitle mb-0">Resumen de ventas diarias, productos líderes y actividad operativa en tiempo real.</p>
             </div>
             <div class="date-time-card">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-calendar3 fs-2 text-primary"></i>
+                    <i class="bi bi-calendar3 fs-2 text-warning"></i>
                     <div>
-                        <div class="small text-muted">Fecha actual</div>
+                        <div class="small text-secondary">Fecha actual</div>
                         <div class="fw-bold" id="currentDate"></div>
                     </div>
                     <div class="vr"></div>
                     <div>
-                        <div class="small text-muted">Hora</div>
+                        <div class="small text-secondary">Hora</div>
                         <div class="fw-bold" id="currentTime"></div>
                     </div>
                 </div>
@@ -37,10 +38,8 @@
                 </div>
                 <div class="stat-card-content">
                     <h3 class="stat-card-title">Ventas del día</h3>
-                    <div class="stat-card-value">$12,450.00</div>
-                    <div class="stat-card-change positive">
-                        <i class="bi bi-arrow-up-short"></i> +15% vs ayer
-                    </div>
+                    <div class="stat-card-value">${{ '%.2f'|format(ventas_hoy_total) }}</div>
+                    <div class="stat-card-change">Monto acumulado de hoy</div>
                 </div>
             </div>
         </div>
@@ -52,8 +51,8 @@
                 </div>
                 <div class="stat-card-content">
                     <h3 class="stat-card-title">Top producto</h3>
-                    <div class="stat-card-value">Tacos al pastor</div>
-                    <div class="stat-card-change">127 unidades vendidas</div>
+                    <div class="stat-card-value">{{ top_producto_nombre }}</div>
+                    <div class="stat-card-change">{{ top_producto_cantidad }} unidades vendidas</div>
                 </div>
             </div>
         </div>
@@ -61,12 +60,12 @@
         <div class="col-md-6 col-lg-3">
             <div class="stat-card stat-card-warning">
                 <div class="stat-card-icon">
-                    <i class="bi bi-clock-history"></i>
+                    <i class="bi bi-bag-check"></i>
                 </div>
                 <div class="stat-card-content">
-                    <h3 class="stat-card-title">Producción pendiente</h3>
-                    <div class="stat-card-value">8 pedidos</div>
-                    <div class="stat-card-change">Tiempo estimado: 45 min</div>
+                    <h3 class="stat-card-title">Pedidos completados hoy</h3>
+                    <div class="stat-card-value">{{ pedidos_completados_hoy }}</div>
+                    <div class="stat-card-change">Ventas reales registradas hoy</div>
                 </div>
             </div>
         </div>
@@ -74,12 +73,12 @@
         <div class="col-md-6 col-lg-3">
             <div class="stat-card stat-card-info">
                 <div class="stat-card-icon">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-grid-3x3-gap"></i>
                 </div>
                 <div class="stat-card-content">
-                    <h3 class="stat-card-title">Clientes atendidos</h3>
-                    <div class="stat-card-value">42 hoy</div>
-                    <div class="stat-card-change">+8 vs ayer</div>
+                    <h3 class="stat-card-title">Presentación top</h3>
+                    <div class="stat-card-value">{{ top_presentacion_nombre }}</div>
+                    <div class="stat-card-change">{{ top_presentacion_cantidad }} unidades</div>
                 </div>
             </div>
         </div>
@@ -155,11 +154,7 @@
                             <h5 class="mb-1 fw-bold">📊 Ventas de la semana</h5>
                             <p class="text-muted small mb-0">Comparativa de ventas diarias</p>
                         </div>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-primary active">Semana</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary">Mes</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary">Año</button>
-                        </div>
+                        <span class="badge rounded-pill text-bg-warning">Últimos 7 días</span>
                     </div>
                 </div>
                 <div class="card-body-custom">
@@ -173,65 +168,23 @@
             <div class="card-modern">
                 <div class="card-header-custom">
                     <h5 class="mb-1 fw-bold">🏆 Top productos</h5>
-                    <p class="text-muted small mb-0">Los más pedidos hoy</p>
+                    <p class="text-muted small mb-0">Los más vendidos (pedidos completados)</p>
                 </div>
                 <div class="card-body-custom">
                     <div class="top-products-list">
-                        <div class="product-item">
-                            <div class="product-rank rank-1">1</div>
-                            <div class="product-info">
-                                <div class="product-name">Tacos al pastor</div>
-                                <div class="product-stats">127 unidades · $2,540.00</div>
+                        {% if top_productos_dashboard %}
+                            {% for prod in top_productos_dashboard %}
+                            <div class="product-item">
+                                <div class="product-rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">{{ loop.index }}</div>
+                                <div class="product-info">
+                                    <div class="product-name">{{ prod.nombre }}</div>
+                                    <div class="product-stats">{{ prod.cantidad|int }} unidades · ${{ '%.2f'|format(prod.monto or 0) }}</div>
+                                </div>
                             </div>
-                            <div class="product-trend">
-                                <i class="bi bi-arrow-up-short text-success"></i>
-                                <span class="text-success">+23%</span>
-                            </div>
-                        </div>
-                        <div class="product-item">
-                            <div class="product-rank rank-2">2</div>
-                            <div class="product-info">
-                                <div class="product-name">Quesadillas</div>
-                                <div class="product-stats">98 unidades · $1,470.00</div>
-                            </div>
-                            <div class="product-trend">
-                                <i class="bi bi-arrow-up-short text-success"></i>
-                                <span class="text-success">+12%</span>
-                            </div>
-                        </div>
-                        <div class="product-item">
-                            <div class="product-rank rank-3">3</div>
-                            <div class="product-info">
-                                <div class="product-name">Tortas</div>
-                                <div class="product-stats">76 unidades · $1,140.00</div>
-                            </div>
-                            <div class="product-trend">
-                                <i class="bi bi-arrow-down-short text-danger"></i>
-                                <span class="text-danger">-5%</span>
-                            </div>
-                        </div>
-                        <div class="product-item">
-                            <div class="product-rank">4</div>
-                            <div class="product-info">
-                                <div class="product-name">Tamales</div>
-                                <div class="product-stats">54 unidades · $810.00</div>
-                            </div>
-                            <div class="product-trend">
-                                <i class="bi bi-arrow-up-short text-success"></i>
-                                <span class="text-success">+8%</span>
-                            </div>
-                        </div>
-                        <div class="product-item">
-                            <div class="product-rank">5</div>
-                            <div class="product-info">
-                                <div class="product-name">Aguas frescas</div>
-                                <div class="product-stats">142 unidades · $710.00</div>
-                            </div>
-                            <div class="product-trend">
-                                <i class="bi bi-arrow-up-short text-success"></i>
-                                <span class="text-success">+34%</span>
-                            </div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-muted">Sin ventas registradas aún.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -244,8 +197,8 @@
         <div class="col-md-6">
             <div class="card-modern">
                 <div class="card-header-custom">
-                    <h5 class="mb-1 fw-bold">🥘 Ventas por categoría</h5>
-                    <p class="text-muted small mb-0">Distribución de ventas</p>
+                    <h5 class="mb-1 fw-bold">🥘 Presentaciones más vendidas</h5>
+                    <p class="text-muted small mb-0">Distribución por presentación</p>
                 </div>
                 <div class="card-body-custom">
                     <canvas id="categoryChart" height="250"></canvas>
@@ -258,50 +211,30 @@
             <div class="card-modern">
                 <div class="card-header-custom">
                     <h5 class="mb-1 fw-bold">🕐 Actividad reciente</h5>
-                    <p class="text-muted small mb-0">Últimos movimientos</p>
+                    <p class="text-muted small mb-0">Últimos pedidos completados</p>
                 </div>
                 <div class="card-body-custom p-0">
                     <div class="activity-timeline">
+                        {% if actividad_reciente %}
+                        {% for item in actividad_reciente %}
                         <div class="activity-item">
                             <div class="activity-icon bg-success">
                                 <i class="bi bi-cart-check"></i>
                             </div>
                             <div class="activity-content">
-                                <div class="activity-text">Venta #1234 completada</div>
-                                <div class="activity-time">Hace 5 minutos</div>
+                                <div class="activity-text">{{ item.texto }}</div>
+                                <div class="activity-time">{{ item.fecha.strftime('%d/%m/%Y %H:%M') if item.fecha else '' }}</div>
                             </div>
-                            <div class="activity-amount">$450.00</div>
+                            <div class="activity-amount">${{ '%.2f'|format(item.monto) }}</div>
                         </div>
+                        {% endfor %}
+                        {% else %}
                         <div class="activity-item">
-                            <div class="activity-icon bg-warning">
-                                <i class="bi bi-clock"></i>
-                            </div>
                             <div class="activity-content">
-                                <div class="activity-text">Producción iniciada - Pedido #89</div>
-                                <div class="activity-time">Hace 15 minutos</div>
+                                <div class="activity-text">No hay pedidos completados recientes.</div>
                             </div>
-                            <div class="activity-amount">3 items</div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-icon bg-info">
-                                <i class="bi bi-person-plus"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-text">Nuevo cliente registrado</div>
-                                <div class="activity-time">Hace 32 minutos</div>
-                            </div>
-                            <div class="activity-amount">Cliente #42</div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon bg-danger">
-                                <i class="bi bi-exclamation-triangle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-text">Stock bajo: Tortillas</div>
-                                <div class="activity-time">Hace 1 hora</div>
-                            </div>
-                            <div class="activity-amount">Urgente</div>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -313,25 +246,25 @@
         <h5 class="mb-3 fw-bold">⚡ Acciones rápidas</h5>
         <div class="row g-3">
             <div class="col-md-3 col-6">
-                <a href="#" class="quick-action-btn">
+                <a href="{{ url_for('pedidos.index') }}" class="quick-action-btn">
                     <i class="bi bi-plus-circle"></i>
                     <span>Nueva venta</span>
                 </a>
             </div>
             <div class="col-md-3 col-6">
-                <a href="#" class="quick-action-btn">
+                <a href="{{ url_for('pedidos.index') }}" class="quick-action-btn">
                     <i class="bi bi-receipt"></i>
                     <span>Ver pedidos</span>
                 </a>
             </div>
             <div class="col-md-3 col-6">
-                <a href="#" class="quick-action-btn">
+                <a href="{{ url_for('caja.historial') }}" class="quick-action-btn">
                     <i class="bi bi-graph-up"></i>
                     <span>Reportes</span>
                 </a>
             </div>
             <div class="col-md-3 col-6">
-                <a href="#" class="quick-action-btn">
+                <a href="{{ url_for('ingredientes.index') }}" class="quick-action-btn">
                     <i class="bi bi-box-seam"></i>
                     <span>Inventario</span>
                 </a>
@@ -341,54 +274,92 @@
 </div>
 
 <style>
+    :root {
+        --dash-bg: #f4f6ef;
+        --dash-card: #ffffff;
+        --dash-text: #1f2d20;
+        --dash-muted: #5e6a5f;
+        --dash-border: #d9dfd2;
+        --dash-accent: #d55f2a;
+        --dash-accent-soft: #fff1e7;
+        --dash-dark: #1f3a2f;
+    }
+
     /* Dashboard styles */
     .dashboard-container {
-        padding: 0;
+        padding: 8px;
+        color: var(--dash-text);
+        background:
+            radial-gradient(circle at top right, #fce9dc 0%, transparent 35%),
+            radial-gradient(circle at bottom left, #e9f2ea 0%, transparent 30%),
+            var(--dash-bg);
+        border-radius: 20px;
+    }
+
+    .welcome-section {
+        background: linear-gradient(130deg, #203b31 0%, #2f5a45 55%, #3a6a52 100%);
+        border-radius: 22px;
+        padding: 26px;
+        color: #f6f8f2;
+        box-shadow: 0 20px 40px rgba(35, 58, 50, 0.22);
+    }
+
+    .welcome-kicker {
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #f4ca8c;
+    }
+
+    .welcome-title {
+        color: #ffffff;
+    }
+
+    .welcome-subtitle {
+        color: #d9e5dc;
+        font-size: 1rem;
     }
 
     /* Tarjetas de estadísticas */
     .stat-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border-radius: 20px;
+        background: var(--dash-card);
+        border-radius: 18px;
         padding: 20px;
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 16px;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
         position: relative;
         overflow: hidden;
+        border: 1px solid var(--dash-border);
+        box-shadow: 0 10px 26px rgba(34, 45, 33, 0.08);
     }
 
     .stat-card::before {
         content: '';
         position: absolute;
         top: 0;
-        left: -100%;
+        left: 0;
         width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: left 0.5s ease;
-    }
-
-    .stat-card:hover::before {
-        left: 100%;
+        height: 4px;
+        background: var(--dash-accent);
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 16px 32px rgba(34, 45, 33, 0.14);
     }
 
     .stat-card-icon {
-        width: 60px;
-        height: 60px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 15px;
+        width: 52px;
+        height: 52px;
+        background: var(--dash-accent-soft);
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
 
     .stat-card-content {
@@ -396,22 +367,24 @@
     }
 
     .stat-card-title {
-        font-size: 0.9rem;
-        color: #a0a0a0;
+        font-size: 0.85rem;
+        color: var(--dash-muted);
         margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.06em;
     }
 
     .stat-card-value {
-        font-size: 1.8rem;
+        font-size: 1.45rem;
         font-weight: bold;
-        color: white;
+        color: var(--dash-text);
         margin-bottom: 5px;
+        line-height: 1.2;
     }
 
     .stat-card-change {
         font-size: 0.8rem;
+        color: var(--dash-muted);
     }
 
     .stat-card-change.positive {
@@ -422,17 +395,19 @@
         color: #ef4444;
     }
 
-    .stat-card-primary .stat-card-icon { color: #667eea; }
-    .stat-card-success .stat-card-icon { color: #10b981; }
-    .stat-card-warning .stat-card-icon { color: #f59e0b; }
-    .stat-card-info .stat-card-icon { color: #3b82f6; }
+    .stat-card-primary .stat-card-icon { color: #1f3a2f; }
+    .stat-card-success .stat-card-icon { color: #267955; }
+    .stat-card-warning .stat-card-icon { color: #d37a1f; }
+    .stat-card-info .stat-card-icon { color: #2f637f; }
 
     /* Tarjetas modernas */
     .card-modern {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border-radius: 20px;
+        background: var(--dash-card);
+        border-radius: 18px;
         overflow: hidden;
         transition: transform 0.3s ease;
+        border: 1px solid var(--dash-border);
+        box-shadow: 0 10px 26px rgba(34, 45, 33, 0.08);
     }
 
     .card-modern:hover {
@@ -440,12 +415,13 @@
     }
 
     .card-header-custom {
-        padding: 20px 25px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--dash-border);
+        background: #fbfcf8;
     }
 
     .card-body-custom {
-        padding: 20px 25px;
+        padding: 18px 22px;
     }
 
     /* Lista de productos */
@@ -460,20 +436,21 @@
         align-items: center;
         gap: 15px;
         padding: 10px;
-        background: rgba(255,255,255,0.05);
+        background: #f8faf6;
         border-radius: 12px;
         transition: all 0.3s ease;
+        border: 1px solid #e5ebdd;
     }
 
     .product-item:hover {
-        background: rgba(255,255,255,0.1);
+        background: #eef5eb;
         transform: translateX(5px);
     }
 
     .product-rank {
         width: 35px;
         height: 35px;
-        background: rgba(255,255,255,0.1);
+        background: #edf2e7;
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -493,11 +470,12 @@
     .product-name {
         font-weight: 600;
         margin-bottom: 5px;
+        color: var(--dash-text);
     }
 
     .product-stats {
         font-size: 0.8rem;
-        color: #a0a0a0;
+        color: var(--dash-muted);
     }
 
     .product-trend {
@@ -515,12 +493,12 @@
         align-items: center;
         gap: 15px;
         padding: 15px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid #ecf0e8;
         transition: all 0.3s ease;
     }
 
     .activity-item:hover {
-        background: rgba(255,255,255,0.05);
+        background: #f8faf6;
     }
 
     .activity-icon {
@@ -545,7 +523,7 @@
 
     .activity-time {
         font-size: 0.75rem;
-        color: #a0a0a0;
+        color: var(--dash-muted);
     }
 
     .activity-amount {
@@ -564,17 +542,19 @@
         align-items: center;
         gap: 10px;
         padding: 20px;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background: var(--dash-card);
         border-radius: 15px;
         text-decoration: none;
-        color: white;
+        color: var(--dash-dark);
         transition: all 0.3s ease;
         text-align: center;
+        border: 1px solid var(--dash-border);
+        box-shadow: 0 8px 18px rgba(34, 45, 33, 0.06);
     }
 
     .quick-action-btn:hover {
         transform: translateY(-5px);
-        background: linear-gradient(135deg, #e63939, #d62828);
+        background: linear-gradient(135deg, #f8b25d, #ef8c40);
         color: white;
     }
 
@@ -584,10 +564,44 @@
 
     /* Fecha y hora */
     .date-time-card {
-        background: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.9);
         padding: 12px 20px;
         border-radius: 15px;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(6px);
+        color: #1f2d20;
+        border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .list-group-item {
+        border-color: #e4eadb;
+        background: #fbfdf9;
+    }
+
+    .list-group-item a:hover {
+        background: #f2f8ef;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 2px;
+            border-radius: 14px;
+        }
+
+        .welcome-section {
+            padding: 18px;
+        }
+
+        .stat-card {
+            padding: 16px;
+        }
+
+        .stat-card-value {
+            font-size: 1.2rem;
+        }
+
+        .quick-action-btn {
+            padding: 14px;
+        }
     }
 </style>
 
@@ -612,18 +626,23 @@
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
+    const ventasDiariasLabels = {{ ventas_diarias_labels|tojson }};
+    const ventasDiariasData = {{ ventas_diarias_data|tojson }};
+    const presentacionesLabels = {{ top_presentaciones_labels|tojson }};
+    const presentacionesData = {{ top_presentaciones_data|tojson }};
+
     // Gráfica de ventas
     const ctx = document.getElementById('salesChart');
     if (ctx) {
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                labels: ventasDiariasLabels,
                 datasets: [{
-                    label: 'Ventas',
-                    data: [8500, 9200, 7800, 10400, 12800, 15600, 11200],
-                    borderColor: '#e63939',
-                    backgroundColor: 'rgba(230, 57, 57, 0.1)',
+                    label: 'Ventas diarias',
+                    data: ventasDiariasData,
+                    borderColor: '#d55f2a',
+                    backgroundColor: 'rgba(213, 95, 42, 0.14)',
                     borderWidth: 3,
                     tension: 0.4,
                     fill: true
@@ -634,17 +653,17 @@
                 maintainAspectRatio: true,
                 plugins: {
                     legend: {
-                        labels: { color: 'white' }
+                        labels: { color: '#2c3a32' }
                     }
                 },
                 scales: {
                     y: {
-                        ticks: { color: 'white' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: '#425246' },
+                        grid: { color: '#e4eadf' }
                     },
                     x: {
-                        ticks: { color: 'white' },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+                        ticks: { color: '#425246' },
+                        grid: { color: '#e4eadf' }
                     }
                 }
             }
@@ -657,9 +676,9 @@
         new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Tacos', 'Quesadillas', 'Tortas', 'Bebidas', 'Postres'],
+                labels: presentacionesLabels,
                 datasets: [{
-                    data: [35, 25, 20, 12, 8],
+                    data: presentacionesData,
                     backgroundColor: ['#e63939', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
                     borderWidth: 0
                 }]
@@ -670,7 +689,7 @@
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { color: 'white' }
+                        labels: { color: '#2c3a32' }
                     }
                 }
             }

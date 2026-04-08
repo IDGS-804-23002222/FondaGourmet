@@ -172,3 +172,100 @@ def serializar_receta(receta):
         ],
         'costo_total': calcular_costo_receta(receta.id_receta)
     }
+
+
+def obtener_receta_detalle(id_receta):
+    try:
+        receta = Receta.query.get(id_receta)
+        if not receta:
+            return None, "Receta no encontrada"
+
+        data = {
+            'id_receta': receta.id_receta,
+            'id_producto': receta.id_producto,
+            'producto_nombre': receta.producto.nombre if receta.producto else 'N/A',
+            'rendimiento': float(receta.rendimiento or 0),
+            'nota': receta.nota,
+            'estado': bool(receta.estado),
+            'fecha_creacion': receta.fecha_creacion,
+            'detalles': [
+                {
+                    'id_detalle': detalle.id_detalle,
+                    'id_materia': detalle.id_materia,
+                    'materia_nombre': detalle.materia_prima.nombre if detalle.materia_prima else 'N/A',
+                    'unidad': detalle.materia_prima.unidad_medida if detalle.materia_prima else '',
+                    'precio': float(detalle.materia_prima.precio or 0) if detalle.materia_prima else 0,
+                    'cantidad': float(detalle.cantidad or 0),
+                    'subtotal': float(detalle.cantidad or 0) * float(detalle.materia_prima.precio or 0) if detalle.materia_prima else 0,
+                }
+                for detalle in receta.detalles
+            ],
+        }
+        data['costo_total'] = sum(item['subtotal'] for item in data['detalles'])
+        return data, None
+    except Exception as e:
+        logger.error(f"Error al obtener detalle de receta: {str(e)}")
+        return None, str(e)
+
+
+def obtener_materias_activas():
+    try:
+        materias = (
+            MateriaPrima.query
+            .filter_by(estado=True)
+            .order_by(MateriaPrima.nombre.asc())
+            .all()
+        )
+        return materias, None
+    except Exception as e:
+        logger.error(f"Error al obtener materias activas: {str(e)}")
+        return None, str(e)
+
+
+def actualizar_receta_completa(id_receta, rendimiento, nota, detalles_payload, estado=True):
+    try:
+        receta = Receta.query.get(id_receta)
+        if not receta:
+            return False, "Receta no encontrada"
+
+        if rendimiento is None or float(rendimiento) < 0:
+            return False, "El rendimiento debe ser un valor válido"
+
+        if not detalles_payload:
+            return False, "Debes agregar al menos un ingrediente"
+
+        detalles_normalizados = []
+        for idx, item in enumerate(detalles_payload, start=1):
+            id_materia = int(item.get('id_materia', 0))
+            cantidad = float(item.get('cantidad', 0))
+
+            if id_materia <= 0:
+                return False, f"Ingrediente inválido en la fila {idx}"
+            if cantidad <= 0:
+                return False, f"La cantidad debe ser mayor a cero en la fila {idx}"
+
+            materia = MateriaPrima.query.get(id_materia)
+            if not materia:
+                return False, f"Materia prima no encontrada en la fila {idx}"
+
+            detalles_normalizados.append({'id_materia': id_materia, 'cantidad': cantidad})
+
+        receta.rendimiento = float(rendimiento)
+        receta.nota = (nota or '').strip() or None
+        receta.estado = bool(estado)
+
+        RecetaDetalle.query.filter_by(id_receta=receta.id_receta).delete()
+
+        for detalle in detalles_normalizados:
+            db.session.add(RecetaDetalle(
+                id_receta=receta.id_receta,
+                id_materia=detalle['id_materia'],
+                cantidad=detalle['cantidad'],
+            ))
+
+        db.session.commit()
+        return True, "Receta actualizada correctamente"
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al actualizar receta completa: {str(e)}")
+        return False, str(e)

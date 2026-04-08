@@ -6,51 +6,123 @@ from flask import current_app, flash, jsonify, redirect, url_for
 
 logger = logging.getLogger(__name__)
 
+
+def calcular_costo_unitario_producto(producto):
+    """Calcula costo unitario estimado en base a receta e insumos vigentes."""
+    if not producto or not producto.recetas:
+        return 0.0
+
+    receta = producto.recetas[0]
+    if not receta or not receta.rendimiento or receta.rendimiento <= 0:
+        return 0.0
+
+    costo_total_receta = 0.0
+    for detalle in receta.detalles:
+        materia = detalle.materia_prima
+        if not materia:
+            continue
+        costo_total_receta += float(detalle.cantidad) * float(materia.precio or 0)
+
+    return costo_total_receta / float(receta.rendimiento)
+
 def obtener_ventas():
     try:
-        result = db.session.execute(text("""
-            SELECT 
-                v.id_venta,
-                v.fecha,
-                v.estado,
-                pr.nombre AS nombre_producto,
-                pr.stock_actual,
-                d.cantidad,
-                v.total
-            FROM ventas v
-            JOIN detalle_venta d ON v.id_venta = d.id_venta
-            JOIN productos pr ON d.id_producto = pr.id_producto
-            ORDER BY v.fecha ASC
-        """))
-        
-        ventas_dict = {}
-        
-        for row in result.mappings():
-            id_venta = row['id_venta']
-            
-            if id_venta not in ventas_dict:
-                ventas_dict[id_venta] = {
-                    'id_venta': id_venta,
-                    'fecha': row['fecha'],
-                    'estado': row['estado'],
-                    'total': row['total'],
-                    'productos': [],
-                    'stock_suficiente': True
-                }
-            
-            if row['stock_actual'] < row['cantidad']:
-                ventas_dict[id_venta]['stock_suficiente'] = False
-                
-            ventas_dict[id_venta]['productos'].append({
-                'nombre': row['nombre_producto'],
-                'stock_actual': row['stock_actual'],
-                'cantidad': row['cantidad']
+        ventas_db = (
+            Venta.query
+            .order_by(Venta.fecha.desc())
+            .all()
+        )
+
+        ventas = []
+        for venta in ventas_db:
+            productos = []
+            costo_total = 0.0
+
+            for detalle in venta.detalles:
+                producto = detalle.producto
+                precio_unitario = (float(detalle.subtotal) / float(detalle.cantidad)) if detalle.cantidad else 0.0
+                costo_unitario = calcular_costo_unitario_producto(producto)
+                costo_subtotal = costo_unitario * float(detalle.cantidad)
+                utilidad_subtotal = float(detalle.subtotal) - costo_subtotal
+                costo_total += costo_subtotal
+
+                productos.append({
+                    'id_producto': producto.id_producto if producto else None,
+                    'nombre': producto.nombre if producto else 'Producto',
+                    'cantidad': detalle.cantidad,
+                    'precio_unitario': precio_unitario,
+                    'subtotal': float(detalle.subtotal),
+                    'costo_unitario': costo_unitario,
+                    'costo_subtotal': costo_subtotal,
+                    'utilidad_subtotal': utilidad_subtotal,
+                })
+
+            utilidad_total = float(venta.total) - costo_total
+            margen = (utilidad_total / float(venta.total) * 100.0) if venta.total else 0.0
+
+            ventas.append({
+                'id_venta': venta.id_venta,
+                'fecha': venta.fecha,
+                'estado': venta.estado,
+                'total': float(venta.total),
+                'metodo_pago': venta.metodo_pago,
+                'productos': productos,
+                'costo_total': costo_total,
+                'utilidad_total': utilidad_total,
+                'margen_porcentaje': margen,
             })
 
-        ventas = list(ventas_dict.values())
         return ventas, None
     except Exception as e:
         logger.error(f"Error al obtener ventas: {str(e)}")
+        return None, str(e)
+
+
+def obtener_detalle_venta(id_venta):
+    try:
+        venta = Venta.query.get(id_venta)
+        if not venta:
+            return None, "Venta no encontrada"
+
+        costo_total = 0.0
+        detalles = []
+
+        for detalle in venta.detalles:
+            producto = detalle.producto
+            precio_unitario = (float(detalle.subtotal) / float(detalle.cantidad)) if detalle.cantidad else 0.0
+            costo_unitario = calcular_costo_unitario_producto(producto)
+            costo_subtotal = costo_unitario * float(detalle.cantidad)
+            utilidad_subtotal = float(detalle.subtotal) - costo_subtotal
+            costo_total += costo_subtotal
+
+            detalles.append({
+                'producto': producto.nombre if producto else 'Producto',
+                'cantidad': detalle.cantidad,
+                'precio_unitario': precio_unitario,
+                'subtotal': float(detalle.subtotal),
+                'costo_unitario': costo_unitario,
+                'costo_subtotal': costo_subtotal,
+                'utilidad_subtotal': utilidad_subtotal,
+            })
+
+        utilidad_total = float(venta.total) - costo_total
+        margen = (utilidad_total / float(venta.total) * 100.0) if venta.total else 0.0
+
+        return {
+            'id_venta': venta.id_venta,
+            'fecha': venta.fecha,
+            'metodo_pago': venta.metodo_pago,
+            'estado': venta.estado,
+            'usuario': venta.usuario.username if venta.usuario else 'Usuario',
+            'detalles': detalles,
+            'total': float(venta.total),
+            'costo_total': costo_total,
+            'utilidad_total': utilidad_total,
+            'margen_porcentaje': margen,
+        }, None
+
+    except Exception as e:
+        logger.error(f"Error al obtener detalle de venta: {str(e)}")
         return None, str(e)
     
 def crear_venta(id_usuario, metodo_pago, productos):
@@ -150,12 +222,12 @@ def crear_venta(id_usuario, metodo_pago, productos):
 
         db.session.commit()
 
-        return True, "Venta registrada correctamente"
+        return True, "Venta registrada correctamente", venta.id_venta
 
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error crear_venta: {str(e)}")
-        return False, str(e)
+        return False, str(e), None
             
 def agregar_producto_a_venta(id_venta, id_producto, cantidad):
     try:

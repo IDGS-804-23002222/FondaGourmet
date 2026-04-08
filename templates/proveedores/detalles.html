@@ -84,6 +84,87 @@
                     <p>{{ proveedor.direccion or 'No disponible' }}</p>
                 </div>
             </div>
+
+            <div class="user-item" style="grid-column: 1 / -1; align-items: flex-start;">
+                <div class="icon blue">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                <div style="width: 100%;">
+                    <span>COMPRAS DEL PROVEEDOR</span>
+                    {% if proveedor.compras %}
+                        <div class="table-responsive mt-3">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>No. Compra</th>
+                                        <th>Fecha</th>
+                                        <th>Entrega</th>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                        <th>Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for compra in proveedor.compras %}
+                                        <tr>
+                                            <td>#{{ compra.id_compra }}</td>
+                                            <td>{{ compra.fecha.strftime('%d/%m/%Y') if compra.fecha else 'Sin fecha' }}</td>
+                                            <td>{{ compra.fecha_entrega.strftime('%d/%m/%Y') if compra.fecha_entrega else 'Sin fecha' }}</td>
+                                            <td>
+                                                <span class="badge
+                                                    {% if compra.estado == 'Completada' or compra.estado == 'Completado' %}bg-success
+                                                    {% elif compra.estado == 'En Camino' %}bg-info
+                                                    {% elif compra.estado == 'Cancelada' or compra.estado == 'Cancelado' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ compra.estado }}
+                                                </span>
+                                            </td>
+                                            <td>${{ '%.2f'|format(compra.total or 0) }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#compraDetalle{{ compra.id_compra }}" aria-expanded="false" aria-controls="compraDetalle{{ compra.id_compra }}">
+                                                    Ver detalle
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="collapse" id="compraDetalle{{ compra.id_compra }}">
+                                            <td colspan="6">
+                                                <div class="p-3 bg-light rounded-3">
+                                                    <p class="mb-2"><strong>Método de pago:</strong> {{ compra.metodo_pago or 'No registrado' }}</p>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Materia prima</th>
+                                                                    <th>Cantidad</th>
+                                                                    <th>Precio unitario</th>
+                                                                    <th>Subtotal</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for detalle in compra.detalles %}
+                                                                    <tr>
+                                                                        <td>{{ detalle.materia }}</td>
+                                                                        <td>{{ detalle.cantidad }}</td>
+                                                                        <td>${{ '%.2f'|format(detalle.precio_u or 0) }}</td>
+                                                                        <td>${{ '%.2f'|format(detalle.subtotal or 0) }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="mt-2 mb-0 text-muted">Este proveedor todavía no tiene compras registradas.</p>
+                    {% endif %}
+                </div>
+            </div>
+
             <a href="{{ url_for('proveedores.index') }}" class="btn volver-btn">
                 Volver
             </a>

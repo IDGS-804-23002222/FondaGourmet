@@ -12,6 +12,8 @@
         <p class="text-muted mb-0">Puedes combinar varias materias en una sola solicitud. Si eliges distintos proveedores, se crearán solicitudes agrupadas por proveedor.</p>
         {% if id_materia_alerta %}
         <p class="mt-2 mb-0 text-primary"><strong>Vienes desde una alerta de stock.</strong> Puedes agregar también otras materias faltantes para producción.</p>
+        {% elif alerta_stock %}
+            <p class="mt-2 mb-0 text-primary"><strong>Vienes desde alertas de stock bajo.</strong> Se cargaron las materias primas que están igual o por debajo del mínimo.</p>
         {% endif %}
     </div>
 
@@ -62,6 +64,7 @@
 
     <div class="mt-3 d-flex gap-2">
         <button type="button" class="btn btn-warning" id="btnAgregarFila">Agregar materia</button>
+        <button type="button" class="btn btn-outline-primary" id="btnAgregarSugeridas">Agregar sugeridas</button>
         <button type="submit" class="btn btn-success">Guardar solicitud</button>
         <a href="{{ url_for('produccion.index') if current_user.id_rol == 2 else url_for('compras.index') }}" class="btn btn-secondary">Volver</a>
     </div>
@@ -69,6 +72,7 @@
 
 <script id="sugerencias-compra-data" type="application/json">{{ (sugerencias or [])|tojson }}</script>
 <input type="hidden" id="idMateriaAlerta" value="{{ id_materia_alerta or 0 }}">
+<input type="hidden" id="alertaStock" value="{{ 1 if alerta_stock else 0 }}">
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -78,8 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formSolicitudCompra');
     const sugerenciasNode = document.getElementById('sugerencias-compra-data');
     const idMateriaAlertaNode = document.getElementById('idMateriaAlerta');
+    const alertaStockNode = document.getElementById('alertaStock');
     const sugerencias = sugerenciasNode ? JSON.parse(sugerenciasNode.textContent || '[]') : [];
     const idMateriaAlerta = idMateriaAlertaNode ? Number(idMateriaAlertaNode.value || 0) : 0;
+    const alertaStock = alertaStockNode ? alertaStockNode.value === '1' : false;
 
     function actualizarFila(fila) {
         const materiaSelect = fila.querySelector('.materia-select');
@@ -194,18 +200,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindFila(cuerpo.querySelector('tr.fila-compra'));
 
-    if (idMateriaAlerta) {
+    if (idMateriaAlerta || alertaStock) {
         const filaInicial = cuerpo.querySelector('tr.fila-compra');
         const primeraVacia = filaInicial && !filaInicial.querySelector('.materia-select').value;
         agregarSugeridas(primeraVacia);
     }
 
     btnAgregarFila.addEventListener('click', crearFila);
-    btnAgregarSugeridas.addEventListener('click', () => {
-        const filaInicial = cuerpo.querySelector('tr.fila-compra');
-        const primeraVacia = filaInicial && !filaInicial.querySelector('.materia-select').value;
-        agregarSugeridas(primeraVacia);
-    });
+    if (btnAgregarSugeridas) {
+        btnAgregarSugeridas.addEventListener('click', () => {
+            const filaInicial = cuerpo.querySelector('tr.fila-compra');
+            const primeraVacia = filaInicial && !filaInicial.querySelector('.materia-select').value;
+            agregarSugeridas(primeraVacia);
+        });
+    }
 
     form.addEventListener('submit', () => {
         cuerpo.querySelectorAll('tr.fila-compra').forEach(fila => {

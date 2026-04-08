@@ -1,17 +1,43 @@
-{% extends "tienda/base_cliente.html" %}
+{% extends "base.html" %}
 {% block title %}Mis pedidos{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/clientes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
 {% endblock %}
 
 {% block content %}
+<section class="mis-pedidos-view">
 
-<h1 class="section-title">Mis Pedidos</h1>
+<div class="mis-pedidos-hero">
+    <div>
+        <p class="hero-kicker mb-1">CLIENTE</p>
+        <h1 class="section-title mb-1">Mis Pedidos</h1>
+        <p class="hero-subtitle mb-0">Consulta estado, detalles y acciones disponibles de tus pedidos.</p>
+    </div>
+    <div class="hero-count-chip">
+        <span id="visiblePedidosCount">{{ pedidos|length if pedidos else 0 }}</span>
+        <small>registrados</small>
+    </div>
+</div>
 
 {% if pedidos %}
 
+<div class="pedidos-toolbar mb-3">
+    <label for="estadoFiltroPedidos" class="form-label mb-0">Filtrar por estado:</label>
+    <select id="estadoFiltroPedidos" class="form-select form-select-sm pedidos-filter-select">
+        <option value="todos">Todos</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="solicitado">Solicitado</option>
+        <option value="en proceso">En Proceso</option>
+        <option value="producido">Producido</option>
+        <option value="completado">Completado</option>
+        <option value="cancelado">Cancelado</option>
+    </select>
+</div>
+
 <div class="pedidos-wrapper">
+    <div class="table-responsive">
     <table class="data-table pedidos-table">
         <thead>
             <tr>
@@ -28,7 +54,7 @@
 
         <tbody>
             {% for p in pedidos %}
-            <tr>
+            <tr data-estado="{{ (p.estado or '')|lower }}">
                 <td>#{{ p.id }}</td>
 
                 <td>
@@ -63,16 +89,16 @@
                     {% endif %}
                 </td>
 
-                <td class="px-4 md:px-6 py-4">
-                    <div class="flex items-center justify-center gap-1.5 md:gap-2">
+                <td class="actions-col">
+                    <div class="pedido-actions-row">
                     <button onclick=window.location.href='{{ url_for("pedidos.ver_detalles_pedido", id_pedido=p.id) }}'
-                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
+                                class="btn-view pedido-action-btn"
                                 title="Ver detalles">
                             <i class="bi bi-eye text-lg"></i>
                         </button>
                         {% if p.estado in ["Pendiente", "Solicitado"] %}
 <button onclick="cancelarPedido('{{ p.id }}')"
-    class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
+    class="btn-delete pedido-action-btn"
     title="Cancelar pedido">
     <i class="bi bi-trash text-lg"></i>
 </button>
@@ -83,15 +109,20 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </div>
 
 {% else %}
 
-<p class="text-center">
-    No tienes pedidos aún 🧾
-</p>
+<div class="pedidos-empty-state">
+    <i class="bi bi-receipt"></i>
+    <p class="text-center mb-2">No tienes pedidos aún.</p>
+    <a href="{{ url_for('tienda.menu') }}" class="btn btn-primary btn-sm">Explorar menú</a>
+</div>
 
 {% endif %}
+
+</section>
 
 {% endblock %}
 
@@ -124,5 +155,35 @@ function cancelarPedido(id) {
     }
     });
 }    
+
+document.addEventListener('DOMContentLoaded', () => {
+    const estadoFiltro = document.getElementById('estadoFiltroPedidos');
+    const filas = Array.from(document.querySelectorAll('.pedidos-table tbody tr'));
+    const visiblePedidosCount = document.getElementById('visiblePedidosCount');
+
+    function aplicarFiltro() {
+        const estado = (estadoFiltro?.value || 'todos').toLowerCase();
+        let visibles = 0;
+
+        filas.forEach((fila) => {
+            const estadoFila = (fila.dataset.estado || '').toLowerCase();
+            const mostrar = estado === 'todos' || estadoFila === estado;
+            fila.style.display = mostrar ? '' : 'none';
+            if (mostrar) {
+                visibles += 1;
+            }
+        });
+
+        if (visiblePedidosCount) {
+            visiblePedidosCount.textContent = visibles;
+        }
+    }
+
+    if (estadoFiltro) {
+        estadoFiltro.addEventListener('change', aplicarFiltro);
+    }
+
+    aplicarFiltro();
+});
 </script>
 {% endblock %}

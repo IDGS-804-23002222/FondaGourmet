@@ -3,11 +3,20 @@
     top: 0;
     left: 0;
     width: 100%;
+    min-height: var(--navbar-height);
     background: var(--verde);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    padding: 4px 0;
+    padding: 0;
+    margin: 0;
     backdrop-filter: blur(4px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1030;
+}
+
+.navbar .container-fluid {
+    min-height: var(--navbar-height);
+    display: flex;
+    align-items: center;
 }
 
 .nav-link {
@@ -45,7 +54,7 @@
 }
 
 .brand-logo {
-    height: 45px;
+    height: 40px;
     width: auto;
     border-radius: 50%;
     transition: transform 0.3s ease;
@@ -139,3 +148,10 @@
     .navbar-collapse {
     transition: all 0.3s ease;
 }
+
+    @media (max-width: 768px) {
+        .navbar .container-fluid {
+            padding-left: 0.7rem;
+            padding-right: 0.7rem;
+        }
+    }

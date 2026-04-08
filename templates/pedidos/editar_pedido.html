@@ -1,5 +1,9 @@
-{% extends "tienda/base_cliente.html" %}
+{% extends "base.html" %}
 {% block title %}Editar pedido{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
+{% endblock %}
 
 {% block content %}
 <h1 class="section-title">Editar Pedido #{{ pedido.id_pedido }}</h1>

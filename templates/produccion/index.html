@@ -1,22 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Producción{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/produccion.css') }}">
+{% endblock %}
+
 {% block content %}
-<h1>Órdenes de Producción</h1>
-    <div class="toolbar mt-2" id="filtrosUrgencia">
-        <input type="date" class="search" placeholder="Buscar por fecha...">
-        <select class="filter" id="filtroEstadoProduccion">
-        <option value="todas">Todas las órdenes</option>
-        <option value="solicitada">Solicitadas</option>
-        <option value="en proceso">En proceso</option>
-        <option value="completada">Completadas</option>
-        <option value="cancelada">Canceladas</option>
-    </select>
-    <button type="button" class="btn btn-sm btn-outline-secondary active" data-urgencia="todas">Todas</button>
-    <button type="button" class="btn btn-sm btn-outline-danger" data-urgencia="vencida">Urgentes</button>
-    <button type="button" class="btn btn-sm btn-outline-primary" data-urgencia="proxima">Próximas</button>
-    <button type="button" class="btn btn-sm btn-outline-success" data-urgencia="normal">A tiempo</button>
+<div class="produccion-index-hero">
+    <div>
+        <p class="hero-kicker mb-2">Cocina y tiempos</p>
+        <h1 class="mb-2">Órdenes de Producción</h1>
+        <p class="hero-subtitle mb-0">Supervisa urgencia, progreso y cumplimiento de fechas desde un tablero único.</p>
     </div>
-<table class="data-table">
+    <div class="produccion-hero-stats">
+        <div class="hero-count-chip">
+            <span>{{ ordenes_completadas_hoy }}</span>
+            <small>Completadas hoy</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ ordenes_solicitadas }}</span>
+            <small>Solicitadas</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ ordenes_en_proceso }}</span>
+            <small>En proceso</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ total_ordenes }}</span>
+            <small>Totales</small>
+        </div>
+    </div>
+</div>
+
+<div class="produccion-index-shell">
+    <div class="toolbar produccion-toolbar" id="filtrosUrgencia">
+        <input type="text" class="search" id="buscarProduccion" placeholder="Buscar orden, responsable o estado...">
+        <input type="date" class="search" id="filtroFechaProduccion" title="Filtrar por fecha necesaria">
+        <select class="filter" id="filtroEstadoProduccion">
+            <option value="todas">Todas las órdenes</option>
+            <option value="solicitada">Solicitadas</option>
+            <option value="en proceso">En proceso</option>
+            <option value="completada">Completadas</option>
+            <option value="cancelada">Canceladas</option>
+        </select>
+        <div class="urgencia-switches">
+            <button type="button" class="btn btn-sm btn-outline-secondary active" data-urgencia="todas">Todas</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-urgencia="urgente">Urgentes</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-urgencia="proxima">Próximas</button>
+            <button type="button" class="btn btn-sm btn-outline-success" data-urgencia="normal">A tiempo</button>
+        </div>
+    </div>
+
+<div class="produccion-table-wrap">
+<table class="data-table produccion-table">
     <thead>
         <tr>
             <th>No. orden</th>
@@ -27,10 +63,11 @@
             <th>Fecha Producción</th>
             <th>Urgencia</th>
             <th>Acciones</th>
+        </tr>
         </thead>
     <tbody>
 {% for p in producciones %}
-<tr data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}">
+<tr data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
     <td>{{ p.id_produccion }}</td>
     <td>
         {{ p.usuario }}
@@ -55,9 +92,9 @@
     <td>{{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</td>
     <td>{{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</td>
     <td>
-        {% if p.estado != 'Completada' and p.dias_restantes <= 1 %}
+        {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
     <span class="badge bg-danger">URGENTE</span>
-{% elif p.estado != 'Completada' and p.dias_restantes <= 2 %}
+{% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
     <span class="badge bg-warning">Próximo</span>
 {% else %}
     <span class="badge bg-success">A tiempo</span>
@@ -70,6 +107,50 @@
 {% endfor %}
 </tbody>
 </table>
+</div>
+
+<div class="produccion-cards-mobile">
+{% for p in producciones %}
+<article class="produccion-mobile-card" data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
+    <div class="produccion-mobile-head">
+        <div>
+            <p class="produccion-mobile-kicker mb-1">Orden #{{ p.id_produccion }}</p>
+            <h3 class="produccion-mobile-title mb-0">{{ p.usuario }}</h3>
+        </div>
+        <span class="badge
+            {% if p.estado == 'Solicitada' %}bg-warning text-dark
+            {% elif p.estado == 'En Proceso' %}bg-info
+            {% elif p.estado == 'Completada' %}bg-success
+            {% elif p.estado == 'Cancelada' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ p.estado }}
+        </span>
+    </div>
+
+    <div class="produccion-mobile-meta">
+        <div><strong>Solicitud:</strong> {{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</div>
+        <div><strong>A completar:</strong> {{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</div>
+        <div><strong>Producción:</strong> {{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</div>
+    </div>
+
+    <div class="produccion-mobile-block">
+        <span class="produccion-mobile-label">Urgencia</span>
+        {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
+            <span class="badge bg-danger">URGENTE</span>
+        {% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
+            <span class="badge bg-warning">Próximo</span>
+        {% else %}
+            <span class="badge bg-success">A tiempo</span>
+        {% endif %}
+    </div>
+
+    <div class="produccion-mobile-actions">
+        <a href="{{ url_for('produccion.ver', id=p.id_produccion) }}" class="btn btn-view">Ver</a>
+    </div>
+</article>
+{% endfor %}
+</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -105,31 +186,52 @@ function clasificarUrgencia(dias, estado) {
 
 function aplicarFiltrosProduccion() {
     const buscador = document.getElementById('buscarProduccion');
+    const filtroFecha = document.getElementById('filtroFechaProduccion');
     const filtroEstado = document.getElementById('filtroEstadoProduccion');
     const urgenciaActiva = document.querySelector('#filtrosUrgencia button.active');
     const textoBusqueda = normalizarTexto(buscador ? buscador.value : '');
+    const fechaNecesaria = filtroFecha ? filtroFecha.value : '';
     const estadoSeleccionado = normalizarTexto(filtroEstado ? filtroEstado.value : 'todas');
     const filtroUrgencia = urgenciaActiva ? urgenciaActiva.dataset.urgencia : 'todas';
 
     const filas = document.querySelectorAll('table.data-table tbody tr');
+    const cards = document.querySelectorAll('.produccion-cards-mobile .produccion-mobile-card');
 
     filas.forEach((fila) => {
         const diasRaw = fila.dataset.diasRestantes;
         const estado = normalizarTexto(fila.dataset.estado);
+        const fechaFila = fila.dataset.fechaNecesaria || '';
         const dias = diasRaw === '' ? null : parseInt(diasRaw, 10);
         const urgencia = clasificarUrgencia(dias, estado);
         const contenidoFila = normalizarTexto(fila.textContent);
         const coincideBusqueda = !textoBusqueda || contenidoFila.includes(textoBusqueda);
         const coincideEstado = estadoSeleccionado === 'todas' || estado === estadoSeleccionado;
+        const coincideFecha = !fechaNecesaria || fechaFila === fechaNecesaria;
         const coincideUrgencia = filtroUrgencia === 'todas' || urgencia === filtroUrgencia;
 
-        fila.style.display = (coincideBusqueda && coincideEstado && coincideUrgencia) ? '' : 'none';
+        fila.style.display = (coincideBusqueda && coincideEstado && coincideFecha && coincideUrgencia) ? '' : 'none';
+    });
+
+    cards.forEach((card) => {
+        const diasRaw = card.dataset.diasRestantes;
+        const estado = normalizarTexto(card.dataset.estado);
+        const fechaFila = card.dataset.fechaNecesaria || '';
+        const dias = diasRaw === '' ? null : parseInt(diasRaw, 10);
+        const urgencia = clasificarUrgencia(dias, estado);
+        const contenidoCard = normalizarTexto(card.textContent);
+        const coincideBusqueda = !textoBusqueda || contenidoCard.includes(textoBusqueda);
+        const coincideEstado = estadoSeleccionado === 'todas' || estado === estadoSeleccionado;
+        const coincideFecha = !fechaNecesaria || fechaFila === fechaNecesaria;
+        const coincideUrgencia = filtroUrgencia === 'todas' || urgencia === filtroUrgencia;
+
+        card.style.display = (coincideBusqueda && coincideEstado && coincideFecha && coincideUrgencia) ? '' : 'none';
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const contenedor = document.getElementById('filtrosUrgencia');
     const buscador = document.getElementById('buscarProduccion');
+    const filtroFecha = document.getElementById('filtroFechaProduccion');
     const filtroEstado = document.getElementById('filtroEstadoProduccion');
 
     if (contenedor) {
@@ -148,6 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (filtroEstado) {
         filtroEstado.addEventListener('change', aplicarFiltrosProduccion);
+    }
+
+    if (filtroFecha) {
+        filtroFecha.addEventListener('change', aplicarFiltrosProduccion);
     }
 
     aplicarFiltrosProduccion();

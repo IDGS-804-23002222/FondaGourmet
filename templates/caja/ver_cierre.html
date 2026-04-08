@@ -1,102 +1,483 @@
 {% extends "base.html" %}
 {% block title %}Detalle de Cierre{% endblock %}
 {% block content %}
-<div class="form-page">
-    <div class="form-header">
-        <h1>Detalle de Cierre de Caja</h1>
-        <p>Información completa del cierre ID: {{ id }}</p>
-    </div>
-    
-    <div class="form-container">
-        <div class="form-grid">
-            <div class="form-group-half">
-                <label>Fecha</label>
-                <div class="info-value">Fecha de ejemplo</div>
-            </div>
-            <div class="form-group-half">
-                <label>Hora</label>
-                <div class="info-value">18:00</div>
-            </div>
-            <div class="form-group-half">
-                <label>Usuario</label>
-                <div class="info-value">Usuario ejemplo</div>
-            </div>
-            <div class="form-group-half">
-                <label>Total ventas</label>
-                <div class="info-value">$0.00</div>
-            </div>
-            <div class="form-group-half">
-                <label>Efectivo (sistema)</label>
-                <div class="info-value">$0.00</div>
-            </div>
-            <div class="form-group-half">
-                <label>Efectivo (contado)</label>
-                <div class="info-value">$0.00</div>
-            </div>
-            <div class="form-group-half">
-                <label>Tarjeta</label>
-                <div class="info-value">$0.00</div>
-            </div>
-            <div class="form-group-half">
-                <label>Diferencia</label>
-                <div class="info-value"><span style="color: var(--verde-menta);">$0.00</span></div>
-            </div>
-            <div class="form-group-full">
-                <label>Observaciones</label>
-                <div class="info-value">Cierre sin incidencias</div>
-            </div>
+<style>
+    .close-detail-shell {
+        display: grid;
+        gap: 16px;
+    }
+
+    .close-detail-hero {
+        background: linear-gradient(135deg, #183954 0%, #245d89 60%, #2f77ac 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 14px 30px rgba(24, 57, 84, 0.22);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .close-detail-hero h1 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .close-detail-hero p {
+        margin: 6px 0 0;
+        opacity: 0.9;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .summary-card {
+        color: #fff;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    }
+
+    .summary-card h3 {
+        margin: 0;
+        font-size: 0.84rem;
+        font-weight: 600;
+        opacity: 0.95;
+    }
+
+    .summary-card .value {
+        margin: 8px 0 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .card-ventas { background: linear-gradient(140deg, #1f8a57, #2ca66c); }
+    .card-efectivo { background: linear-gradient(140deg, #2d6ca5, #4a89c3); }
+    .card-egresos { background: linear-gradient(140deg, #a03f28, #bf5e45); }
+    .card-sistema { background: linear-gradient(140deg, #5b3aa0, #7a57c4); }
+    .card-dif-ok { background: linear-gradient(140deg, #1f7a4c, #2f9b62); }
+    .card-dif-bad { background: linear-gradient(140deg, #9f2d2d, #c14545); }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 14px;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #e5ecf3;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .panel-head {
+        background: #f6f9fd;
+        border-bottom: 1px solid #e5ecf3;
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .panel-body {
+        padding: 12px;
+    }
+
+    .formula {
+        background: #f7fbff;
+        border: 1px dashed #a8c7e8;
+        color: #1f4b70;
+        border-radius: 10px;
+        padding: 10px;
+        font-weight: 600;
+    }
+
+    .info-list {
+        margin-top: 12px;
+        display: grid;
+        gap: 8px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #f8fbff;
+        border: 1px solid #e8eff7;
+    }
+
+    .money {
+        font-weight: 700;
+        color: #1f3247;
+    }
+
+    .table-ventas th,
+    .table-ventas td {
+        white-space: nowrap;
+    }
+
+    .table-compras th,
+    .table-compras td {
+        white-space: nowrap;
+    }
+
+    .table-movimientos th,
+    .table-movimientos td {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 1100px) {
+        .summary-grid {
+            grid-template-columns: repeat(3, minmax(150px, 1fr));
+        }
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(145px, 1fr));
+        }
+        .close-detail-hero h1 {
+            font-size: 1.3rem;
+        }
+    }
+
+    .print-header {
+        display: none;
+    }
+
+    @media print {
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+
+        body {
+            background: #fff;
+            color: #111;
+        }
+
+        .navbar,
+        .sidebar,
+        #alerts-container,
+        .no-print {
+            display: none !important;
+        }
+
+        .app-container,
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .print-header {
+            display: block;
+            border-bottom: 2px solid #1f3247;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+        }
+
+        .print-header h1 {
+            margin: 0;
+            font-size: 18pt;
+        }
+
+        .print-header p {
+            margin: 4px 0 0;
+            font-size: 10pt;
+            color: #333;
+        }
+
+        .close-detail-shell {
+            gap: 10px;
+        }
+
+        .close-detail-hero {
+            background: #fff !important;
+            color: #111 !important;
+            box-shadow: none;
+            border: 1px solid #d7dde5;
+            padding: 10px;
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(5, minmax(120px, 1fr));
+            gap: 8px;
+        }
+
+        .summary-card {
+            background: #fff !important;
+            color: #111 !important;
+            border: 1px solid #d7dde5;
+            box-shadow: none;
+        }
+
+        .summary-card h3 {
+            font-size: 8.5pt;
+            color: #2b3c52;
+        }
+
+        .summary-card .value {
+            font-size: 11pt;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .panel,
+        .panel-head,
+        .panel-body,
+        .formula,
+        .info-item {
+            background: #fff !important;
+            color: #111 !important;
+            box-shadow: none;
+        }
+
+        .panel {
+            border: 1px solid #d7dde5;
+            break-inside: avoid;
+        }
+
+        .panel-head {
+            border-bottom: 1px solid #d7dde5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #d9e0e8;
+            padding: 6px;
+            font-size: 9pt;
+            color: #111 !important;
+            white-space: normal;
+        }
+
+        tfoot tr {
+            background: #f2f5f8 !important;
+        }
+    }
+</style>
+
+<div class="close-detail-shell">
+    <section class="print-header">
+        <h1>Reporte de Cierre de Caja #{{ id }}</h1>
+        <p>
+            Fecha: {{ fecha_referencia.strftime('%d/%m/%Y') }} |
+            Hora: {{ caja.fecha.strftime('%H:%M') if caja.fecha else '' }} |
+            Responsable: {{ caja.usuario.username if caja.usuario else 'N/D' }}
+        </p>
+    </section>
+
+    <section class="close-detail-hero">
+        <div>
+            <h1>Detalle de Cierre #{{ id }}</h1>
+            <p>
+                Fecha: {{ fecha_referencia.strftime('%d/%m/%Y') }} |
+                Hora: {{ caja.fecha.strftime('%H:%M') if caja.fecha else '' }} |
+                Responsable: {{ caja.usuario.username if caja.usuario else 'N/D' }}
+            </p>
         </div>
-        
-        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--verde);">Ventas incluidas en este cierre</h3>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Venta ID</th>
-                    <th>Hora</th>
-                    <th>Cliente</th>
-                    <th>Monto</th>
-                    <th>Método de pago</th>
-                 </tr>
-            </thead>
-            <tbody>
-                 <tr>
-                    <td>1</td>
-                    <td>10:30</td>
-                    <td>Cliente ejemplo</td>
-                    <td>$0.00</td>
-                    <td>Efectivo</td>
-                 </tr>
-                 <tr>
-                    <td>2</td>
-                    <td>11:15</td>
-                    <td>Cliente ejemplo</td>
-                    <td>$0.00</td>
-                    <td>Tarjeta</td>
-                 </tr>
-            </tbody>
-            <tfoot style="background: #f0f0f0; font-weight: bold;">
-                 <tr>
-                    <td colspan="3" style="text-align: right;">Total:</td>
-                    <td>$0.00</td>
-                    <td></td>
-                 </tr>
-            </tfoot>
-        </table>
-        
-        <div class="form-actions" style="margin-top: 25px;">
+        <div class="form-actions no-print" style="margin:0;">
+            <form method="POST" action="{{ url_for('caja.abrir_caja') }}" style="display:inline-flex; margin-right:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="monto_inicial" value="{{ '%.2f'|format(efectivo_contado) }}">
+                <button type="submit" class="btn-primary">Abrir nueva caja con contado</button>
+            </form>
             <button type="button" class="btn-primary" onclick="window.print()">Imprimir reporte</button>
             <button type="button" class="btn-secondary" onclick="window.location.href='/caja/historial'">Volver al historial</button>
         </div>
-    </div>
-</div>
+    </section>
 
-<style>
-.info-value {
-    background: #f8f9fa;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--gris);
-    color: #333;
-}
-</style>
+    <section class="summary-grid">
+        <article class="summary-card card-ventas">
+            <h3>Total ventas</h3>
+            <p class="value">${{ '%.2f'|format(total_ventas) }}</p>
+        </article>
+        <article class="summary-card card-efectivo">
+            <h3>Efectivo contado</h3>
+            <p class="value">${{ '%.2f'|format(efectivo_contado) }}</p>
+        </article>
+        <article class="summary-card card-egresos">
+            <h3>Egresos proveedores</h3>
+            <p class="value">-${{ '%.2f'|format(total_egresos) }}</p>
+        </article>
+        <article class="summary-card card-sistema">
+            <h3>Efectivo sistema</h3>
+            <p class="value">${{ '%.2f'|format(efectivo_sistema) }}</p>
+        </article>
+        <article class="summary-card {{ 'card-dif-ok' if diferencia >= 0 else 'card-dif-bad' }}">
+            <h3>Diferencia</h3>
+            <p class="value">${{ '%.2f'|format(diferencia) }}</p>
+        </article>
+    </section>
+
+    <section class="detail-grid">
+        <article class="panel">
+            <header class="panel-head">
+                <h2>Ventas incluidas en este cierre</h2>
+                <small>{{ ventas_dia|length }} ventas</small>
+            </header>
+            <div class="panel-body table-responsive">
+                <table class="data-table table-ventas">
+                    <thead>
+                        <tr>
+                            <th>Pedido ID</th>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Monto</th>
+                            <th>Método de pago</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venta in ventas_dia %}
+                        <tr>
+                            <td>#{{ venta.id_pedido }}</td>
+                            <td>{{ venta.fecha.strftime('%H:%M') if venta.fecha else '' }}</td>
+                            <td>{{ venta.cliente }}</td>
+                            <td class="money">${{ '%.2f'|format(venta.total) }}</td>
+                            <td>{{ venta.metodo_pago }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No hay ventas en este cierre.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot style="background:#f2f6fb; font-weight:700;">
+                        <tr>
+                            <td colspan="3" style="text-align:right;">Total:</td>
+                            <td class="money">${{ '%.2f'|format(total_ventas) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel">
+            <header class="panel-head">
+                <h3>Compras incluidas en este cierre</h3>
+                <small>{{ compras_egreso_dia|length }} compras</small>
+            </header>
+            <div class="panel-body">
+                <div class="table-responsive" style="margin-bottom:12px;">
+                    <table class="data-table table-compras">
+                        <thead>
+                            <tr>
+                                <th>Compra ID</th>
+                                <th>Hora</th>
+                                <th>Proveedor</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for compra in compras_egreso_dia %}
+                            <tr>
+                                <td>#{{ compra.id_compra }}</td>
+                                <td>{{ (compra.fecha_entrega or compra.fecha).strftime('%H:%M') if (compra.fecha_entrega or compra.fecha) else '' }}</td>
+                                <td>{{ compra.proveedor.persona.nombre if compra.proveedor and compra.proveedor.persona else 'Proveedor' }}</td>
+                                <td class="money">-${{ '%.2f'|format(compra.total) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No hay compras en este cierre.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="formula">
+                    Monto inicial (${{ '%.2f'|format(caja.monto_inicial or 0) }})
+                    + Efectivo ventas (${{ '%.2f'|format(total_efectivo) }})
+                    - Egresos compras (${{ '%.2f'|format(total_egresos) }})
+                    = Efectivo sistema (${{ '%.2f'|format(efectivo_sistema) }})
+                </div>
+
+                <div class="info-list">
+                    <div class="info-item">
+                        <span>Tarjeta</span>
+                        <strong>${{ '%.2f'|format(total_tarjeta) }}</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Transferencia</span>
+                        <strong>${{ '%.2f'|format(total_transferencia) }}</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Efectivo contado</span>
+                        <strong>${{ '%.2f'|format(efectivo_contado) }}</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Diferencia de arqueo</span>
+                        <strong style="color: {{ '#1f7a4c' if diferencia >= 0 else '#b33a3a' }};">${{ '%.2f'|format(diferencia) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="panel">
+        <header class="panel-head">
+            <h3>Movimientos del corte</h3>
+            <small>{{ movimientos_corte|length }} movimientos</small>
+        </header>
+        <div class="panel-body table-responsive">
+            <table class="data-table table-movimientos">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Tipo</th>
+                        <th>Referencia</th>
+                        <th>Método</th>
+                        <th>Responsable</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movimientos_corte %}
+                    <tr>
+                        <td>{{ mov.fecha.strftime('%H:%M') if mov.fecha else '' }}</td>
+                        <td>{{ mov.tipo }}</td>
+                        <td>{{ mov.referencia }}</td>
+                        <td>{{ mov.metodo_pago }}</td>
+                        <td>{{ mov.responsable }}</td>
+                        <td class="money">{{ '+' if mov.tipo == 'Ingreso' else '-' }}${{ '%.2f'|format(mov.monto) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No hay movimientos en este corte.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}

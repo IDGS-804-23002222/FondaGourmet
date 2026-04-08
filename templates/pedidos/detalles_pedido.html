@@ -1,19 +1,56 @@
-{% extends "tienda/base_cliente.html" %}
+{% extends "base.html" %}
 {% block title %}Detalle pedido{% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
+{% endblock %}
+
 {% block content %}
+{% set ns = namespace(total_items=0) %}
+{% for d in pedido.detalles %}
+    {% set ns.total_items = ns.total_items + d.cantidad %}
+{% endfor %}
+
+<section class="pedido-detalle-view">
+
+<div class="pedido-detail-hero">
+    <div>
+        <p class="hero-kicker mb-1">DETALLE DE PEDIDO</p>
+        <h1 class="pedido-title mb-1">Pedido #{{ pedido.id_pedido }}</h1>
+        <p class="hero-subtitle mb-0">Consulta la información completa de este pedido.</p>
+    </div>
+    <div class="detail-hero-metrics">
+        <div class="hero-count-chip">
+            <span>{{ ns.total_items }}</span>
+            <small>artículos</small>
+        </div>
+        <div class="hero-count-chip">
+            <span>${{ '%.2f'|format(pedido.total) }}</span>
+            <small>total</small>
+        </div>
+    </div>
+</div>
 
 <div class="pedido-detalle-card">
-
-    <h1 class="pedido-title">Pedido #{{ pedido.id_pedido }}</h1>
+    <div class="mb-2">
+        <span class="pedido-estado-chip">{{ pedido.estado }}</span>
+    </div>
 
     <ul class="info-list">
-        <li><strong>Fecha:</strong> {{ pedido.fecha }}</li>
+        <li><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y') if pedido.fecha else 'No disponible' }}</li>
+        <li><strong>Cliente:</strong> {{ (pedido.cliente.persona.nombre ~ ' ' ~ (pedido.cliente.persona.apellido_p or '')) if pedido.cliente and pedido.cliente.persona else 'No disponible' }}</li>
         <li><strong>Estado:</strong> {{ pedido.estado }}</li>
+        <li><strong>Método de pago:</strong> {{ pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D' }}</li>
+        {% if pedido.meta_pedido and pedido.meta_pedido.metodo_pago == 'Tarjeta' %}
+        <li><strong>Titular:</strong> {{ pedido.meta_pedido.tarjeta_titular or 'N/D' }}</li>
+        <li><strong>Tarjeta:</strong> **** **** **** {{ pedido.meta_pedido.tarjeta_ultimos4 or '----' }}</li>
+        <li><strong>Vencimiento:</strong> {{ pedido.meta_pedido.tarjeta_vencimiento or 'N/D' }}</li>
+        {% endif %}
     </ul>
 
-    <h3 class="subtitulo">Productos</h3>
+    <h3 class="subtitulo">Productos del pedido</h3>
 
+    <div class="table-responsive detalle-table-wrap">
     <table class="data-table detalle-table">
         <thead>
             <tr>
@@ -27,19 +64,28 @@
         <tbody>
             {% for d in pedido.detalles %}
             <tr>
-                <td>{{ d.producto.nombre }}</td>
-                <td>${{ d.producto.precio }}</td>
+                <td class="fw-semibold">{{ d.producto.nombre }}</td>
+                <td>${{ '%.2f'|format(d.producto.precio) }}</td>
                 <td>{{ d.cantidad }}</td>
-                <td>${{ d.subtotal }}</td>
+                <td class="fw-semibold">${{ '%.2f'|format(d.subtotal) }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <h2 class="pedido-total">
-        Total: ${{ pedido.total }}
+        Total: ${{ '%.2f'|format(pedido.total) }}
     </h2>
 
+    <div class="account-actions mt-3">
+        <a href="{{ url_for('pedidos.mis_pedidos') if current_user.id_rol == 4 else url_for('pedidos.index') }}" class="btn btn-secondary">
+            Volver
+        </a>
+    </div>
+
 </div>
+
+</section>
 
 {% endblock %}

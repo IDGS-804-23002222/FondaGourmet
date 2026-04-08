@@ -74,7 +74,7 @@
             
             <div class="form-actions" style="margin-top: 25px;">
                 <button type="button" onclick="registrarVenta()" class="btn-primary btn-large">Registrar venta</button>
-                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='{{url_for(ventas.index)}}'">Cancelar</button>
+                <button type="button" class="btn-secondary btn-large" onclick="window.location.href='{{ url_for('ventas.index') }}'">Cancelar</button>
             </div>
         </form>
     </div>
@@ -200,7 +200,7 @@ document.querySelectorAll("#detalleVenta tr").forEach(fila => {
             icon: data.success ? "success" : "error",
             title: data.message
         }).then(() => {
-            if (data.success) window.location.href = "/index";
+            if (data.success) window.location.href = "/ventas";
         });
     })
     .catch(err => {

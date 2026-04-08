@@ -3,6 +3,7 @@ from flask import render_template, redirect, url_for, flash, request, current_ap
 from flask_login import login_required, current_user
 from utils.security import role_required
 from models import db, Pedido, DetallePedido, Producto, Cliente
+from datetime import datetime
 from .services import (
     obtener_pedidos, obtener_pedido, obtener_detalles_pedido, completar_pedido, cancelar_pedido,
     crear_pedido_manual, editar_pedido_propio
@@ -20,7 +21,37 @@ def index():
         flash("Error al cargar los pedidos", "danger")
         return redirect(url_for('produccion.index'))
 
-    return render_template('pedidos/index.html', pedidos=pedidos, productos=productos, clientes=clientes)
+    hoy = datetime.now().date()
+    pedidos_pendientes = sum(1 for pedido in pedidos if pedido.get('estado') == 'Pendiente')
+    pedidos_en_proceso = sum(1 for pedido in pedidos if pedido.get('estado') == 'En Proceso')
+    pedidos_produccion_completada = sum(
+        1
+        for pedido in pedidos
+        if (
+            pedido.get('estado') == 'Producido'
+            or (pedido.get('estado') == 'Completado' and pedido.get('requiere_produccion'))
+        )
+    )
+    pedidos_completados_hoy = sum(
+        1
+        for pedido in pedidos
+        if pedido.get('estado') in ('Completado', 'Producido')
+        and (
+            (pedido.get('fecha_entrega') and pedido['fecha_entrega'].date() == hoy)
+            or (pedido.get('fecha') and pedido['fecha'].date() == hoy)
+        )
+    )
+
+    return render_template(
+        'pedidos/index.html',
+        pedidos=pedidos,
+        productos=productos,
+        clientes=clientes,
+        pedidos_pendientes=pedidos_pendientes,
+        pedidos_en_proceso=pedidos_en_proceso,
+        pedidos_produccion_completada=pedidos_produccion_completada,
+        pedidos_completados_hoy=pedidos_completados_hoy,
+    )
 
 
 @pedidos.route('/mis_pedidos')
@@ -85,6 +116,12 @@ def procesar():
 def crear():
     id_cliente = request.form.get('id_cliente')
     metodo_pago = request.form.get('metodo_pago')
+    datos_tarjeta = {
+        'numero_tarjeta': request.form.get('numero_tarjeta', ''),
+        'titular_tarjeta': request.form.get('titular_tarjeta', ''),
+        'vencimiento_tarjeta': request.form.get('vencimiento_tarjeta', ''),
+        'cvv_tarjeta': request.form.get('cvv_tarjeta', ''),
+    }
     ids_producto = request.form.getlist('id_producto[]')
     cantidades = request.form.getlist('cantidad[]')
 
@@ -95,7 +132,13 @@ def crear():
             'cantidad': cantidades[idx] if idx < len(cantidades) else None
         })
 
-    exito, mensaje = crear_pedido_manual(id_cliente, productos, metodo_pago, current_user.id_usuario)
+    exito, mensaje = crear_pedido_manual(
+        id_cliente,
+        productos,
+        metodo_pago,
+        current_user.id_usuario,
+        datos_tarjeta=datos_tarjeta,
+    )
     flash(mensaje, 'success' if exito else 'danger')
 
     return redirect(url_for('pedidos.index'))

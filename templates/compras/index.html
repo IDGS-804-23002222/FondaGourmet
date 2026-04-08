@@ -1,25 +1,54 @@
 {% extends "base.html" %}
 {% block title %}Compras{% endblock %}
 
-{% block content %}
-<h1>Compras a Proveedores</h1>
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/compras.css') }}">
+{% endblock %}
 
-<div class="toolbar">
-    <input type="date" class="search" id="filtroFechaSolicitud" title="Filtrar por fecha de solicitud">
-    <input type="date" class="search" id="filtroFechaEntrega" title="Filtrar por fecha de entrega">
-    <select class="filter" id="filtroEstadoCompra">
-        <option value="todas">Todos los estados</option>
-        <option value="solicitada">Solicitadas</option>
-        <option value="completada">Completadas</option>
-        <option value="cancelada">Canceladas</option>
-    </select>
+{% block content %}
+<div class="compras-index-hero">
+    <div>
+        <p class="hero-kicker mb-2">Abasto y control</p>
+        <h1 class="mb-2">Compras a Proveedores</h1>
+        <p class="hero-subtitle mb-0">Revisa solicitudes, entregas y estados en una sola vista.</p>
+    </div>
+    <div class="compras-hero-stats">
+        <div class="hero-count-chip">
+            <span>{{ compras_completadas_hoy }}</span>
+            <small>Completadas hoy</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ compras_solicitadas }}</span>
+            <small>Solicitadas</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ compras|length }}</span>
+            <small>Visibles</small>
+        </div>
+    </div>
+</div>
+
+<div class="compras-index-shell">
+<div class="compras-toolbar">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <input type="date" class="search" id="filtroFechaSolicitud" title="Filtrar por fecha de solicitud">
+        <input type="date" class="search" id="filtroFechaEntrega" title="Filtrar por fecha de entrega">
+        <select class="filter" id="filtroEstadoCompra">
+            <option value="todas">Todos los estados</option>
+            <option value="solicitada">Solicitadas</option>
+            <option value="completada">Completadas</option>
+            <option value="cancelada">Canceladas</option>
+        </select>
+    </div>
     <a href="{{ url_for('compras.crear') }}" class="btn btn-success">Nueva solicitud</a>
 </div>
 
-<table class="data-table">
+<div class="compras-table-wrap">
+<table class="data-table compras-table">
     <thead>
         <tr>
             <th>No. Compra</th>
+            <th>Origen</th>
             <th>Responsable</th>
             <th>Fecha Solicitud</th>
             <th>Fecha Entrega</th>
@@ -35,6 +64,13 @@
         {% for compra in compras %}
         <tr data-estado-clave="{{ compra.estado|lower|replace(' ', '_') }}" data-fecha-solicitud="{{ compra.fecha.strftime('%Y-%m-%d') if compra.fecha else '' }}" data-fecha-entrega="{{ compra.fecha_entrega.strftime('%Y-%m-%d') if compra.fecha_entrega else '' }}">
             <td>#{{ compra.id_compra }}</td>
+            <td>
+                {% if compra.desde_produccion %}
+                    <span class="badge bg-warning text-dark">Producción</span>
+                {% else %}
+                    <span class="badge bg-secondary">Manual</span>
+                {% endif %}
+            </td>
             <td>{{ compra.responsable }}</td>
             <td>{{ compra.fecha.strftime('%d/%m/%Y') }}</td>
             <td>{{ compra.fecha_entrega.strftime('%d/%m/%Y') if compra.fecha_entrega else 'Sin fecha' }}</td>
@@ -99,18 +135,69 @@
             </td>
 <!-- ACCIONES -->
             <td>
-                {% if compra.estado not in ["Completada", "Completado", "Cancelado"] %}
-                    <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-success">
-                        Completar
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-outline-primary btn-sm">
+                        Ver detalles
                     </a>
-                {% else %}
-                    <span class="text-muted">Sin acciones</span>
-                {% endif %}
+
+                    {% if compra.estado not in ["Completada", "Completado", "Cancelado"] %}
+                        <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-success btn-sm">
+                            Completar
+                        </a>
+                    {% endif %}
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+
+<div class="compras-cards-mobile">
+    {% for compra in compras %}
+    <article class="compra-mobile-card" data-estado-clave="{{ compra.estado|lower|replace(' ', '_') }}" data-fecha-solicitud="{{ compra.fecha.strftime('%Y-%m-%d') if compra.fecha else '' }}" data-fecha-entrega="{{ compra.fecha_entrega.strftime('%Y-%m-%d') if compra.fecha_entrega else '' }}">
+        <div class="compra-mobile-head">
+            <div>
+                <p class="compra-mobile-kicker mb-1">Compra #{{ compra.id_compra }}</p>
+                <h3 class="compra-mobile-title mb-0">{{ compra.responsable }}</h3>
+            </div>
+            <span class="compra-mobile-badge {% if compra.estado in ['Completada', 'Completado'] %}badge-completada{% elif compra.estado == 'Solicitada' %}badge-solicitada{% elif compra.estado == 'En Camino' %}badge-camino{% else %}badge-cancelada{% endif %}">
+                {{ compra.estado }}
+            </span>
+        </div>
+
+        <div class="compra-mobile-meta">
+            <div><strong>Origen:</strong> {% if compra.desde_produccion %}Producción{% else %}Manual{% endif %}</div>
+            <div><strong>Solicitud:</strong> {{ compra.fecha.strftime('%d/%m/%Y') if compra.fecha else 'Sin fecha' }}</div>
+            <div><strong>Entrega:</strong> {{ compra.fecha_entrega.strftime('%d/%m/%Y') if compra.fecha_entrega else 'Sin fecha' }}</div>
+            <div><strong>Materias:</strong> {{ compra.materias_primas|length }}</div>
+        </div>
+
+        <div class="compra-mobile-block">
+            <span class="compra-mobile-label">Materias primas</span>
+            <ul class="compra-mobile-list">
+                {% for m in compra.materias_primas[:3] %}
+                <li>
+                    <span>{{ m.nombre }}</span>
+                    <span class="compra-mobile-chip">x{{ m.cantidad }}</span>
+                </li>
+                {% endfor %}
+                {% if compra.materias_primas|length > 3 %}
+                <li class="compra-mobile-more">+{{ compra.materias_primas|length - 3 }} materias más</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="compra-mobile-actions">
+            <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-outline-primary btn-sm">Ver detalles</a>
+            {% if compra.estado not in ['Completada', 'Completado', 'Cancelado'] %}
+                <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-success btn-sm">Completar</a>
+            {% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -147,6 +234,20 @@ function aplicarFiltrosCompras() {
         const coincideEntrega = !fechaEntrega || fechaEntregaFila === fechaEntrega;
 
         fila.style.display = (coincideTexto && coincideEstado && coincideSolicitud && coincideEntrega) ? '' : 'none';
+    });
+
+    document.querySelectorAll('.compras-cards-mobile .compra-mobile-card').forEach((card) => {
+        const estadoFila = normalizarTexto(card.dataset.estadoClave);
+        const fechaSolicitudFila = card.dataset.fechaSolicitud || '';
+        const fechaEntregaFila = card.dataset.fechaEntrega || '';
+        const contenidoFila = normalizarTexto(card.textContent);
+
+        const coincideTexto = !textoBusqueda || contenidoFila.includes(textoBusqueda);
+        const coincideEstado = estadoSeleccionado === 'todas' || estadoFila === estadoSeleccionado;
+        const coincideSolicitud = !fechaSolicitud || fechaSolicitudFila === fechaSolicitud;
+        const coincideEntrega = !fechaEntrega || fechaEntregaFila === fechaEntrega;
+
+        card.style.display = (coincideTexto && coincideEstado && coincideSolicitud && coincideEntrega) ? '' : 'none';
     });
 }
 

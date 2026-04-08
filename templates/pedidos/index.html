@@ -1,163 +1,258 @@
 {% extends "base.html" %}
 {% block title %}Pedidos{% endblock %}
 
-{% block content %}
-<h1>Pedidos de Clientes</h1>
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
+{% endblock %}
 
-<div class="toolbar">
-    <input type="date" class="search" placeholder="Buscar por fecha...">
-    <select class="filter" id="filtroEstadoPedidos">
-        <option value="todas">Todos los estados</option>
-        <option value="pendiente">Pendientes</option>
-        <option value="en proceso">En proceso</option>
-        <option value="producido">Producidos</option>
-        <option value="completado">Completados</option>
-    </select>
-                    
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoPedido">
-        Nuevo pedido
-    </button>
+{% block content %}
+<div class="pedidos-index-hero">
+    <div>
+        <p class="hero-kicker mb-2">Operación diaria</p>
+        <h1 class="mb-2">Pedidos de Clientes</h1>
+        <p class="hero-subtitle mb-0">Filtra por estado, tipo de venta y revisa rápidamente qué pedidos requieren producción.</p>
+    </div>
+    <div class="pedidos-hero-stats">
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ pedidos_pendientes }}</span>
+            <small>Pendientes</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ pedidos_en_proceso }}</span>
+            <small>En proceso</small>
+        </div>
+        <div class="hero-count-chip hero-count-chip-soft">
+            <span>{{ pedidos_produccion_completada }}</span>
+            <small>Producidos</small>
+        </div>
+         <div class="hero-count-chip">
+            <span>{{ pedidos_completados_hoy }}</span>
+            <small>Completados hoy</small>
+        </div>
+       
+    </div>
 </div>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>No. Pedido</th>
-            <th>Fecha Solicitud</th>
-            <th>Fecha Entrega</th>
-            <th>Método de pago</th>
-            <th>Responsable</th>
-            <th>Productos</th>
-            <th>Cantidad</th>
-            <th>Stock</th>
-            <th>Producción</th>
-            <th>Estado Pedido</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
+<div class="pedidos-index-shell">
+    <div class="toolbar pedidos-toolbar">
+        <input type="date" class="search" placeholder="Buscar por fecha...">
+        <select class="filter" id="filtroEstadoPedidos">
+            <option value="todas">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="en proceso">En proceso</option>
+            <option value="producido">Producidos</option>
+            <option value="completado">Completados</option>
+        </select>
+        <select class="filter" id="filtroTipoVenta">
+            <option value="todas">Todas las ventas</option>
+            <option value="sucursal">Venta en sucursal</option>
+            <option value="en_linea">Venta en línea</option>
+        </select>
 
-    <tbody>
-        {% for pedido in pedidos %}
-        <tr data-estado="{{ pedido.estado }}">
-            <td>#{{ pedido.id_pedido }}</td>
-            <!-- FECHA -->
-            <td>{{ pedido.fecha.strftime("%Y-%m-%d") if pedido.fecha else '' }}</td>
-            <td>{{pedido.fecha_entrega.strftime("%Y-%m-%d") if pedido.fecha_entrega else 'Sin fecha'}}</td>
-            <td>{{ pedido.metodo_pago }}</td>
-            <td>{{ pedido.usuario_responsable }}</td>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoPedido">
+            Nuevo pedido
+        </button>
+    </div>
 
+<div class="pedidos-table-wrap">
+    <table class="data-table pedidos-table-responsive pedidos-table">
+        <thead>
+            <tr>
+                <th>No. Pedido</th>
+                <th>Fecha Solicitud</th>
+                <th>Fecha Entrega</th>
+                <th>Tipo de venta</th>
+                <th>Productos</th>
+                <th>Cantidad</th>
+                <th>Stock</th>
+                <th>Producción</th>
+                <th>Estado Pedido</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
 
-            <!-- PRODUCTOS -->
-            <td>
-                <ul>
-                    {% for producto in pedido.productos %}
-                        <li>{{ producto.nombre }}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-
-            <!-- CANTIDADES -->
-            <td>
-                <ul>
-                    {% for producto in pedido.productos %}
-                        <li>
-                            <span class="badge bg-info">
-                                x{{ producto.cantidad }}
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </td>
-
-            <!-- STOCK -->
-            <td>
-                <ul>
-                    {% for producto in pedido.productos %}
-                        <li>
-                            <span class="badge 
-                                {% if producto.stock_actual < producto.cantidad %}
-                                    bg-danger
-                                {% else %}
-                                    bg-success
-                                {% endif %}
-                            ">
-                                {{ producto.stock_actual }}
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </td>
-
-            <!-- PRODUCCIÓN -->
-            <td>
-                {% if pedido.estado == "Completado" %}
-                    <span class="badge bg-success">
-                        ✔ No necesaria
-                    </span>
-
-                {% elif pedido.estado == "En Proceso" %}
-                    <span class="badge bg-info">
-                        En producción
-                    </span>
-                {% elif pedido.estado == "Producido" %}
-                    <span class="badge bg-success">
-                        Producción completada
-                    </span>
-                {% elif pedido.stock_suficiente %}
-                    <span class="badge bg-primary">
-                        Disponible en stock
-                    </span>
-                {% else %}
-                    <span class="badge bg-danger">
-                        Requiere producción
-                    </span>
-                {% endif %}
-            </td>
-
-            <!-- ESTADO -->
-            <td>
-                <span class="badge
-                    {% if pedido.estado == 'Pendiente' %}
-                        bg-warning text-dark
-                    {% elif pedido.estado == 'En Proceso' %}
-                        bg-info
-                    {% elif pedido.estado == 'Producido' %}
-                        bg-success
-                    {% elif pedido.estado == 'Completado' %}
-                        bg-success
-                    {% elif pedido.estado == 'Cancelado' %}
-                        bg-danger
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr data-estado="{{ pedido.estado }}" data-tipo-venta="{{ pedido.tipo_venta }}">
+                <td>#{{ pedido.id_pedido }}</td>
+                <td>{{ pedido.fecha.strftime("%Y-%m-%d") if pedido.fecha else '' }}</td>
+                <td>{{ pedido.fecha_entrega.strftime("%Y-%m-%d") if pedido.fecha_entrega else 'Sin fecha' }}</td>
+                <td>
+                    {% if pedido.tipo_venta == 'sucursal' %}
+                        <span class="badge bg-secondary">Venta en sucursal</span>
+                    {% else %}
+                        <span class="badge bg-primary">Venta en línea</span>
                     {% endif %}
-                ">
+                </td>
+                <td>
+                    <ul class="pedido-lista-compacta">
+                        {% for producto in pedido.productos %}
+                            <li>{{ producto.nombre }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    <ul class="pedido-lista-compacta">
+                        {% for producto in pedido.productos %}
+                            <li><span class="badge bg-info">x{{ producto.cantidad }}</span></li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    <ul class="pedido-lista-compacta">
+                        {% for producto in pedido.productos %}
+                            <li>
+                                <span class="badge {% if producto.stock_actual < producto.cantidad %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ producto.stock_actual }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    {% if pedido.estado == "Completado" %}
+                        {% if pedido.requiere_produccion %}
+                            <span class="badge bg-success">Producción completada</span>
+                        {% else %}
+                            <span class="badge bg-success">✔ No necesaria</span>
+                        {% endif %}
+                    {% elif pedido.estado == "En Proceso" %}
+                        <span class="badge bg-info">En producción</span>
+                    {% elif pedido.estado == "Producido" %}
+                        <span class="badge bg-success">Producción completada</span>
+                    {% elif pedido.stock_suficiente %}
+                        <span class="badge bg-primary">Disponible en stock</span>
+                    {% else %}
+                        <span class="badge bg-danger">Requiere producción</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge
+                        {% if pedido.estado == 'Pendiente' %}bg-warning text-dark
+                        {% elif pedido.estado == 'En Proceso' %}bg-info
+                        {% elif pedido.estado == 'Producido' %}bg-success
+                        {% elif pedido.estado == 'Completado' %}bg-success
+                        {% elif pedido.estado == 'Cancelado' %}bg-danger{% endif %}">
+                        {{ pedido.estado }}
+                    </span>
+                </td>
+                <td>
+                    <div class="pedido-acciones-stack">
+                        <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=pedido.id_pedido) }}" class="btn btn-info btn-sm">
+                            Ver detalles
+                        </a>
+
+                        {% if pedido.estado != "Completado" and pedido.estado != "Cancelado" and pedido.estado != "En Proceso" %}
+                            {% if pedido.stock_suficiente %}
+                                <button onclick="procesarPedido('{{ pedido.id_pedido }}', false)" class="btn btn-success btn-sm">
+                                    Completar
+                                </button>
+                            {% else %}
+                                <button onclick="procesarPedido('{{ pedido.id_pedido }}', true)" class="btn btn-warning btn-sm">
+                                    Enviar a producción
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+</div>
+
+<div class="pedidos-cards-mobile">
+    {% for pedido in pedidos %}
+    <article class="pedido-mobile-card" data-estado="{{ pedido.estado }}" data-tipo-venta="{{ pedido.tipo_venta }}">
+        <div class="pedido-mobile-head">
+            <div>
+                <p class="pedido-mobile-kicker mb-1">Pedido #{{ pedido.id_pedido }}</p>
+                <h3 class="pedido-mobile-title mb-0">{{ pedido.usuario_responsable }}</h3>
+            </div>
+            <span class="pedido-mobile-badge {% if pedido.tipo_venta == 'sucursal' %}badge-sucursal{% else %}badge-linea{% endif %}">
+                {% if pedido.tipo_venta == 'sucursal' %}Sucursal{% else %}Línea{% endif %}
+            </span>
+        </div>
+
+        <div class="pedido-mobile-meta">
+            <div><strong>Fecha:</strong> {{ pedido.fecha.strftime('%Y-%m-%d') if pedido.fecha else '' }}</div>
+            <div><strong>Entrega:</strong> {{ pedido.fecha_entrega.strftime('%Y-%m-%d') if pedido.fecha_entrega else 'Sin fecha' }}</div>
+            <div><strong>Pago:</strong> {{ pedido.metodo_pago }}</div>
+        </div>
+
+        <div class="pedido-mobile-block">
+            <span class="pedido-mobile-label">Productos</span>
+            <ul class="pedido-mobile-list">
+                {% for producto in pedido.productos %}
+                <li>
+                    <span>{{ producto.nombre }}</span>
+                    <span class="pedido-mobile-chip">x{{ producto.cantidad }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="pedido-mobile-block pedido-mobile-grid">
+            <div>
+                <span class="pedido-mobile-label">Stock</span>
+                <ul class="pedido-mobile-list compact">
+                    {% for producto in pedido.productos %}
+                    <li>
+                        <span class="badge {% if producto.stock_actual < producto.cantidad %}bg-danger{% else %}bg-success{% endif %}">
+                            {{ producto.stock_actual }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <span class="pedido-mobile-label">Estado</span>
+                <span class="badge
+                    {% if pedido.estado == 'Pendiente' %}bg-warning text-dark
+                    {% elif pedido.estado == 'En Proceso' %}bg-info
+                    {% elif pedido.estado == 'Producido' %}bg-success
+                    {% elif pedido.estado == 'Completado' %}bg-success
+                    {% elif pedido.estado == 'Cancelado' %}bg-danger{% endif %}">
                     {{ pedido.estado }}
                 </span>
-            </td>
+            </div>
+        </div>
 
-            <!-- ACCIONES -->
-            <td>
-                <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=pedido.id_pedido) }}" class="btn btn-info">
-                    Ver detalles
-                </a>
-
-                {% if pedido.estado != "Completado" and pedido.estado != "Cancelado" and pedido.estado != "En Proceso" %}
-                    {% if pedido.stock_suficiente %}
-                        <button onclick="procesarPedido('{{ pedido.id_pedido }}', false)" 
-                                class="btn btn-success">
-                            Completar
-                        </button>
-                    {% else %}
-                        <button onclick="procesarPedido('{{ pedido.id_pedido }}', true)" 
-                                class="btn btn-warning">
-                            Enviar a producción
-                        </button>
-                    {% endif %}
+        <div class="pedido-mobile-block">
+            <span class="pedido-mobile-label">Producción</span>
+            {% if pedido.estado == 'Completado' %}
+                {% if pedido.requiere_produccion %}
+                    <span class="badge bg-success">Producción completada</span>
+                {% else %}
+                    <span class="badge bg-success">✔ No necesaria</span>
                 {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+            {% elif pedido.estado == 'En Proceso' %}
+                <span class="badge bg-info">En producción</span>
+            {% elif pedido.estado == 'Producido' %}
+                <span class="badge bg-success">Producción completada</span>
+            {% elif pedido.stock_suficiente %}
+                <span class="badge bg-primary">Disponible en stock</span>
+            {% else %}
+                <span class="badge bg-danger">Requiere producción</span>
+            {% endif %}
+        </div>
 
-</table>
+        <div class="pedido-mobile-actions">
+            <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=pedido.id_pedido) }}" class="btn btn-info btn-sm">Ver detalles</a>
+
+            {% if pedido.estado != "Completado" and pedido.estado != "Cancelado" and pedido.estado != "En Proceso" %}
+                {% if pedido.stock_suficiente %}
+                    <button onclick="procesarPedido('{{ pedido.id_pedido }}', false)" class="btn btn-success btn-sm">Completar</button>
+                {% else %}
+                    <button onclick="procesarPedido('{{ pedido.id_pedido }}', true)" class="btn btn-warning btn-sm">Producción</button>
+                {% endif %}
+            {% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</div>
 
 <div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -173,8 +268,8 @@
 
                     <div class="mb-3">
                         <label class="form-label">Cliente</label>
-                        <select class="form-select" name="id_cliente" required>
-                            <option value="">Selecciona un cliente</option>
+                        <select class="form-select" name="id_cliente">
+                            <option value="">Venta en sucursal</option>
                             {% for cliente in clientes %}
                                 <option value="{{ cliente.id_cliente }}">
                                     {{ cliente.persona.nombre }} {{ cliente.persona.apellido_p }}
@@ -185,11 +280,32 @@
 
                     <div class="mb-3">
                         <label class="form-label">Método de pago</label>
-                        <select class="form-select" name="metodo_pago" required>
+                        <select class="form-select" name="metodo_pago" id="metodoPagoPedido" required>
                             <option value="Efectivo">Efectivo</option>
                             <option value="Tarjeta">Tarjeta</option>
                             <option value="Transferencia">Transferencia</option>
                         </select>
+                    </div>
+
+                    <div id="tarjetaFieldsPedido" class="mb-3" style="display: none;">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Número de tarjeta</label>
+                                <input type="text" class="form-control" id="numeroTarjetaPedido" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="23" autocomplete="cc-number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Titular</label>
+                                <input type="text" class="form-control" id="titularTarjetaPedido" name="titular_tarjeta" placeholder="Nombre del titular" autocomplete="cc-name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vencimiento</label>
+                                <input type="text" class="form-control" id="vencimientoTarjetaPedido" name="vencimiento_tarjeta" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CVV</label>
+                                <input type="password" class="form-control" id="cvvTarjetaPedido" name="cvv_tarjeta" placeholder="123" maxlength="4" autocomplete="cc-csc">
+                            </div>
+                        </div>
                     </div>
 
                     <div id="productosContainer"></div>
@@ -257,6 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
     agregarRenglonProducto();
 
     const filtroEstado = document.getElementById('filtroEstadoPedidos');
+    const filtroTipoVenta = document.getElementById('filtroTipoVenta');
+    const metodoPagoPedido = document.getElementById('metodoPagoPedido');
+    const tarjetaFieldsPedido = document.getElementById('tarjetaFieldsPedido');
+    const numeroTarjetaPedido = document.getElementById('numeroTarjetaPedido');
+    const titularTarjetaPedido = document.getElementById('titularTarjetaPedido');
+    const vencimientoTarjetaPedido = document.getElementById('vencimientoTarjetaPedido');
+    const cvvTarjetaPedido = document.getElementById('cvvTarjetaPedido');
     const filas = document.querySelectorAll('table.data-table tbody tr');
 
     function normalizarTexto(texto) {
@@ -269,10 +392,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function aplicarFiltroEstado() {
         const estadoSeleccionado = normalizarTexto(filtroEstado ? filtroEstado.value : 'todas');
+        const tipoVentaSeleccionado = normalizarTexto(filtroTipoVenta ? filtroTipoVenta.value : 'todas');
 
         filas.forEach((fila) => {
             const estadoFila = normalizarTexto(fila.dataset.estado);
-            const coincide = estadoSeleccionado === 'todas' || estadoFila === estadoSeleccionado;
+            const tipoVentaFila = normalizarTexto(fila.dataset.tipoVenta || fila.getAttribute('data-tipo-venta'));
+
+            const coincideEstado = estadoSeleccionado === 'todas' || estadoFila === estadoSeleccionado;
+            const coincideTipoVenta = tipoVentaSeleccionado === 'todas' || tipoVentaFila === tipoVentaSeleccionado;
+            const coincide = coincideEstado && coincideTipoVenta;
             fila.style.display = coincide ? '' : 'none';
         });
     }
@@ -281,7 +409,46 @@ document.addEventListener('DOMContentLoaded', () => {
         filtroEstado.addEventListener('change', aplicarFiltroEstado);
     }
 
+    if (filtroTipoVenta) {
+        filtroTipoVenta.addEventListener('change', aplicarFiltroEstado);
+    }
+
+    function toggleTarjetaFieldsPedido() {
+        const esTarjeta = metodoPagoPedido && metodoPagoPedido.value === 'Tarjeta';
+        if (tarjetaFieldsPedido) {
+            tarjetaFieldsPedido.style.display = esTarjeta ? 'block' : 'none';
+        }
+        [numeroTarjetaPedido, titularTarjetaPedido, vencimientoTarjetaPedido, cvvTarjetaPedido].forEach((input) => {
+            if (input) {
+                input.required = esTarjeta;
+            }
+        });
+    }
+
+    if (metodoPagoPedido) {
+        metodoPagoPedido.addEventListener('change', toggleTarjetaFieldsPedido);
+    }
+
+    if (numeroTarjetaPedido) {
+        numeroTarjetaPedido.addEventListener('input', (e) => {
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+            e.target.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        });
+    }
+
+    if (vencimientoTarjetaPedido) {
+        vencimientoTarjetaPedido.addEventListener('input', (e) => {
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+            if (digits.length >= 3) {
+                e.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+            } else {
+                e.target.value = digits;
+            }
+        });
+    }
+
     aplicarFiltroEstado();
+    toggleTarjetaFieldsPedido();
 });
 
 function procesarPedido(id, requiereProduccion) {

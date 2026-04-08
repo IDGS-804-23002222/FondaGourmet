@@ -9,7 +9,8 @@
         <input type="text" name="filtro" class="search" placeholder="Buscar por nombre o categoría..." value="{{ request.args.get('filtro', '') }}">
         <button type="submit" class="btn-secondary">Buscar</button>
     </form>
-    <button type="button" class="btn-primary" onclick="window.location.href='{{ url_for("ingredientes.crear") }}'">Nuevo ingrediente</button>
+    <button type="button" class="btn btn-primary" onclick="window.location.href='{{ url_for("ingredientes.crear") }}'">Nuevo ingrediente</button>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for("inventario.index") }}'">Volver al inventario</button>
 </div>
 
 <table class="data-table">

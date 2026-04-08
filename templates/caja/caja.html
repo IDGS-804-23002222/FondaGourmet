@@ -1,122 +1,404 @@
 {% extends "base.html" %}
 {% block title %}Control de Caja{% endblock %}
 {% block content %}
-<h1>Control de Caja</h1>
+<style>
+    .caja-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
 
-<div class="toolbar">
-    <div style="display: flex; gap: 10px;">
-        <input type="date" id="fechaCaja" class="search" style="width: 200px;" value="2026-03-28">
-        <button type="button" class="btn-secondary">Consultar</button>
-        <button type="button" class="btn-primary" onclick="window.location.href='/caja/cierre'">Realizar cierre de caja</button>
-    </div>
-</div>
+    .caja-hero {
+        background: linear-gradient(135deg, #17324d 0%, #244f79 55%, #3270a8 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 14px 30px rgba(23, 50, 77, 0.26);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
 
-<div class="cards" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
-    <div class="card" style="background: linear-gradient(135deg, var(--verde) 0%, #1e451f 100%); color: white;">
-        <h3>Ventas del día</h3>
-        <p class="value" style="font-size: 32px; font-weight: bold;">$0.00</p>
-        <p>Total de ventas registradas</p>
-    </div>
-    <div class="card" style="background: linear-gradient(135deg, var(--azul) 0%, #2d5580 100%); color: white;">
-        <h3>Total efectivo</h3>
-        <p class="value" style="font-size: 32px; font-weight: bold;">$0.00</p>
-        <p>Pagos en efectivo</p>
-    </div>
-    <div class="card" style="background: linear-gradient(135deg, var(--amarillo) 0%, #e6a800 100%); color: #333;">
-        <h3>Total tarjeta</h3>
-        <p class="value" style="font-size: 32px; font-weight: bold;">$0.00</p>
-        <p>Pagos con tarjeta</p>
-    </div>
-    <div class="card" style="background: linear-gradient(135deg, var(--verde-menta) 0%, #3d8b40 100%); color: white;">
-        <h3>Diferencia</h3>
-        <p class="value" style="font-size: 32px; font-weight: bold;">$0.00</p>
-        <p>Efectivo vs sistema</p>
-    </div>
-</div>
+    .caja-hero h1 {
+        margin: 0 0 6px 0;
+        font-size: 1.7rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
 
-<div class="card" style="margin-bottom: 30px;">
-    <div class="card-header" style="background: var(--verde); color: white; padding: 10px; border-radius: 8px 8px 0 0;">
-        <h3>Resumen de ventas por método de pago</h3>
-    </div>
-    <div class="card-body" style="padding: 20px;">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-            <div>
-                <p><strong>Efectivo:</strong> $0.00 (0%)</p>
-                <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
-                    <div style="background: var(--verde-menta); width: 0%; height: 100%;"></div>
-                </div>
-            </div>
-            <div>
-                <p><strong>Tarjeta:</strong> $0.00 (0%)</p>
-                <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
-                    <div style="background: var(--azul); width: 0%; height: 100%;"></div>
-                </div>
-            </div>
-            <div>
-                <p><strong>Transferencia:</strong> $0.00 (0%)</p>
-                <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
-                    <div style="background: var(--amarillo); width: 0%; height: 100%;"></div>
-                </div>
+    .caja-hero p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .caja-filtro {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .caja-filtro input[type="date"] {
+        min-width: 180px;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(170px, 1fr));
+        gap: 14px;
+    }
+
+    .kpi-card {
+        border-radius: 14px;
+        padding: 14px;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(24, 28, 37, 0.14);
+    }
+
+    .kpi-card h3 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        opacity: 0.95;
+    }
+
+    .kpi-card .value {
+        margin: 8px 0 2px;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .kpi-card p {
+        margin: 0;
+        font-size: 0.82rem;
+        opacity: 0.92;
+    }
+
+    .kpi-ventas { background: linear-gradient(140deg, #19713f, #2b9d61); }
+    .kpi-efectivo { background: linear-gradient(140deg, #2f6fb0, #4f8fcd); }
+    .kpi-tarjeta { background: linear-gradient(140deg, #b98508, #e3ad2d); color: #2f2500; }
+    .kpi-egresos { background: linear-gradient(140deg, #8a3b22, #b65b3f); }
+    .kpi-utilidad { background: linear-gradient(140deg, #5f2fa8, #7d46d0); }
+
+    .caja-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+    }
+
+    .section-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #e5ecf2;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .section-head {
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        background: #f5f8fc;
+        border-bottom: 1px solid #e6edf5;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .section-body {
+        padding: 12px;
+    }
+
+    .badge-flow {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .badge-in {
+        background: #dff7e9;
+        color: #19653f;
+    }
+
+    .badge-out {
+        background: #fde7df;
+        color: #8f2f18;
+    }
+
+    .text-in {
+        color: #19653f;
+        font-weight: 700;
+    }
+
+    .text-out {
+        color: #8f2f18;
+        font-weight: 700;
+    }
+
+    .split-bars {
+        display: grid;
+        gap: 12px;
+    }
+
+    .split-row {
+        display: grid;
+        gap: 6px;
+    }
+
+    .split-track {
+        height: 10px;
+        border-radius: 999px;
+        background: #e9eef5;
+        overflow: hidden;
+    }
+
+    .split-fill {
+        height: 100%;
+        border-radius: 999px;
+    }
+
+    .fill-efectivo { background: #2b9d61; }
+    .fill-tarjeta { background: #2f6fb0; }
+    .fill-transferencia { background: #e3ad2d; }
+
+    .table-tight th,
+    .table-tight td {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .caja-status {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        opacity: 0.95;
+    }
+
+    .status-open {
+        background: rgba(45, 157, 97, 0.2);
+        color: #e7fff3;
+        border: 1px solid rgba(227, 255, 241, 0.45);
+        border-radius: 999px;
+        padding: 3px 9px;
+        display: inline-block;
+    }
+
+    .open-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .open-form input {
+        width: 150px;
+    }
+
+    @media (max-width: 1200px) {
+        .kpi-grid {
+            grid-template-columns: repeat(3, minmax(170px, 1fr));
+        }
+        .caja-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .kpi-grid {
+            grid-template-columns: repeat(2, minmax(145px, 1fr));
+        }
+        .caja-hero {
+            padding: 14px;
+        }
+        .caja-hero h1 {
+            font-size: 1.35rem;
+        }
+    }
+</style>
+
+<div class="caja-shell">
+    <section class="caja-hero">
+        <div>
+            <h1>Control de Caja</h1>
+            <p>Resumen financiero diario con ingresos y salidas en una sola vista.</p>
+            <div class="caja-status">
+                {% if caja_abierta %}
+                    <span class="status-open">Caja abierta #{{ caja_abierta.id_caja }} | Inicial: ${{ '%.2f'|format(caja_abierta.monto_inicial or 0) }}</span>
+                {% else %}
+                    <span>No hay caja abierta. Puedes abrir una usando el efectivo contado del último cierre.</span>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
+        <div class="caja-filtro">
+            <form method="GET" action="{{ url_for('caja.index') }}" class="caja-filtro">
+                <input type="date" id="fechaCaja" name="fecha" class="search" value="{{ fecha_referencia.strftime('%Y-%m-%d') }}">
+                <button type="submit" class="btn-secondary">Consultar</button>
+            </form>
+            {% if not caja_abierta %}
+            <form method="POST" action="{{ url_for('caja.abrir_caja') }}" class="open-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="number" name="monto_inicial" step="0.01" class="search" value="{{ '%.2f'|format(monto_sugerido_apertura) }}" min="0">
+                <button type="submit" class="btn-primary">Abrir caja</button>
+            </form>
+            {% endif %}
+            <button
+                type="button"
+                class="btn-primary"
+                onclick="window.location.href='{{ url_for('caja.cierre') }}'"
+                {% if not caja_abierta %}disabled title="Abre una caja para poder realizar el cierre"{% endif %}
+            >
+                Realizar cierre
+            </button>
+            <button type="button" class="btn-secondary" onclick="window.location.href='{{ url_for('caja.historial') }}'">Ver historial</button>
+        </div>
+    </section>
 
-<h2>Movimientos del día</h2>
-<div class="toolbar" style="margin-bottom: 15px;">
-    <input type="text" class="search" placeholder="Buscar movimiento..." style="width: 300px;">
-    <select class="filter">
-        <option value="todos">Todos los métodos</option>
-        <option value="efectivo">Efectivo</option>
-        <option value="tarjeta">Tarjeta</option>
-        <option value="transferencia">Transferencia</option>
-    </select>
-    <button type="button" class="btn-secondary" onclick="window.location.href='/caja/historial'">Ver historial</button>
-</div>
+    <section class="kpi-grid">
+        <article class="kpi-card kpi-ventas">
+            <h3>Ventas del día</h3>
+            <p class="value">${{ '%.2f'|format(total_ventas) }}</p>
+            <p>Total de ingresos por pedidos</p>
+        </article>
+        <article class="kpi-card kpi-efectivo">
+            <h3>Total efectivo</h3>
+            <p class="value">${{ '%.2f'|format(total_efectivo) }}</p>
+            <p>Cobrado en efectivo</p>
+        </article>
+        <article class="kpi-card kpi-tarjeta">
+            <h3>Total tarjeta</h3>
+            <p class="value">${{ '%.2f'|format(total_tarjeta) }}</p>
+            <p>Cobrado por tarjeta</p>
+        </article>
+        <article class="kpi-card kpi-egresos">
+            <h3>Egresos proveedores</h3>
+            <p class="value">${{ '%.2f'|format(total_egresos) }}</p>
+            <p>Compras completadas en efectivo</p>
+        </article>
+        <article class="kpi-card kpi-utilidad">
+            <h3>Utilidad diaria</h3>
+            <p class="value">${{ '%.2f'|format(utilidad_diaria) }}</p>
+            <p>Ventas - egresos proveedores</p>
+        </article>
+    </section>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>Hora</th>
-            <th>Venta ID</th>
-            <th>Cliente</th>
-            <th>Monto</th>
-            <th>Método de pago</th>
-            <th>Usuario</th>
-            <th>Acciones</th>
-        </thead>
-    <tbody>
-        <tr>
-            <td>10:30</td>
-            <td>1</td>
-            <td>Cliente ejemplo</td>
-            <td>$0.00</td>
-            <td><span class="badge" style="background: var(--verde-menta);">Efectivo</span></td>
-            <td>Usuario ejemplo</td>
-            <td>
-                <button type="button" class="btn-view" onclick="window.location.href='/ventas/ver/1'">Ver venta</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/caja/anular/1'">Anular</button>
-             </td>
-          </tr>
-          <tr>
-             <td>11:15</td>
-             <td>2</td>
-             <td>Cliente ejemplo</td>
-             <td>$0.00</td>
-             <td><span class="badge" style="background: var(--azul);">Tarjeta</span></td>
-             <td>Usuario ejemplo</td>
-             <td>
-                <button type="button" class="btn-view" onclick="window.location.href='/ventas/ver/2'">Ver venta</button>
-                <button type="button" class="btn-delete" onclick="window.location.href='/caja/anular/2'">Anular</button>
-             </td>
-          </tr>
-    </tbody>
-    <tfoot style="background: #f0f0f0; font-weight: bold;">
-         <tr>
-            <td colspan="3" style="text-align: right;">Total ventas del día:</td>
-            <td>$0.00</td>
-            <td colspan="3"></td>
-         </tr>
-    </tfoot>
-</table>
+    <section class="caja-grid">
+        <article class="section-card">
+            <header class="section-head">
+                <h2>Movimientos del día</h2>
+                <small>{{ movimientos_dia|length }} registros</small>
+            </header>
+            <div class="section-body table-responsive">
+                <table class="data-table table-tight">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                            <th>Referencia</th>
+                            <th>Método</th>
+                            <th>Responsable</th>
+                            <th>Monto</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mov in movimientos_dia %}
+                        <tr>
+                            <td>{{ mov.fecha.strftime('%H:%M') if mov.fecha else '' }}</td>
+                            <td>
+                                <span class="badge-flow {{ 'badge-in' if mov.tipo == 'Ingreso' else 'badge-out' }}">{{ mov.tipo }}</span>
+                            </td>
+                            <td>{{ mov.referencia }}</td>
+                            <td>{{ mov.metodo_pago }}</td>
+                            <td>{{ mov.responsable }}</td>
+                            <td class="{{ 'text-in' if mov.tipo == 'Ingreso' else 'text-out' }}">
+                                {{ '+' if mov.tipo == 'Ingreso' else '-' }}${{ '%.2f'|format(mov.monto) }}
+                            </td>
+                            <td>
+                                {% if mov.tipo == 'Ingreso' and mov.id_pedido %}
+                                <a class="btn btn-view" href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=mov.id_pedido) }}">Ver pedido</a>
+                                {% elif mov.tipo == 'Egreso' and mov.id_compra %}
+                                <a class="btn btn-view" href="{{ url_for('compras.ver', id=mov.id_compra) }}">Ver compra</a>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay movimientos en la fecha seleccionada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="section-card">
+            <header class="section-head">
+                <h3>Corte por método de cobro</h3>
+            </header>
+            <div class="section-body">
+                <div class="split-bars">
+                    <div class="split-row">
+                        <strong>Efectivo: ${{ '%.2f'|format(total_efectivo) }}</strong>
+                        <div class="split-track">
+                            <div class="split-fill fill-efectivo" style="width: {{ (total_efectivo * 100 / total_ventas) if total_ventas else 0 }}%;"></div>
+                        </div>
+                    </div>
+                    <div class="split-row">
+                        <strong>Tarjeta: ${{ '%.2f'|format(total_tarjeta) }}</strong>
+                        <div class="split-track">
+                            <div class="split-fill fill-tarjeta" style="width: {{ (total_tarjeta * 100 / total_ventas) if total_ventas else 0 }}%;"></div>
+                        </div>
+                    </div>
+                    <div class="split-row">
+                        <strong>Transferencia: ${{ '%.2f'|format(total_transferencia) }}</strong>
+                        <div class="split-track">
+                            <div class="split-fill fill-transferencia" style="width: {{ (total_transferencia * 100 / total_ventas) if total_ventas else 0 }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h3 style="margin-top:0;">Salidas de efectivo (proveedores)</h3>
+                <div class="table-responsive">
+                    <table class="data-table table-tight">
+                        <thead>
+                            <tr>
+                                <th>Compra</th>
+                                <th>Hora</th>
+                                <th>Proveedor</th>
+                                <th>Responsable</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for compra in compras_egreso_dia %}
+                            <tr>
+                                <td>#{{ compra.id_compra }}</td>
+                                <td>{{ (compra.fecha_entrega or compra.fecha).strftime('%H:%M') if (compra.fecha_entrega or compra.fecha) else '' }}</td>
+                                <td>{{ compra.proveedor.persona.nombre if compra.proveedor and compra.proveedor.persona else 'Proveedor' }}</td>
+                                <td>{{ compra.usuario.username if compra.usuario else 'N/D' }}</td>
+                                <td class="text-out">-${{ '%.2f'|format(compra.total) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No hay salidas de efectivo por compras hoy.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+    </section>
+</div>
 {% endblock %}

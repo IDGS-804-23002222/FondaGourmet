@@ -131,12 +131,20 @@ def actualizar_cantidad(id):
 
     return {"ok": True}
 
-@tienda.route('/finalizar')
+@tienda.route('/finalizar', methods=['POST'])
 @login_required
 @role_required(3, 4)
 def finalizar_compra():
+    metodo_pago = (request.form.get('metodo_pago') or 'Efectivo').strip()
 
-    exito, mensaje = finalizar_pedido()
+    datos_tarjeta = {
+        'numero_tarjeta': request.form.get('numero_tarjeta', ''),
+        'titular_tarjeta': request.form.get('titular_tarjeta', ''),
+        'vencimiento_tarjeta': request.form.get('vencimiento_tarjeta', ''),
+        'cvv_tarjeta': request.form.get('cvv_tarjeta', ''),
+    }
+
+    exito, mensaje = finalizar_pedido(metodo_pago=metodo_pago, datos_tarjeta=datos_tarjeta)
 
     if not exito:
         flash(mensaje, "danger")

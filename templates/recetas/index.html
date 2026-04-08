@@ -12,6 +12,7 @@
 			<th>Estado</th>
 			<th>Fecha</th>
 			<th>Ingredientes</th>
+			<th>Acciones</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -30,9 +31,13 @@
 					Sin ingredientes
 				{% endif %}
 			</td>
+			<td>
+				<a class="btn btn-view" href="{{ url_for('recetas.ver', id_receta=receta.id_receta) }}">Ver</a>
+				<a class="btn btn-edit" href="{{ url_for('recetas.editar', id_receta=receta.id_receta) }}">Editar</a>
+			</td>
 		</tr>
 		{% else %}
-		<tr><td colspan="5" style="text-align:center;">No hay recetas registradas.</td></tr>
+		<tr><td colspan="6" style="text-align:center;">No hay recetas registradas.</td></tr>
 		{% endfor %}
 	</tbody>
 </table>

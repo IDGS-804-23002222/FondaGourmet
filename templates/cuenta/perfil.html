@@ -1,5 +1,5 @@
-{% if current_user.is_authenticated and current_user.id_rol == 4 %}
-{% extends 'tienda/base_cliente.html' %}
+{% if current_user.is_authenticated %}
+{% extends 'base.html' %}
 {% else %}
 {% extends 'base.html' %}
 {% endif %}
@@ -94,9 +94,14 @@
 
         </div>
 
-            <a href="{{ url_for('auth.redirigir') }}" class="btn volver-btn">
-                Volver
-            </a>
+            <div class="d-flex gap-2 justify-content-end mt-3">
+                <a href="{{ url_for('cuenta.editar') }}" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Editar perfil
+                </a>
+                <a href="{{ url_for('auth.redirigir') }}" class="btn btn-secondary">
+                    Volver
+                </a>
+            </div>
 
     </div>
 </div>

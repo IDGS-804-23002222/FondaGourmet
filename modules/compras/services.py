@@ -1,6 +1,6 @@
 from models import db, Compra, DetalleCompra, MateriaPrima, Proveedor, Produccion
 from flask import current_app
-from sqlalchemy import text
+from sqlalchemy import text, func
 from datetime import datetime, timedelta
 import logging
 
@@ -146,6 +146,7 @@ def crear_solicitud_compra_manual(form, id_usuario):
 
 def obtener_materias_faltantes_produccion(id_materia_prioritaria=None):
     sugerencias = {}
+    requerimientos = {}
 
     producciones = Produccion.query.filter(Produccion.estado.in_(['Solicitada', 'En Proceso'])).all()
 
@@ -157,7 +158,7 @@ def obtener_materias_faltantes_produccion(id_materia_prioritaria=None):
             if not receta or receta.rendimiento <= 0:
                 continue
 
-            veces = detalle_prod.cantidad / receta.rendimiento
+            veces = float(detalle_prod.cantidad or 0) / receta.rendimiento
 
             for detalle_receta in receta.detalles:
                 materia = detalle_receta.materia_prima
@@ -165,30 +166,52 @@ def obtener_materias_faltantes_produccion(id_materia_prioritaria=None):
                     continue
 
                 requerido = detalle_receta.cantidad * veces
-                faltante = max(0, requerido - materia.stock_actual)
+                requerimientos[materia.id_materia] = requerimientos.get(materia.id_materia, 0) + requerido
 
-                if faltante > 0:
-                    if materia.id_materia not in sugerencias:
-                        sugerencias[materia.id_materia] = {
-                            'id_materia': materia.id_materia,
-                            'cantidad_sugerida': 0,
-                        }
-                    sugerencias[materia.id_materia]['cantidad_sugerida'] += faltante
+    materias_requeridas_ids = list(requerimientos.keys())
+    compras_pendientes_por_materia = {}
 
-    if id_materia_prioritaria:
+    if materias_requeridas_ids:
+        pendientes = (
+            db.session.query(
+                DetalleCompra.id_materia,
+                func.coalesce(func.sum(DetalleCompra.cantidad), 0)
+            )
+            .join(Compra, Compra.id_compra == DetalleCompra.id_compra)
+            .filter(
+                Compra.estado.in_(['Solicitada', 'En Camino', 'En Proceso']),
+                DetalleCompra.id_materia.in_(materias_requeridas_ids)
+            )
+            .group_by(DetalleCompra.id_materia)
+            .all()
+        )
+        compras_pendientes_por_materia = {
+            id_materia: float(total_pendiente or 0)
+            for id_materia, total_pendiente in pendientes
+        }
+
+    for id_materia, requerido_total in requerimientos.items():
+        materia = MateriaPrima.query.get(id_materia)
+        if not materia:
+            continue
+
+        pendiente_compra = compras_pendientes_por_materia.get(id_materia, 0.0)
+        faltante = round(max(0, requerido_total - materia.stock_actual - pendiente_compra), 2)
+        if faltante > 0:
+            sugerencias[id_materia] = {
+                'id_materia': id_materia,
+                'cantidad_sugerida': faltante,
+            }
+
+    if id_materia_prioritaria and id_materia_prioritaria not in sugerencias:
         materia_prioritaria = MateriaPrima.query.get(id_materia_prioritaria)
         if materia_prioritaria:
             faltante_minimo = max(0, materia_prioritaria.stock_minimo - materia_prioritaria.stock_actual)
-            if id_materia_prioritaria not in sugerencias:
+            if faltante_minimo > 0:
                 sugerencias[id_materia_prioritaria] = {
                     'id_materia': id_materia_prioritaria,
-                    'cantidad_sugerida': faltante_minimo if faltante_minimo > 0 else 1,
+                    'cantidad_sugerida': round(faltante_minimo, 2),
                 }
-            else:
-                sugerencias[id_materia_prioritaria]['cantidad_sugerida'] = max(
-                    sugerencias[id_materia_prioritaria]['cantidad_sugerida'],
-                    faltante_minimo if faltante_minimo > 0 else 1
-                )
 
     return list(sugerencias.values())
 
@@ -196,7 +219,7 @@ def obtener_materias_faltantes_produccion(id_materia_prioritaria=None):
 def obtener_materias_alerta_stock_bajo(id_materia_prioritaria=None):
     materias_alerta = (
         MateriaPrima.query
-        .filter(MateriaPrima.stock_actual < MateriaPrima.stock_minimo)
+        .filter(MateriaPrima.stock_actual <= MateriaPrima.stock_minimo)
         .order_by(MateriaPrima.nombre.asc())
         .all()
     )
@@ -206,7 +229,7 @@ def obtener_materias_alerta_stock_bajo(id_materia_prioritaria=None):
         faltante = max(0, materia.stock_minimo - materia.stock_actual)
         sugerencias.append({
             'id_materia': materia.id_materia,
-            'cantidad_sugerida': faltante if faltante > 0 else 1,
+            'cantidad_sugerida': faltante if faltante > 0 else 10,
         })
 
     if id_materia_prioritaria:
@@ -245,6 +268,7 @@ def obtener_compras():
         c.fecha,
         c.fecha_entrega,
         c.estado,
+        c.desde_produccion,
         u.username AS responsable,
         m.nombre AS nombre_materia,
         d.cantidad,
@@ -271,6 +295,7 @@ def obtener_compras():
                     'fecha': row['fecha'],
                     'fecha_entrega': row['fecha_entrega'],
                     'estado': row['estado'],
+                    'desde_produccion': bool(row['desde_produccion']),
                     'responsable': row['responsable'],
                     'materias_primas': []
                     }

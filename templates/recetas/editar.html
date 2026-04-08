@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Editar Receta{% endblock %}
+
+{% block content %}
+<h1>Editar receta #{{ receta.id_receta }}</h1>
+<p><strong>Producto:</strong> {{ receta.producto_nombre }}</p>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="card mb-3" style="padding:16px; display:grid; gap:12px;">
+        <div>
+            <label for="rendimiento"><strong>Rendimiento</strong></label>
+            <input id="rendimiento" name="rendimiento" type="number" min="0" step="0.01" class="form-control" value="{{ receta.rendimiento }}" required>
+        </div>
+
+        <div>
+            <label for="nota"><strong>Nota</strong></label>
+            <textarea id="nota" name="nota" class="form-control" rows="3">{{ receta.nota or '' }}</textarea>
+        </div>
+
+        <div>
+            <label>
+                <input type="checkbox" name="estado" {% if receta.estado %}checked{% endif %}>
+                Activa
+            </label>
+        </div>
+    </div>
+
+    <h3>Ingredientes</h3>
+    <div class="table-responsive">
+        <table class="data-table" id="tablaIngredientes">
+            <thead>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="bodyIngredientes">
+                {% for d in receta.detalles %}
+                <tr>
+                    <td>
+                        <select name="id_materia[]" class="form-control" required>
+                            <option value="">Selecciona...</option>
+                            {% for m in materias %}
+                            <option value="{{ m.id_materia }}" {% if m.id_materia == d.id_materia %}selected{% endif %}>
+                                {{ m.nombre }} ({{ m.unidad_medida }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="cantidad[]" min="0.01" step="0.01" class="form-control" value="{{ d.cantidad }}" required>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-delete btn-remove">Quitar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3" style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" id="btnAgregar" class="btn btn-warning">Agregar ingrediente</button>
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <a href="{{ url_for('recetas.ver', id_receta=receta.id_receta) }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<template id="tplRow">
+    <tr>
+        <td>
+            <select name="id_materia[]" class="form-control" required>
+                <option value="">Selecciona...</option>
+                {% for m in materias %}
+                <option value="{{ m.id_materia }}">{{ m.nombre }} ({{ m.unidad_medida }})</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="cantidad[]" min="0.01" step="0.01" class="form-control" required>
+        </td>
+        <td>
+            <button type="button" class="btn btn-delete btn-remove">Quitar</button>
+        </td>
+    </tr>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const body = document.getElementById('bodyIngredientes');
+    const tpl = document.getElementById('tplRow');
+    const btnAgregar = document.getElementById('btnAgregar');
+
+    function bindRemove(button) {
+        button.addEventListener('click', () => {
+            const rows = body.querySelectorAll('tr');
+            if (rows.length > 1) {
+                button.closest('tr').remove();
+            }
+        });
+    }
+
+    body.querySelectorAll('.btn-remove').forEach(bindRemove);
+
+    btnAgregar.addEventListener('click', () => {
+        const clone = tpl.content.cloneNode(true);
+        const btn = clone.querySelector('.btn-remove');
+        bindRemove(btn);
+        body.appendChild(clone);
+    });
+
+    if (!body.querySelector('tr')) {
+        btnAgregar.click();
+    }
+});
+</script>
+{% endblock %}

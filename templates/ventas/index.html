@@ -19,8 +19,12 @@
             <th>No. Venta</th>
             <th>Fecha</th>
             <th>Total</th>
+            <th>Costo</th>
+            <th>Utilidad</th>
             <th>Método de pago</th>
+            <th>Estado</th>
             <th>Acciones</th>
+        </tr>
         </thead>
     <tbody>
         {% if ventas %}
@@ -28,38 +32,33 @@
 
         <tr>
             <td>{{ v.id_venta }}</td>
-            <td>{{ v.fecha }}</td>
+            <td>{{ v.fecha.strftime('%d/%m/%Y %H:%M') if v.fecha else '' }}</td>
             <td>${{ "%.2f"|format(v.total) }}</td>
+            <td>${{ "%.2f"|format(v.costo_total) }}</td>
+            <td>
+                <span class="badge {% if v.utilidad_total >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                    ${{ "%.2f"|format(v.utilidad_total) }}
+                </span>
+            </td>
             <td>{{ v.metodo_pago }}</td>
-              <td class="px-4 md:px-6 py-4">
-                    <div class="flex items-center justify-center gap-1.5 md:gap-2">
-                    <button onclick=window.location.href='{{ url_for("ventas.detalles", id_venta=v.id_venta) }}'
-                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Ver detalles">
-                            <i class="bi bi-eye text-lg"></i>
-                        </button>
-                        <button onclick=window.location.href='{{ url_for("ventas.editar", id_venta=v.id_venta) }}'
-                                class="btn-edit p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Editar">
-                            <i class="bi bi-pencil text-lg"></i>
-                        </button>
-                        <button onclick="eliminarVenta('{{ v.id_venta }}', '{{ v.id_venta }}')"
-                                class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Desactivar">
-                            <i class="bi bi-ban text-lg"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-           <tr>
+            <td>
+                <span class="badge {% if v.estado == 'Completada' %}bg-success{% elif v.estado == 'Pendiente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ v.estado }}
+                </span>
+            </td>
+            <td>
+                <a href="{{ url_for('ventas.detalles', id_venta=v.id_venta) }}" class="btn btn-info btn-sm">Ver ticket</a>
+            </td>
+        </tr>
             {% endfor %}
         {%else%}
-                <td colspan="6" class="px-6 py-20 text-center">
+            <tr>
+                <td colspan="8" class="px-6 py-20 text-center">
                     <div class="flex flex-col items-center gap-4">
                         <i class="bi bi-box-seam text-7xl text-gray-300 dark:text-gray-600"></i>
                         <p class="text-xl font-medium text-gray-500 dark:text-gray-400">No hay ventas registradas</p>
                         <a href="{{ url_for('ventas.nueva') }}" 
-                           class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
+                           class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
                             <i class="bi bi-plus-circle"></i>
                             Crear primer producto
                         </a>
@@ -69,33 +68,4 @@
         {% endif %}
     </tbody>
 </table>
-{% endblock %}
-{% block scripts %}
-<script>
-    let actionData = {};
-
-function eliminarVenta(id, nombre) {
-    actionData = { id: id, action: 'eliminar' };
-     document.getElementById('modalTitle').textContent = 'Eliminar Venta';
-    document.getElementById('modalMessage').textContent = `¿Eliminar la venta "${nombre}"?`;
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-   function confirmAction() {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = actionData.action === 'eliminar' 
-        ? '{{ url_for("ventas.eliminar") }}'
-        : '{{ url_for("productos.activar") }}';
-    
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'id_venta';
-    input.value = actionData.id;
-    
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
-}
-</script>
 {% endblock %}

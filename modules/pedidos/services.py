@@ -1,22 +1,126 @@
-from models import db, Pedido, DetallePedido, Produccion, Producto, DetalleProduccion, PedidoMeta
+from models import db, Pedido, DetallePedido, Produccion, Producto, DetalleProduccion, PedidoMeta, Cliente, Persona, Usuario, Rol
 from flask import current_app
 from sqlalchemy import text
 from datetime import datetime, timedelta
+from sqlalchemy import func
+from werkzeug.security import generate_password_hash
+import uuid
+import re
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def crear_pedido_manual(id_cliente, productos, metodo_pago, id_usuario):
+def _validar_datos_tarjeta(numero, titular, vencimiento, cvv):
+    numero_limpio = re.sub(r'\s+', '', (numero or '').strip())
+    titular = (titular or '').strip()
+    vencimiento = (vencimiento or '').strip()
+    cvv = (cvv or '').strip()
+
+    if not re.fullmatch(r'\d{13,19}', numero_limpio):
+        return False, "Número de tarjeta inválido"
+
+    if len(titular) < 3:
+        return False, "Ingresa el nombre del titular"
+
+    if not re.fullmatch(r'(0[1-9]|1[0-2])/\d{2}', vencimiento):
+        return False, "Fecha de vencimiento inválida (MM/AA)"
+
+    mes, anio = vencimiento.split('/')
+    mes = int(mes)
+    anio = 2000 + int(anio)
+    hoy = datetime.utcnow()
+
+    if (anio < hoy.year) or (anio == hoy.year and mes < hoy.month):
+        return False, "La tarjeta está vencida"
+
+    if not re.fullmatch(r'\d{3,4}', cvv):
+        return False, "CVV inválido"
+
+    return True, None
+
+
+def _obtener_o_crear_cliente_sucursal():
+    cliente_sucursal = (
+        Cliente.query
+        .join(Persona, Persona.id_persona == Cliente.id_persona)
+        .filter(func.lower(Persona.nombre) == 'venta en sucursal')
+        .first()
+    )
+
+    if cliente_sucursal:
+        return cliente_sucursal, None
+
+    rol_cliente = Rol.query.filter(func.lower(Rol.nombre) == 'cliente').first()
+    if not rol_cliente:
+        return None, "No existe el rol Cliente configurado"
+
+    ts = datetime.utcnow().strftime('%H%M%S%f')
+    telefono = ts[-10:]
+
+    persona = Persona(
+        nombre='Venta en sucursal',
+        apellido_p='Mostrador',
+        apellido_m='',
+        telefono=telefono,
+        correo=f"venta.sucursal.{ts}@local.com",
+        direccion='Sucursal'
+    )
+    db.session.add(persona)
+    db.session.flush()
+
+    usuario = Usuario(
+        username=f"venta_sucursal_{ts}",
+        contrasena=generate_password_hash(uuid.uuid4().hex),
+        estado=True,
+        fs_uniquifier=str(uuid.uuid4()),
+        id_rol=rol_cliente.id_rol,
+    )
+    db.session.add(usuario)
+    db.session.flush()
+
+    cliente = Cliente(
+        id_usuario=usuario.id_usuario,
+        id_persona=persona.id_persona,
+    )
+    db.session.add(cliente)
+    db.session.flush()
+
+    return cliente, None
+
+
+def crear_pedido_manual(id_cliente, productos, metodo_pago, id_usuario, datos_tarjeta=None):
     try:
         if not id_cliente:
-            return False, "Debes seleccionar un cliente"
+            cliente_sucursal, error_cliente = _obtener_o_crear_cliente_sucursal()
+            if error_cliente:
+                return False, error_cliente
+            id_cliente = cliente_sucursal.id_cliente
 
         if not productos:
             return False, "Debes agregar al menos un producto"
 
         if metodo_pago not in ('Efectivo', 'Tarjeta', 'Transferencia'):
             return False, "Selecciona un método de pago válido"
+
+        tarjeta_titular = None
+        tarjeta_ultimos4 = None
+        tarjeta_vencimiento = None
+        if metodo_pago == 'Tarjeta':
+            datos_tarjeta = datos_tarjeta or {}
+            valido, error = _validar_datos_tarjeta(
+                datos_tarjeta.get('numero_tarjeta'),
+                datos_tarjeta.get('titular_tarjeta'),
+                datos_tarjeta.get('vencimiento_tarjeta'),
+                datos_tarjeta.get('cvv_tarjeta')
+            )
+            if not valido:
+                return False, error
+
+            numero_limpio = re.sub(r'\s+', '', (datos_tarjeta.get('numero_tarjeta') or '').strip())
+            tarjeta_titular = (datos_tarjeta.get('titular_tarjeta') or '').strip()
+            tarjeta_ultimos4 = numero_limpio[-4:] if len(numero_limpio) >= 4 else None
+            tarjeta_vencimiento = (datos_tarjeta.get('vencimiento_tarjeta') or '').strip()
 
         detalles = []
         total = 0
@@ -69,11 +173,16 @@ def crear_pedido_manual(id_cliente, productos, metodo_pago, id_usuario):
                 subtotal=d['subtotal']
             ))
 
-        db.session.add(PedidoMeta(
-            id_pedido=pedido.id_pedido,
-            metodo_pago=metodo_pago,
-            id_usuario=id_usuario,
-        ))
+            meta = PedidoMeta.query.get(pedido.id_pedido)
+            if not meta:
+                meta = PedidoMeta(id_pedido=pedido.id_pedido)
+                db.session.add(meta)
+
+            meta.metodo_pago = metodo_pago
+            meta.tarjeta_titular = tarjeta_titular
+            meta.tarjeta_ultimos4 = tarjeta_ultimos4
+            meta.tarjeta_vencimiento = tarjeta_vencimiento
+            meta.id_usuario = id_usuario
 
         db.session.commit()
         return True, "Pedido creado correctamente"
@@ -91,12 +200,15 @@ def obtener_pedidos():
         p.fecha,
         p.fecha_entrega,
         p.estado,
+        pe.nombre AS cliente_nombre,
         pm.metodo_pago,
         ru.username AS usuario_responsable,
         pr.nombre AS nombre_producto,
         pr.stock_actual,
         d.cantidad
     FROM pedidos p
+    LEFT JOIN clientes c ON c.id_cliente = p.id_cliente
+    LEFT JOIN personas pe ON pe.id_persona = c.id_persona
     LEFT JOIN pedidos_meta pm ON pm.id_pedido = p.id_pedido
     LEFT JOIN usuarios ru ON ru.id_usuario = pm.id_usuario
     JOIN detalle_pedido d ON p.id_pedido = d.id_pedido
@@ -112,11 +224,13 @@ def obtener_pedidos():
 
             # Si el pedido no existe, lo creamos
             if id_pedido not in pedidos_dict:
+                es_sucursal = (row['cliente_nombre'] or '').strip().lower() == 'venta en sucursal'
                 pedidos_dict[id_pedido] = {
                     'id_pedido': id_pedido,
                     'fecha': row['fecha'],
                     'fecha_entrega': row['fecha_entrega'],
                     'estado': row['estado'],
+                    'tipo_venta': 'sucursal' if es_sucursal else 'en_linea',
                     'metodo_pago': row['metodo_pago'] or 'N/D',
                     'usuario_responsable': row['usuario_responsable'] or 'N/D',
                     'productos': [], 
@@ -207,6 +321,7 @@ def completar_pedido(id_pedido):
             return False, f"Stock insuficiente para el producto '{producto.nombre}'"
         
         pedido.estado = "Completado"
+        pedido.fecha_entrega = datetime.now()
         if producto:
             producto.stock_actual -= pedido.detalles[0].cantidad
 
@@ -329,20 +444,40 @@ def completar_o_producir(id_pedido, id_usuario, fecha_necesaria=None):
         if not pedido:
             return False, "Pedido no encontrado"
 
-        necesita_produccion = False
-
+        requerimientos_por_producto = {}
         for detalle in pedido.detalles:
             producto = Producto.query.get(detalle.id_producto)
+            if not producto:
+                continue
 
-            if producto.stock_actual < detalle.cantidad:
-                necesita_produccion = True
-                break
+            item = requerimientos_por_producto.setdefault(
+                producto.id_producto,
+                {
+                    "producto": producto,
+                    "cantidad_pedida": 0.0,
+                    "stock_actual": float(producto.stock_actual or 0),
+                }
+            )
+            item["cantidad_pedida"] += float(detalle.cantidad)
+
+        faltantes_por_producto = {}
+        for id_producto, item in requerimientos_por_producto.items():
+            faltante = round(max(0.0, item["cantidad_pedida"] - item["stock_actual"]), 2)
+            if faltante > 0:
+                faltantes_por_producto[id_producto] = {
+                    "producto": item["producto"],
+                    "faltante": faltante,
+                    "cantidad_pedida": item["cantidad_pedida"],
+                    "stock_actual": item["stock_actual"],
+                }
+
+        necesita_produccion = len(faltantes_por_producto) > 0
 
         # 🟢 CASO 1: NO necesita producción
         if not necesita_produccion:
-            for detalle in pedido.detalles:
-                producto = Producto.query.get(detalle.id_producto)
-                producto.stock_actual -= detalle.cantidad
+            for item in requerimientos_por_producto.values():
+                producto = item["producto"]
+                producto.stock_actual -= item["cantidad_pedida"]
 
             pedido.estado = "Completado"
             pedido.fecha_entrega = datetime.now()
@@ -375,12 +510,12 @@ def completar_o_producir(id_pedido, id_usuario, fecha_necesaria=None):
         db.session.add(produccion)
         db.session.flush()
 
-        for detalle in pedido.detalles:
+        for item in faltantes_por_producto.values():
             db.session.add(DetalleProduccion(
                 id_produccion=produccion.id_produccion,
-                id_producto=detalle.id_producto,
+                id_producto=item["producto"].id_producto,
                 id_materia=None,
-                cantidad=detalle.cantidad
+                cantidad=item["faltante"]
             ))
 
         pedido.estado = "En Proceso"

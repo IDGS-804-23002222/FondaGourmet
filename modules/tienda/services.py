@@ -1,6 +1,7 @@
-from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido
+from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido, PedidoMeta
 from flask_login import current_user
 from datetime import datetime
+import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,8 @@ def obtener_menu():
                 "nombre": p.nombre,
                 "descripcion": p.descripcion,
                 "precio": p.precio,
-                "imagen": p.imagen
+                "imagen": p.imagen,
+                "categoria": p.categoria_platillo.nombre if p.categoria_platillo else "Sin categoria"
             })
 
         return resultado, None
@@ -197,10 +199,78 @@ def agregar_cantidad_carrito(id_detalle):
 # ===============================
 # FINALIZAR PEDIDO
 # ===============================
-def finalizar_pedido():
+def _luhn_valido(numero_tarjeta):
+    digitos = [int(d) for d in numero_tarjeta if d.isdigit()]
+    checksum = 0
+    par = len(digitos) % 2
+    for i, d in enumerate(digitos):
+        if i % 2 == par:
+            d *= 2
+            if d > 9:
+                d -= 9
+        checksum += d
+    return checksum % 10 == 0
+
+
+def _validar_datos_tarjeta(numero, titular, vencimiento, cvv):
+    numero_limpio = re.sub(r'\s+', '', (numero or '').strip())
+    titular = (titular or '').strip()
+    vencimiento = (vencimiento or '').strip()
+    cvv = (cvv or '').strip()
+
+    if not re.fullmatch(r'\d{13,19}', numero_limpio):
+        return False, "Número de tarjeta inválido"
+
+    # Permitimos tarjetas de prueba/locales: validamos formato y longitud sin exigir Luhn.
+
+    if len(titular) < 3:
+        return False, "Ingresa el nombre del titular"
+
+    if not re.fullmatch(r'(0[1-9]|1[0-2])/\d{2}', vencimiento):
+        return False, "Fecha de vencimiento inválida (MM/AA)"
+
+    mes, anio = vencimiento.split('/')
+    mes = int(mes)
+    anio = 2000 + int(anio)
+    hoy = datetime.utcnow()
+
+    if (anio < hoy.year) or (anio == hoy.year and mes < hoy.month):
+        return False, "La tarjeta está vencida"
+
+    if not re.fullmatch(r'\d{3,4}', cvv):
+        return False, "CVV inválido"
+
+    return True, None
+
+
+def finalizar_pedido(metodo_pago='Efectivo', datos_tarjeta=None):
     try:
         if not current_user.is_authenticated:
             return False, "Usuario no autenticado"
+
+        metodo_pago = (metodo_pago or '').strip().title()
+        if metodo_pago not in ('Efectivo', 'Tarjeta', 'Transferencia'):
+            return False, "Selecciona un método de pago válido"
+
+        if metodo_pago == 'Tarjeta':
+            datos_tarjeta = datos_tarjeta or {}
+            valido, error = _validar_datos_tarjeta(
+                datos_tarjeta.get('numero_tarjeta'),
+                datos_tarjeta.get('titular_tarjeta'),
+                datos_tarjeta.get('vencimiento_tarjeta'),
+                datos_tarjeta.get('cvv_tarjeta')
+            )
+            if not valido:
+                return False, error
+
+        tarjeta_titular = None
+        tarjeta_ultimos4 = None
+        tarjeta_vencimiento = None
+        if metodo_pago == 'Tarjeta':
+            numero_limpio = re.sub(r'\s+', '', (datos_tarjeta.get('numero_tarjeta') or '').strip())
+            tarjeta_titular = (datos_tarjeta.get('titular_tarjeta') or '').strip()
+            tarjeta_ultimos4 = numero_limpio[-4:] if len(numero_limpio) >= 4 else None
+            tarjeta_vencimiento = (datos_tarjeta.get('vencimiento_tarjeta') or '').strip()
 
         cliente = current_user.cliente
 
@@ -225,6 +295,17 @@ def finalizar_pedido():
         db.session.add(pedido)
         db.session.flush()
 
+        meta = PedidoMeta.query.get(pedido.id_pedido)
+        if not meta:
+            meta = PedidoMeta(id_pedido=pedido.id_pedido)
+            db.session.add(meta)
+
+        meta.metodo_pago = metodo_pago
+        meta.tarjeta_titular = tarjeta_titular
+        meta.tarjeta_ultimos4 = tarjeta_ultimos4
+        meta.tarjeta_vencimiento = tarjeta_vencimiento
+        meta.id_usuario = current_user.id_usuario
+
         for detalle in carrito.detalles:
             detalle_pedido = DetallePedido(
                 id_pedido=pedido.id_pedido,
@@ -240,6 +321,7 @@ def finalizar_pedido():
 
         carrito.total = 0
         carrito.estado = 'Cerrado'
+        carrito.metodo_pago = metodo_pago
 
         db.session.commit()
 

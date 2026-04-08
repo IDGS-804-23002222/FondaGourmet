@@ -3,7 +3,7 @@ from flask import render_template, request, jsonify, current_app, flash, redirec
 from flask_login import login_required, current_user
 from models import Producto, Cliente
 from .services import(
-    crear_venta, obtener_ventas
+    crear_venta, obtener_ventas, obtener_detalle_venta
 )
 import traceback
 
@@ -17,6 +17,18 @@ def index():
         flash("Error al cargar las ventas", "danger")
     
     return render_template('ventas/index.html', ventas=ventas)
+
+
+@ventas.route('/detalles/<int:id_venta>')
+@login_required
+def detalles(id_venta):
+    venta, error = obtener_detalle_venta(id_venta)
+    if error:
+        current_app.logger.error(f"Error al cargar detalle de venta {id_venta}: {error}")
+        flash(error, "danger")
+        return redirect(url_for('ventas.index'))
+
+    return render_template('ventas/detalles.html', venta=venta)
 
 
 # 🧾 FORMULARIO
@@ -47,13 +59,13 @@ def guardar():
         if not productos:
             return jsonify({"success": False, "message": "Agrega productos"}), 400
 
-        ok, msg = crear_venta(
+        ok, msg, id_venta = crear_venta(
             current_user.id_usuario,
             metodo_pago,
             productos
         )
 
-        return jsonify({"success": ok, "message": msg})
+        return jsonify({"success": ok, "message": msg, "id_venta": id_venta})
 
     except Exception as e:
         traceback.print_exc()

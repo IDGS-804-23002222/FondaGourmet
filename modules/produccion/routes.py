@@ -2,12 +2,14 @@ from . import produccion
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from utils.security import role_required
+from datetime import datetime
 from .services import (
     obtener_producciones,
     completar_o_solicitar_compra,
     ver_orden_produccion,
     crear_solicitud_produccion_desde_alerta
 )
+from models import Producto
 
 @produccion.route('/', methods=['GET'])
 @login_required
@@ -19,7 +21,26 @@ def index():
         flash("Error al cargar producción", "danger")
         return redirect(url_for('productos.index'))
 
-    return render_template('produccion/index.html', producciones=producciones)
+    hoy = datetime.now().date()
+    total_ordenes = len(producciones)
+    ordenes_solicitadas = sum(1 for p in producciones if p.get('estado') == 'Solicitada')
+    ordenes_en_proceso = sum(1 for p in producciones if p.get('estado') == 'En Proceso')
+    ordenes_completadas_hoy = sum(
+        1
+        for p in producciones
+        if p.get('estado') == 'Completada'
+        and p.get('fecha_completada')
+        and p['fecha_completada'].date() == hoy
+    )
+
+    return render_template(
+        'produccion/index.html',
+        producciones=producciones,
+        total_ordenes=total_ordenes,
+        ordenes_solicitadas=ordenes_solicitadas,
+        ordenes_en_proceso=ordenes_en_proceso,
+        ordenes_completadas_hoy=ordenes_completadas_hoy,
+    )
 
 @produccion.route('/ver/<int:id>')
 @login_required
@@ -66,15 +87,38 @@ def cancelar(id):
     return redirect(url_for('produccion.index'))
 
 
-@produccion.route('/alerta/<int:id_producto>', methods=['GET'])
+@produccion.route('/alerta/<int:id_producto>', methods=['GET', 'POST'])
 @login_required
 @role_required(1, 2, 3)
 def crear_desde_alerta(id_producto):
-    id_produccion, mensaje = crear_solicitud_produccion_desde_alerta(id_producto, current_user.id_usuario)
+    producto = Producto.query.get(id_producto)
 
-    if id_produccion:
-        flash(mensaje, 'success')
-        return redirect(url_for('produccion.ver', id=id_produccion))
+    if not producto:
+        flash('Producto no encontrado', 'danger')
+        return redirect(url_for('caja.index'))
 
-    flash(mensaje, 'danger')
-    return redirect(url_for('produccion.index'))
+    if request.method == 'POST':
+        cantidad = request.form.get('cantidad', 10)
+        id_produccion, mensaje = crear_solicitud_produccion_desde_alerta(
+            id_producto,
+            current_user.id_usuario,
+            cantidad=cantidad,
+        )
+
+        if id_produccion:
+            flash(mensaje, 'success')
+            return redirect(url_for('produccion.ver', id=id_produccion))
+
+        flash(mensaje, 'danger')
+        return redirect(url_for('produccion.crear_desde_alerta', id_producto=id_producto))
+
+    stock_actual = float(producto.stock_actual or 0)
+    stock_minimo = float(producto.stock_minimo or 0)
+    faltante = max(0.0, stock_minimo - stock_actual)
+
+    return render_template(
+        'produccion/solicitud_alerta.html',
+        producto=producto,
+        cantidad_sugerida=10,
+        faltante=faltante,
+    )

@@ -2,13 +2,14 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user  # Solo flask_login
 from config import DevelopmentConfig
-from models import db, Usuario, Rol, MateriaPrima, Producto, Compra, DetalleCompra
+from models import db, Usuario
 from modules.auth import auth
+from modules.alertas import alertas, init_alertas
 from modules.categorias import categorias
 from modules.cuenta import cuenta
 from modules.ingredientes import ingredientes
@@ -21,6 +22,7 @@ from modules.pedidos import pedidos
 from modules.produccion import produccion
 from modules.proveedores import proveedores
 from modules.productos import productos
+from modules.inventario import inventario
 from modules.tienda import tienda
 
 from modules.usuarios import usuarios
@@ -59,6 +61,7 @@ def create_app():
     
     # Registrar blueprints
     app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(alertas, url_prefix='/alertas')
     app.register_blueprint(cuenta, url_prefix='/cuenta')
     app.register_blueprint(categorias, url_prefix='/categorias')
     app.register_blueprint(dashboard, url_prefix='/dashboard')
@@ -70,9 +73,12 @@ def create_app():
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
     app.register_blueprint(productos, url_prefix='/productos')
+    app.register_blueprint(inventario, url_prefix='/inventario')
     app.register_blueprint(proveedores, url_prefix='/proveedores')
     app.register_blueprint(ingredientes, url_prefix='/ingredientes')
     app.register_blueprint(pedidos, url_prefix='/pedidos')
+
+    init_alertas(app)
     
     # Configurar logging
     if not os.path.exists('logs'):
@@ -89,68 +95,6 @@ def create_app():
     def not_found(error):
         app.logger.warning(f'404: {request.url}')
         return render_template('404.html'), 404
-    
-    # Context processor para tener current_user disponible en todas las plantillas
-    @app.context_processor
-    def inject_user():
-        alertas_materias = []
-        alertas_productos = []
-
-        if current_user.is_authenticated and current_user.id_rol in [1, 2, 3]:
-            try:
-                materias_bajas = MateriaPrima.query.filter(
-                    MateriaPrima.stock_actual < MateriaPrima.stock_minimo
-                ).order_by(MateriaPrima.nombre.asc()).all()
-
-                ids_materias_bajas = [m.id_materia for m in materias_bajas]
-                ids_materias_solicitadas = set()
-
-                if ids_materias_bajas:
-                    filas_solicitadas = (
-                        db.session.query(DetalleCompra.id_materia)
-                        .join(Compra, Compra.id_compra == DetalleCompra.id_compra)
-                        .filter(
-                            Compra.estado.in_(['Solicitada', 'En Camino']),
-                            DetalleCompra.id_materia.in_(ids_materias_bajas)
-                        )
-                        .distinct()
-                        .all()
-                    )
-                    ids_materias_solicitadas = {fila[0] for fila in filas_solicitadas}
-
-                alertas_materias = [
-                    {
-                        'id': m.id_materia,
-                        'nombre': m.nombre,
-                        'stock_actual': m.stock_actual,
-                        'stock_minimo': m.stock_minimo,
-                        'unidad_medida': m.unidad_medida,
-                        'compra_solicitada': m.id_materia in ids_materias_solicitadas,
-                    }
-                    for m in materias_bajas
-                ]
-
-                productos_bajos = Producto.query.filter(
-                    Producto.stock_actual < Producto.stock_minimo
-                ).order_by(Producto.nombre.asc()).all()
-                alertas_productos = [
-                    {
-                        'id': p.id_producto,
-                        'nombre': p.nombre,
-                        'stock_actual': p.stock_actual,
-                        'stock_minimo': p.stock_minimo,
-                    }
-                    for p in productos_bajos
-                ]
-            except Exception as e:
-                app.logger.error(f"Error al cargar alertas de stock: {str(e)}")
-
-        return dict(
-            current_user=current_user,
-            alertas_materias=alertas_materias,
-            alertas_productos=alertas_productos,
-            alertas_stock_total=len(alertas_materias) + len(alertas_productos),
-        )
     
     # 🏠 Home
     @app.route("/")

@@ -23,13 +23,25 @@ def _obtener_proveedores_relacionados_compra(compra):
     return Proveedor.query.filter(Proveedor.id_proveedor.in_(ids)).order_by(Proveedor.id_proveedor.asc()).all()
 
 
-def _aplicar_datos_generales_compra(compra, form):
+def _aplicar_datos_generales_compra(compra, form, usar_hora_actual=False):
     fecha_entrega = form.get('fecha_entrega')
     metodo_pago = form.get('metodo_pago')
     id_proveedor = form.get('id_proveedor', type=int)
 
     if fecha_entrega:
-        compra.fecha_entrega = datetime.strptime(fecha_entrega, "%Y-%m-%d")
+        fecha_base = datetime.strptime(fecha_entrega, "%Y-%m-%d")
+        if usar_hora_actual:
+            ahora = datetime.now()
+            compra.fecha_entrega = datetime(
+                fecha_base.year,
+                fecha_base.month,
+                fecha_base.day,
+                ahora.hour,
+                ahora.minute,
+                ahora.second,
+            )
+        else:
+            compra.fecha_entrega = fecha_base
 
     if metodo_pago:
         compra.metodo_pago = metodo_pago
@@ -50,7 +62,22 @@ def index():
         flash("Error al cargar las compras", "danger")
         return redirect(url_for('pedidos.index'))
 
-    return render_template('compras/index.html', compras=compras)
+    hoy = datetime.now().date()
+    compras_completadas_hoy = sum(
+        1
+        for compra in compras
+        if compra['estado'] in ['Completada', 'Completado']
+        and compra['fecha_entrega']
+        and compra['fecha_entrega'].date() == hoy
+    )
+    compras_solicitadas = sum(1 for compra in compras if compra['estado'] == 'Solicitada')
+
+    return render_template(
+        'compras/index.html',
+        compras=compras,
+        compras_completadas_hoy=compras_completadas_hoy,
+        compras_solicitadas=compras_solicitadas,
+    )
 
 @compras.route('/crear', methods=['GET', 'POST'])
 @login_required
@@ -59,6 +86,8 @@ def crear():
     if current_user.id_rol == 2 and not session.get('compra_alerta_autorizada'):
         flash('Como cocinero solo puedes crear solicitudes de compra desde alertas.', 'warning')
         return redirect(url_for('produccion.index'))
+
+    alerta_stock = request.args.get('alerta_stock', type=int)
 
     if request.method == 'POST':
         resultado, mensaje = crear_solicitud_compra_manual(request.form, current_user.id_usuario)
@@ -97,7 +126,9 @@ def crear():
         )
         materias_solicitadas = {fila[0] for fila in filas_solicitadas}
 
-    if id_materia_alerta:
+    if alerta_stock:
+        sugerencias = obtener_materias_alerta_stock_bajo(id_materia_alerta)
+    elif id_materia_alerta:
         sugerencias = obtener_materias_alerta_stock_bajo(id_materia_alerta)
     else:
         sugerencias = obtener_materias_faltantes_produccion(id_materia_alerta)
@@ -109,6 +140,7 @@ def crear():
         materias_solicitadas=materias_solicitadas,
         sugerencias=sugerencias,
         id_materia_alerta=id_materia_alerta,
+        alerta_stock=bool(alerta_stock),
     )
 
 @compras.route('/ver/<int:id>')
@@ -137,7 +169,7 @@ def actualizar(id):
             flash("Compra no encontrada", "danger")
             return redirect(url_for('compras.index'))
 
-        _aplicar_datos_generales_compra(compra, request.form)
+        _aplicar_datos_generales_compra(compra, request.form, usar_hora_actual=True)
 
         aplicar_cambios_compra(compra, request.form)
 

@@ -9,7 +9,7 @@
     padding: 20px;
     overflow-y: auto;
     transition: all 0.3s ease;
-    z-index: 999;
+    z-index: 1020;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -53,6 +53,22 @@
     box-shadow: 0 4px 15px rgba(60, 40, 161, 0.3);
 }
 
+.profile-toggle-btn {
+    border: none;
+    background: transparent;
+}
+
+.sidebar-submenu {
+    margin: 0.2rem 0 0.4rem;
+    padding-left: 1.1rem;
+}
+
+.sub-link {
+    font-size: 0.92rem;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -64,7 +80,7 @@
 
 @media (max-width: 768px) {
     .sidebar {
-        width: var(--sidebar-width);
+        width: min(82vw, var(--sidebar-width));
         transform: translateX(-100%);
     }
 

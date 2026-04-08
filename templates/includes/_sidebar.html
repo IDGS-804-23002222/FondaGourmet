@@ -1,6 +1,38 @@
 <div class="sidebar" id="sidebar">
 
     <ul class="nav flex-column mt-3">
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+            <button
+                class="nav-link w-100 text-start profile-toggle-btn {{ 'active' if request.endpoint in ['cuenta.perfil', 'cuenta.editar'] else '' }}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#perfilSubmenu"
+                aria-expanded="{{ 'true' if request.endpoint in ['cuenta.perfil', 'cuenta.editar'] else 'false' }}"
+                aria-controls="perfilSubmenu">
+                <i class="bi bi-person-circle"></i> Perfil
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </button>
+
+            <div class="collapse {{ 'show' if request.endpoint in ['cuenta.perfil', 'cuenta.editar'] else '' }}" id="perfilSubmenu">
+                <ul class="nav flex-column sidebar-submenu">
+                    <li class="nav-item">
+                        <a class="nav-link sub-link {{ 'active' if request.endpoint == 'cuenta.perfil' else '' }}"
+                            href="{{ url_for('cuenta.perfil') }}">
+                            <i class="bi bi-eye"></i> Ver perfil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link sub-link {{ 'active' if request.endpoint == 'cuenta.editar' else '' }}"
+                            href="{{ url_for('cuenta.editar') }}">
+                            <i class="bi bi-pencil-square"></i> Editar perfil
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        {% endif %}
+
         {% if current_user.is_authenticated and current_user.id_rol == 1 %}
         <li class="nav-item">
             <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.index' else '' }}"
@@ -20,16 +52,10 @@
                 <i class="bi bi-truck"></i> Proveedores
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link {{ 'active' if request.endpoint == 'productos.index' else '' }}"
-                href="{{ url_for('productos.index') }}">
-                <i class="bi bi-egg-fried"></i> Productos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ 'active' if request.endpoint == 'ingredientes.index' else '' }}"
-                href="{{ url_for('ingredientes.index') }}">
-                <i class="bi bi-box"></i> Ingredientes
+       <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'inventario.index' else '' }}"
+                href="{{ url_for('inventario.index') }}">
+                <i class="bi bi-box"></i> Inventario
             </a>
         </li>
         
@@ -46,7 +72,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{{ url_for('caja.index') }}">
                 <i class="bi bi-cash-stack"></i> Caja / Corte
             </a>
         </li>
@@ -64,6 +90,42 @@
             <a class="nav-link {{ 'active' if request.endpoint == 'recetas.index' else '' }}"
                 href="{{ url_for('recetas.index') }}">
                 <i class="bi bi-book"></i> Recetas
+            </a>
+        </li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.id_rol in [1, 2, 3] %}
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'inventario.index' else '' }}"
+                href="{{ url_for('inventario.index') }}">
+                <i class="bi bi-boxes"></i> Inventario
+            </a>
+        </li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.id_rol in [4] %}
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'tienda.menu' else '' }}"
+                href="{{ url_for('tienda.menu') }}">
+                <i class="bi bi-book"></i> Menú
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'tienda.carrito' else '' }}"
+                href="{{ url_for('tienda.carrito') }}">
+                <i class="bi bi-cart"></i> Carrito
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'pedidos.mis_pedidos' else '' }}"
+                href="{{ url_for('pedidos.mis_pedidos') }}">
+                <i class="bi bi-book"></i> Mis Pedidos
+            </a>
+        </li>
+        {%endif %}
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'auth.logout' else '' }}"
+                href="{{ url_for('auth.logout') }}">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
             </a>
         </li>
         {% endif %}

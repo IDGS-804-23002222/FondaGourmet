@@ -285,6 +285,7 @@ class Compra(db.Model):
     fecha_entrega = db.Column(db.DateTime)
     metodo_pago = db.Column(db.String(50))
     estado = db.Column(db.String(50), nullable=False, default='Solicitada')
+    desde_produccion = db.Column(db.Boolean, nullable=False, default=False)
     id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'))
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
@@ -376,6 +377,9 @@ class PedidoMeta(db.Model):
     __tablename__ = 'pedidos_meta'
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido'), primary_key=True)
     metodo_pago = db.Column(db.String(50), nullable=False, default='Efectivo')
+    tarjeta_titular = db.Column(db.String(120))
+    tarjeta_ultimos4 = db.Column(db.String(4))
+    tarjeta_vencimiento = db.Column(db.String(5))
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
 
     pedido = db.relationship('Pedido', back_populates='meta_pedido')

@@ -320,6 +320,206 @@
     font-weight: bold;
 }
 
+.carrito-view {
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+.carrito-hero {
+    background: linear-gradient(125deg, #17443a 0%, #1f5f4d 55%, #2f7f68 100%);
+    color: #fff;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.carrito-kicker {
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    opacity: 0.9;
+}
+
+.carrito-title {
+    color: #fff;
+    margin-bottom: 0;
+    text-align: left;
+    font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+}
+
+.carrito-subtitle {
+    opacity: 0.9;
+}
+
+.carrito-total-chip {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 12px;
+    padding: 0.5rem 0.8rem;
+    min-width: 120px;
+    text-align: right;
+}
+
+.carrito-total-chip small {
+    display: block;
+    font-size: 0.72rem;
+    opacity: 0.9;
+}
+
+.carrito-total-chip span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.carrito-hero-metrics {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.carrito-items-chip {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 12px;
+    padding: 0.5rem 0.8rem;
+    min-width: 110px;
+    text-align: right;
+}
+
+.carrito-items-chip small {
+    display: block;
+    font-size: 0.72rem;
+    opacity: 0.9;
+}
+
+.carrito-items-chip span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.carrito-card {
+    max-width: 100%;
+    border: 1px solid #e4ece8;
+    box-shadow: 0 8px 20px rgba(13, 34, 27, 0.08);
+}
+
+.carrito-table thead {
+    background: #f3f8f5;
+}
+
+.carrito-table .producto-cell {
+    font-weight: 600;
+    color: #1d463b;
+}
+
+.cantidad-pill {
+    display: inline-block;
+    min-width: 34px;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #ebf5f1;
+    color: #1f5f4d;
+    font-weight: 700;
+}
+
+.carrito-btn-control {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 0;
+}
+
+.acciones-cell {
+    white-space: nowrap;
+}
+
+.carrito-actions {
+    max-width: 100%;
+}
+
+.checkout-form {
+    margin-top: 1rem;
+}
+
+.checkout-payment-card {
+    border: 1px solid #e3ece7;
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.9rem;
+    box-shadow: 0 6px 16px rgba(14, 30, 24, 0.05);
+}
+
+.checkout-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #173f35;
+}
+
+.checkout-payment-row {
+    max-width: 360px;
+}
+
+.tarjeta-fields {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed #cddfd7;
+}
+
+.tarjeta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.carrito-empty-state {
+    max-width: 420px;
+    margin: 1.2rem auto 0;
+    border: 1px dashed #bfd7cf;
+    background: #f7fbf9;
+    border-radius: 14px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+}
+
+.carrito-empty-state i {
+    font-size: 1.8rem;
+    color: #2f7f68;
+}
+
+@media (max-width: 768px) {
+    .carrito-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .carrito-total-chip {
+        align-self: flex-end;
+    }
+
+    .carrito-hero-metrics {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .carrito-card {
+        padding: 0.75rem;
+    }
+
+    .carrito-table th,
+    .carrito-table td {
+        font-size: 0.88rem;
+        padding: 8px;
+    }
+}
+
 /* ===== CONFIRMACIÓN DE PEDIDO ===== */
 
 .confirm-card {

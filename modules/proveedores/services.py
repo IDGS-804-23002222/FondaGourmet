@@ -168,6 +168,32 @@ def obtener_proveedor(id_proveedor):
     try:
         proveedor = Proveedor.query.get(id_proveedor)
         if proveedor and proveedor.persona:
+            compras = []
+            compras_ordenadas = sorted(
+                proveedor.compras or [],
+                key=lambda compra: compra.fecha or datetime.min,
+                reverse=True,
+            )
+
+            for compra in compras_ordenadas:
+                compras.append({
+                    'id_compra': compra.id_compra,
+                    'fecha': compra.fecha,
+                    'fecha_entrega': compra.fecha_entrega,
+                    'estado': compra.estado,
+                    'total': compra.total,
+                    'metodo_pago': compra.metodo_pago,
+                    'detalles': [
+                        {
+                            'materia': detalle.materia_prima.nombre if detalle.materia_prima else 'Materia prima',
+                            'cantidad': detalle.cantidad,
+                            'precio_u': detalle.precio_u,
+                            'subtotal': detalle.subtotal,
+                        }
+                        for detalle in compra.detalles
+                    ],
+                })
+
             return {
                 'id_proveedor': proveedor.id_proveedor,
                 'nombre': proveedor.persona.nombre,
@@ -178,7 +204,8 @@ def obtener_proveedor(id_proveedor):
                 'direccion': proveedor.persona.direccion,
                 'id_categoria_proveedor': proveedor.id_categoria_proveedor,
                 'categoria_proveedor': proveedor.categoria_proveedor.nombre if proveedor.categoria_proveedor else None,
-                'estado': proveedor.estado
+                'estado': proveedor.estado,
+                'compras': compras,
             }, None
         return None, "Proveedor no encontrado"
     except Exception as e:

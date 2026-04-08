@@ -1,4 +1,4 @@
-{% extends "tienda/base_cliente.html" %}
+{% extends "base.html" %}
 {% block title %}Menú{% endblock %}
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/tienda.css') }}">
@@ -6,33 +6,125 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="menu-title">Nuestro Menú</h1>
+<section class="menu-hero">
+    <div>
+        <p class="menu-kicker mb-2">CASA GOURMET</p>
+        <h1 class="menu-title mb-2">Nuestro Menú</h1>
+        <p class="menu-subtitle mb-0">Elige tus platillos favoritos y agrégalos al carrito en un clic.</p>
+    </div>
+    <div class="menu-badge">
+        <span id="menuProductsCount">{{ productos|length }}</span>
+        <small>platillos</small>
+    </div>
+</section>
 
-<div class="productos-grid cliente-menu-list">
+{% set categorias = productos | map(attribute='categoria') | list | unique | list %}
+<section class="menu-toolbar mb-3">
+    <div class="menu-filters">
+        <button type="button" class="menu-filter-btn active" data-category="all">Todos</button>
+        {% for categoria in categorias %}
+            <button type="button" class="menu-filter-btn" data-category="{{ categoria|lower }}">{{ categoria }}</button>
+        {% endfor %}
+    </div>
+    <div class="menu-search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="menuSearchInput" class="menu-search-input" placeholder="Buscar platillo...">
+    </div>
+</section>
+
+<div class="productos-grid cliente-menu-list menu-grid-modern">
     {% for producto in productos %}
-    <div class="producto-card cliente-producto-card">
+    <article class="producto-card cliente-producto-card menu-card-modern" data-category="{{ (producto.categoria or 'Sin categoria')|lower }}">
 
         <div class="producto-img-area">
             {% if producto.imagen %}
-    <img src="{{ url_for('static', filename=producto.imagen) }}" alt="{{ producto.nombre }}" class="detail-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2216%22 fill=%22%23999%22%3EImagen no disponible%3C/text%3E%3C/svg%3E'">
-{% else %}
-    <div class="producto-placeholder"></div>
-{% endif %}
+                <img src="{{ url_for('static', filename=producto.imagen) }}" alt="{{ producto.nombre }}" class="detail-image menu-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2216%22 fill=%22%23999%22%3EImagen no disponible%3C/text%3E%3C/svg%3E'">
+            {% else %}
+                <div class="producto-placeholder menu-placeholder">Sin imagen</div>
+            {% endif %}
 
         </div>
 
         <div class="producto-info">
-            <h3>{{ producto.nombre }}</h3>
+            <h3 class="menu-product-title">{{ producto.nombre }}</h3>
+            <p class="menu-category-chip">{{ producto.categoria or 'Sin categoria' }}</p>
             <p class="descripcion">{{ producto.descripcion }}</p>
-            <p class="precio">${{ "%.2f"|format(producto.precio) }}</p>
-
-            <a href="{{ url_for('tienda.agregar_carrito', id=producto.id) }}" class="btn-success btn-add">
-                Agregar al carrito
-            </a>
+            <div class="menu-card-footer">
+                <p class="precio mb-0">${{ "%.2f"|format(producto.precio) }}</p>
+                <a href="{{ url_for('tienda.agregar_carrito', id=producto.id) }}" class="btn-success btn-add menu-btn-add">
+                    <i class="bi bi-cart-plus"></i> Agregar
+                </a>
+            </div>
         </div>
 
-    </div>
+    </article>
     {% endfor %}
 </div>
 
+<div id="menuEmptyState" class="menu-empty-state" style="display: none;">
+    <i class="bi bi-emoji-neutral"></i>
+    <p>No encontramos productos con ese filtro.</p>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const filterButtons = document.querySelectorAll('.menu-filter-btn');
+    const menuCards = document.querySelectorAll('.menu-card-modern');
+    const menuProductsCount = document.getElementById('menuProductsCount');
+    const menuSearchInput = document.getElementById('menuSearchInput');
+    const menuEmptyState = document.getElementById('menuEmptyState');
+
+    let selectedCategory = 'all';
+
+    function normalizeText(text) {
+        return (text || '').toLowerCase().trim();
+    }
+
+    function updateMenuFilters() {
+        const searchTerm = normalizeText(menuSearchInput ? menuSearchInput.value : '');
+        let visibleCount = 0;
+
+        menuCards.forEach((card) => {
+            const cardCategory = card.dataset.category;
+            const cardTitle = normalizeText(card.querySelector('.menu-product-title')?.textContent);
+            const cardDescription = normalizeText(card.querySelector('.descripcion')?.textContent);
+
+            const matchesCategory = selectedCategory === 'all' || cardCategory === selectedCategory;
+            const matchesSearch = !searchTerm || cardTitle.includes(searchTerm) || cardDescription.includes(searchTerm);
+            const showCard = matchesCategory && matchesSearch;
+
+            card.style.display = showCard ? '' : 'none';
+            if (showCard) {
+                visibleCount += 1;
+            }
+        });
+
+        if (menuProductsCount) {
+            menuProductsCount.textContent = visibleCount;
+        }
+
+        if (menuEmptyState) {
+            menuEmptyState.style.display = visibleCount === 0 ? 'flex' : 'none';
+        }
+    }
+
+    filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedCategory = button.dataset.category;
+
+            filterButtons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            updateMenuFilters();
+        });
+    });
+
+    if (menuSearchInput) {
+        menuSearchInput.addEventListener('input', updateMenuFilters);
+    }
+
+    updateMenuFilters();
+</script>
 {% endblock %}

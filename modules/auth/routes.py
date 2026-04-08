@@ -127,7 +127,7 @@ def editar_perfil():
 def logout():
     logout_user()
     flash('Sesión cerrada correctamente.', 'info')
-    return redirect(url_for('index'))
+    return redirect(url_for('auth.login'))
 
 @auth.route('/redirigir')
 @login_required

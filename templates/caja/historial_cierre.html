@@ -1,57 +1,199 @@
 {% extends "base.html" %}
 {% block title %}Historial de Cierres{% endblock %}
 {% block content %}
-<h1>Historial de Cierres de Caja</h1>
-<div class="toolbar">
-    <input type="text" class="search" placeholder="Buscar por fecha..." style="width: 300px;">
-    <select class="filter">
-        <option value="marzo">Marzo 2026</option>
-        <option value="febrero">Febrero 2026</option>
-        <option value="enero">Enero 2026</option>
-    </select>
-    <button type="button" class="btn-secondary" onclick="window.location.href='/caja'">Volver a caja</button>
-</div>
+<style>
+    .hist-shell {
+        display: grid;
+        gap: 16px;
+    }
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>ID Cierre</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Usuario</th>
-            <th>Total ventas</th>
-            <th>Efectivo</th>
-            <th>Tarjeta</th>
-            <th>Diferencia</th>
-            <th>Acciones</th>
-        </thead>
-    <tbody>
-        <tr>
-            <td>101</td>
-            <td>Fecha de ejemplo</td>
-            <td>18:00</td>
-            <td>Usuario ejemplo</td>
-            <td>$0.00</td>
-            <td>$0.00</td>
-            <td>$0.00</td>
-            <td><span style="color: var(--verde-menta);">$0.00</span></td>
-            <td>
-                <button type="button" class="btn-view" onclick="window.location.href='/caja/ver-cierre/101'">Ver detalle</button>
-             </td>
-         </tr>
-         <tr>
-            <td>100</td>
-            <td>Fecha de ejemplo</td>
-            <td>18:00</td>
-            <td>Usuario ejemplo</td>
-            <td>$0.00</td>
-            <td>$0.00</td>
-            <td>$0.00</td>
-            <td><span style="color: var(--verde-menta);">$0.00</span></td>
-            <td>
-                <button type="button" class="btn-view" onclick="window.location.href='/caja/ver-cierre/100'">Ver detalle</button>
-             </td>
-         </tr>
-    </tbody>
-</table>
+    .hist-hero {
+        background: linear-gradient(135deg, #1f3f61 0%, #295984 55%, #3874a8 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        box-shadow: 0 14px 28px rgba(31, 63, 97, 0.22);
+    }
+
+    .hist-hero h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 700;
+    }
+
+    .hist-hero p {
+        margin: 6px 0 0;
+        opacity: 0.9;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(170px, 1fr));
+        gap: 12px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e4ecf3;
+        border-radius: 12px;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+        padding: 12px;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        color: #516273;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .stat-card .value {
+        margin-top: 8px;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1f3142;
+    }
+
+    .table-wrap {
+        background: #fff;
+        border: 1px solid #e4ecf3;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .table-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e5edf5;
+        background: #f7faff;
+    }
+
+    .table-head h2 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-closed {
+        color: #1d6e45;
+        background: #dff8eb;
+    }
+
+    .money {
+        font-weight: 700;
+        color: #1f3142;
+    }
+
+    @media (max-width: 900px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(150px, 1fr));
+        }
+    }
+
+    @media (max-width: 650px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .hist-hero h1 {
+            font-size: 1.35rem;
+        }
+    }
+</style>
+
+{% set total_final = namespace(value=0.0) %}
+{% for cierre in cierres %}
+    {% set total_final.value = total_final.value + (cierre.monto_final or 0) %}
+{% endfor %}
+
+<div class="hist-shell">
+    <section class="hist-hero">
+        <div>
+            <h1>Historial de Cierres de Caja</h1>
+            <p>Consulta cierres anteriores con su responsable, montos y acceso rápido al detalle.</p>
+        </div>
+        <button type="button" class="btn-secondary" onclick="window.location.href='{{ url_for('caja.index') }}'">Volver a caja</button>
+    </section>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <h3>Total de cierres</h3>
+            <div class="value">{{ cierres|length }}</div>
+        </article>
+        <article class="stat-card">
+            <h3>Último cierre</h3>
+            <div class="value">
+                {{ cierres[0].fecha.strftime('%d/%m/%Y') if cierres and cierres[0].fecha else 'N/D' }}
+            </div>
+        </article>
+        <article class="stat-card">
+            <h3>Suma monto final</h3>
+            <div class="value">${{ '%.2f'|format(total_final.value) }}</div>
+        </article>
+    </section>
+
+    <section class="table-wrap">
+        <div class="table-head">
+            <h2>Registros de cierre</h2>
+            <small>{{ cierres|length }} resultados</small>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID Cierre</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Usuario</th>
+                        <th>Monto inicial</th>
+                        <th>Monto final</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cierre in cierres %}
+                    <tr>
+                        <td>#{{ cierre.id_caja }}</td>
+                        <td>{{ cierre.fecha.strftime('%d/%m/%Y') if cierre.fecha else '' }}</td>
+                        <td>{{ cierre.fecha.strftime('%H:%M') if cierre.fecha else '' }}</td>
+                        <td>{{ cierre.usuario.username if cierre.usuario else 'N/D' }}</td>
+                        <td class="money">${{ '%.2f'|format(cierre.monto_inicial or 0) }}</td>
+                        <td class="money">${{ '%.2f'|format(cierre.monto_final or 0) }}</td>
+                        <td>
+                            <span class="status-badge status-closed">{{ cierre.estado }}</span>
+                        </td>
+                        <td>
+                            <a class="btn btn-view" href="{{ url_for('caja.ver_cierre', id_caja=cierre.id_caja) }}">Ver detalle</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No hay cierres registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}
