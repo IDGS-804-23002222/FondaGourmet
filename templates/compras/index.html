@@ -5,13 +5,22 @@
 <h1>Compras a Proveedores</h1>
 
 <div class="toolbar">
-    <input type="date" class="search" placeholder="Buscar por fecha...">
+    <input type="date" class="search" id="filtroFechaSolicitud" title="Filtrar por fecha de solicitud">
+    <input type="date" class="search" id="filtroFechaEntrega" title="Filtrar por fecha de entrega">
+    <select class="filter" id="filtroEstadoCompra">
+        <option value="todas">Todos los estados</option>
+        <option value="solicitada">Solicitadas</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+    </select>
+    <a href="{{ url_for('compras.crear') }}" class="btn btn-success">Nueva solicitud</a>
 </div>
 
 <table class="data-table">
     <thead>
         <tr>
             <th>No. Compra</th>
+            <th>Responsable</th>
             <th>Fecha Solicitud</th>
             <th>Fecha Entrega</th>
             <th>Productos</th>
@@ -24,8 +33,9 @@
 
     <tbody>
         {% for compra in compras %}
-        <tr>
+        <tr data-estado-clave="{{ compra.estado|lower|replace(' ', '_') }}" data-fecha-solicitud="{{ compra.fecha.strftime('%Y-%m-%d') if compra.fecha else '' }}" data-fecha-entrega="{{ compra.fecha_entrega.strftime('%Y-%m-%d') if compra.fecha_entrega else '' }}">
             <td>#{{ compra.id_compra }}</td>
+            <td>{{ compra.responsable }}</td>
             <td>{{ compra.fecha.strftime('%d/%m/%Y') }}</td>
             <td>{{ compra.fecha_entrega.strftime('%d/%m/%Y') if compra.fecha_entrega else 'Sin fecha' }}</td>
             <td>
@@ -51,7 +61,7 @@
                     {% for m in compra.materias_primas %}
                         <li>
                             <span class="badge 
-                                {% if m.stock_actual < m.cantidad %}
+                                {% if m.stock_actual < m.stock_minimo %}
                                     bg-danger
                                 {% else %}
                                     bg-success
@@ -89,11 +99,10 @@
             </td>
 <!-- ACCIONES -->
             <td>
-                {% if compra.estado != "Completado" and compra.estado != "Cancelado" %}
-                    <button onclick="window.location.href='{{ url_for('compras.ver', id=compra.id_compra) }}'" 
-                                class="btn btn-success">
-                            Completar
-                    </button>
+                {% if compra.estado not in ["Completada", "Completado", "Cancelado"] %}
+                    <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="btn btn-success">
+                        Completar
+                    </a>
                 {% else %}
                     <span class="text-muted">Sin acciones</span>
                 {% endif %}
@@ -105,4 +114,65 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+function normalizarTexto(texto) {
+    return (texto || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '_');
+}
+
+function aplicarFiltrosCompras() {
+    const buscador = document.getElementById('buscarCompra');
+    const filtroFechaSolicitud = document.getElementById('filtroFechaSolicitud');
+    const filtroFechaEntrega = document.getElementById('filtroFechaEntrega');
+    const filtroEstado = document.getElementById('filtroEstadoCompra');
+
+    const textoBusqueda = normalizarTexto(buscador ? buscador.value : '');
+    const fechaSolicitud = filtroFechaSolicitud ? filtroFechaSolicitud.value : '';
+    const fechaEntrega = filtroFechaEntrega ? filtroFechaEntrega.value : '';
+    const estadoSeleccionado = normalizarTexto(filtroEstado ? filtroEstado.value : 'todas');
+
+    document.querySelectorAll('table.data-table tbody tr').forEach((fila) => {
+        const estadoFila = normalizarTexto(fila.dataset.estadoClave);
+        const fechaSolicitudFila = fila.dataset.fechaSolicitud || '';
+        const fechaEntregaFila = fila.dataset.fechaEntrega || '';
+        const contenidoFila = normalizarTexto(fila.textContent);
+
+        const coincideTexto = !textoBusqueda || contenidoFila.includes(textoBusqueda);
+        const coincideEstado = estadoSeleccionado === 'todas' || estadoFila === estadoSeleccionado;
+        const coincideSolicitud = !fechaSolicitud || fechaSolicitudFila === fechaSolicitud;
+        const coincideEntrega = !fechaEntrega || fechaEntregaFila === fechaEntrega;
+
+        fila.style.display = (coincideTexto && coincideEstado && coincideSolicitud && coincideEntrega) ? '' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const buscador = document.getElementById('buscarCompra');
+    const filtroFechaSolicitud = document.getElementById('filtroFechaSolicitud');
+    const filtroFechaEntrega = document.getElementById('filtroFechaEntrega');
+    const filtroEstado = document.getElementById('filtroEstadoCompra');
+
+    if (buscador) {
+        buscador.addEventListener('input', aplicarFiltrosCompras);
+    }
+
+    if (filtroFechaSolicitud) {
+        filtroFechaSolicitud.addEventListener('change', aplicarFiltrosCompras);
+    }
+
+    if (filtroFechaEntrega) {
+        filtroFechaEntrega.addEventListener('change', aplicarFiltrosCompras);
+    }
+
+    if (filtroEstado) {
+        filtroEstado.addEventListener('change', aplicarFiltrosCompras);
+    }
+
+    aplicarFiltrosCompras();
+});
+</script>
 {% endblock %}

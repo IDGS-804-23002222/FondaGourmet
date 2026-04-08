@@ -52,7 +52,7 @@ def redirect_por_rol(user):
         return redirect(url_for('dashboard.index'))
     elif user.rol.nombre == 'Cajero':
         return redirect(url_for('pedidos.index'))
-    elif user.rol.id_rol == 'Cocinero':
+    elif user.rol.nombre == 'Cocinero':
         return redirect(url_for('produccion.index'))
     elif user.rol.nombre == 'Cliente':
         return redirect(url_for('tienda.menu'))

@@ -2,18 +2,20 @@
 {% block title %}Producción{% endblock %}
 {% block content %}
 <h1>Órdenes de Producción</h1>
-<div class="toolbar">
-    <input type="text" class="search" placeholder="Buscar orden...">
-    <select class="filter">
+    <div class="toolbar mt-2" id="filtrosUrgencia">
+        <input type="date" class="search" placeholder="Buscar por fecha...">
+        <select class="filter" id="filtroEstadoProduccion">
         <option value="todas">Todas las órdenes</option>
         <option value="solicitada">Solicitadas</option>
-        <option value="en_proceso">En proceso</option>
+        <option value="en proceso">En proceso</option>
         <option value="completada">Completadas</option>
         <option value="cancelada">Canceladas</option>
     </select>
-    <button type="button" class="btn-primary" onclick="window.location.href='/produccion/nueva'">Nueva orden</button>
-</div>
-
+    <button type="button" class="btn btn-sm btn-outline-secondary active" data-urgencia="todas">Todas</button>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-urgencia="vencida">Urgentes</button>
+    <button type="button" class="btn btn-sm btn-outline-primary" data-urgencia="proxima">Próximas</button>
+    <button type="button" class="btn btn-sm btn-outline-success" data-urgencia="normal">A tiempo</button>
+    </div>
 <table class="data-table">
     <thead>
         <tr>
@@ -21,14 +23,14 @@
             <th>Responsable</th>
             <th>Estado</th>
             <th>Fecha Solicitud</th>
-            <th>Fecha Producción</th>
             <th>Fecha a Completar</th>
+            <th>Fecha Producción</th>
             <th>Urgencia</th>
             <th>Acciones</th>
         </thead>
     <tbody>
 {% for p in producciones %}
-<tr>
+<tr data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}">
     <td>{{ p.id_produccion }}</td>
     <td>
         {{ p.usuario }}
@@ -50,8 +52,8 @@
     </td>
 
     <td>{{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</td>
-    <td>{{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</td>
     <td>{{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</td>
+    <td>{{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</td>
     <td>
         {% if p.estado != 'Completada' and p.dias_restantes <= 1 %}
     <span class="badge bg-danger">URGENTE</span>
@@ -68,4 +70,87 @@
 {% endfor %}
 </tbody>
 </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function normalizarTexto(texto) {
+    return (texto || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function clasificarUrgencia(dias, estado) {
+    if (estado === 'completada' || estado === 'cancelada') {
+        return 'normal';
+    }
+
+    if (dias === null || Number.isNaN(dias)) {
+        return 'normal';
+    }
+
+    if (dias < 0) {
+        return 'vencida';
+    }
+    if (dias <= 1) {
+        return 'urgente';
+    }
+    if (dias <= 2) {
+        return 'proxima';
+    }
+    return 'normal';
+}
+
+function aplicarFiltrosProduccion() {
+    const buscador = document.getElementById('buscarProduccion');
+    const filtroEstado = document.getElementById('filtroEstadoProduccion');
+    const urgenciaActiva = document.querySelector('#filtrosUrgencia button.active');
+    const textoBusqueda = normalizarTexto(buscador ? buscador.value : '');
+    const estadoSeleccionado = normalizarTexto(filtroEstado ? filtroEstado.value : 'todas');
+    const filtroUrgencia = urgenciaActiva ? urgenciaActiva.dataset.urgencia : 'todas';
+
+    const filas = document.querySelectorAll('table.data-table tbody tr');
+
+    filas.forEach((fila) => {
+        const diasRaw = fila.dataset.diasRestantes;
+        const estado = normalizarTexto(fila.dataset.estado);
+        const dias = diasRaw === '' ? null : parseInt(diasRaw, 10);
+        const urgencia = clasificarUrgencia(dias, estado);
+        const contenidoFila = normalizarTexto(fila.textContent);
+        const coincideBusqueda = !textoBusqueda || contenidoFila.includes(textoBusqueda);
+        const coincideEstado = estadoSeleccionado === 'todas' || estado === estadoSeleccionado;
+        const coincideUrgencia = filtroUrgencia === 'todas' || urgencia === filtroUrgencia;
+
+        fila.style.display = (coincideBusqueda && coincideEstado && coincideUrgencia) ? '' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedor = document.getElementById('filtrosUrgencia');
+    const buscador = document.getElementById('buscarProduccion');
+    const filtroEstado = document.getElementById('filtroEstadoProduccion');
+
+    if (contenedor) {
+        contenedor.querySelectorAll('button[data-urgencia]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                contenedor.querySelectorAll('button[data-urgencia]').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                aplicarFiltrosProduccion();
+            });
+        });
+    }
+
+    if (buscador) {
+        buscador.addEventListener('input', aplicarFiltrosProduccion);
+    }
+
+    if (filtroEstado) {
+        filtroEstado.addEventListener('change', aplicarFiltrosProduccion);
+    }
+
+    aplicarFiltrosProduccion();
+});
+</script>
 {% endblock %}

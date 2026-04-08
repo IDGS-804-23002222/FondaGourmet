@@ -18,6 +18,8 @@
                 <th>ID</th>
                 <th>Fecha Creación</th>
                 <th>Fecha</th>
+                <th>Método de pago</th>
+                <th>Responsable</th>
                 <th>Total</th>
                 <th>Estado</th>
                 <th></th>
@@ -42,6 +44,9 @@
     {% endif %}
 </td>
 
+                <td>{{ p.metodo_pago }}</td>
+                <td>{{ p.usuario_responsable }}</td>
+
                 <td>${{ "%.2f"|format(p.total) }}</td>
 
                 <td>
@@ -65,7 +70,7 @@
                                 title="Ver detalles">
                             <i class="bi bi-eye text-lg"></i>
                         </button>
-                        {% if p.estado == "Pendiente" %}
+                        {% if p.estado in ["Pendiente", "Solicitado"] %}
 <button onclick="cancelarPedido('{{ p.id }}')"
     class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
     title="Cancelar pedido">

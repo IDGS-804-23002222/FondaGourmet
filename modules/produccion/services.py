@@ -1,10 +1,48 @@
-from models import db, Pedido, Produccion, Compra, DetalleCompra
-from datetime import datetime
+from models import db, Pedido, Produccion, Compra, DetalleCompra, Producto, DetalleProduccion
+from datetime import datetime, timedelta
 from flask import current_app
 from sqlalchemy import text
 import logging
 import os
 logger = logging.getLogger(__name__)
+
+
+def crear_solicitud_produccion_desde_alerta(id_producto, id_usuario):
+    try:
+        producto = Producto.query.get(id_producto)
+
+        if not producto:
+            return None, "Producto no encontrado"
+
+        if producto.stock_actual >= producto.stock_minimo:
+            return None, "El producto ya no está por debajo del mínimo"
+
+        cantidad = producto.stock_minimo - producto.stock_actual
+
+        produccion = Produccion(
+            fecha_solicitud=datetime.now(),
+            fecha_necesaria=datetime.now() + timedelta(days=3),
+            estado="Solicitada",
+            id_usuario=id_usuario,
+        )
+
+        db.session.add(produccion)
+        db.session.flush()
+
+        db.session.add(DetalleProduccion(
+            id_produccion=produccion.id_produccion,
+            id_producto=producto.id_producto,
+            id_materia=None,
+            cantidad=cantidad
+        ))
+
+        db.session.commit()
+        return produccion.id_produccion, f"Solicitud de producción creada para {producto.nombre}"
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al crear solicitud de producción desde alerta: {str(e)}")
+        return None, str(e)
 
 def obtener_producciones():
     try:
@@ -18,7 +56,7 @@ def obtener_producciones():
                 u.username AS usuario
             FROM producciones pr
             JOIN usuarios u ON pr.id_usuario = u.id_usuario
-            ORDER BY pr.fecha_necesaria DESC
+            ORDER BY pr.fecha_necesaria ASC
         """))
 
         producciones = []

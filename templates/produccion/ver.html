@@ -4,6 +4,22 @@
 {% if produccion.estado != 'Completada' %}
 <h1 class="section-title">Orden de Producción #{{ produccion.id_produccion }}</h1>
 
+{% set ns = namespace(tiene_faltantes=false) %}
+{% for fila in produccion.filas %}
+    {% if fila.ingredientes|selectattr('faltante')|list|length > 0 %}
+        {% set ns.tiene_faltantes = true %}
+    {% endif %}
+{% endfor %}
+
+<div class="toolbar" style="margin-bottom: 1rem;">
+    {% if produccion.estado != 'Completada' and not ns.tiene_faltantes %}
+        <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-primary">Completar producción</a>
+    {% elif produccion.estado != 'Completada' and ns.tiene_faltantes %}
+        <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-warning">Solicitar compra</a>
+    {% endif %}
+    <a href="{{ url_for('produccion.index')}}" class="btn btn-delete">Volver</a>
+</div>
+
 <div class="pedidos-wrapper">
     <table class="data-table pedidos-table">
         <thead>
@@ -13,7 +29,6 @@
                 <th>Cantidad Solicitada</th>
                 <th>Ingredientes necesarios</th>
                 <th>Estado ingredientes</th>
-                <th>Acciones</th>
             </tr>
         </thead>
 
@@ -26,7 +41,7 @@
                 <td>
     <ul>
     {% for ing in p.ingredientes %}
-        <li style="color: {{ 'red' if ing.faltante else 'green' }}">
+        <li class="{{ 'text-danger' if ing.faltante else 'text-success' }}">
             {{ ing.nombre }} →
             Req: {{ ing.requerido }} {{ ing.unidad }},
             Stock: {{ ing.stock }}
@@ -37,18 +52,14 @@
 
 <td>
     {% if p.ingredientes|selectattr("faltante")|list|length > 0 %}
-        <span class="badge bg-danger">Faltan ingredientes</span>
+        {% if produccion.estado == 'En Proceso' %}
+            <span class="badge bg-warning text-dark">Compra solicitada</span>
+        {% else %}
+            <span class="badge bg-danger">Faltan ingredientes</span>
+        {% endif %}
     {% else %}
         <span class="badge bg-success">Ingredientes completos</span>
     {% endif %}
-    </td>
-    <td>
-        {% if p.ingredientes|selectattr("faltante")|list|length == 0 and produccion.estado == 'En Proceso' %}
-        <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-primary">Completar</a>
-        {% elif p.ingredientes|selectattr("faltante")|list|length > 0 and produccion.estado == 'Solicitada' %}
-            <a href="{{ url_for('produccion.completar', id=produccion.id_produccion) }}" class="btn btn-primary">Solicitar compra</a>
-        {% endif %}
-        <a href="{{ url_for('produccion.index')}}" class="btn btn-delete">Volver</a>
     </td>
             </tr>
             {% endfor %}
@@ -88,7 +99,7 @@
                 <td>
     <ul>
     {% for ing in p.ingredientes %}
-        <li style="color: {{ 'green' }}">
+        <li class="text-success">
             {{ ing.nombre }} →
             Utilizado: {{ ing.requerido }} {{ ing.unidad }}
         </li>

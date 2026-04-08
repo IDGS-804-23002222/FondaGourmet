@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Nueva Solicitud de Compra{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Nueva Solicitud de Compra</h1>
+
+<form method="POST" id="formSolicitudCompra">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="card mb-4">
+        <p class="mb-2"><strong>Agrega una o varias materias primas</strong></p>
+        <p class="text-muted mb-0">Puedes combinar varias materias en una sola solicitud. Si eliges distintos proveedores, se crearán solicitudes agrupadas por proveedor.</p>
+        {% if id_materia_alerta %}
+        <p class="mt-2 mb-0 text-primary"><strong>Vienes desde una alerta de stock.</strong> Puedes agregar también otras materias faltantes para producción.</p>
+        {% endif %}
+    </div>
+
+    <div class="pedidos-wrapper">
+        <table class="data-table" id="tablaSolicitudesCompra">
+            <thead>
+                <tr>
+                    <th>Materia prima</th>
+                    <th>Cantidad</th>
+                    <th>Proveedor</th>
+                    <th>Precio actual</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoSolicitudesCompra">
+                <tr class="fila-compra">
+                    <td>
+                        <select name="id_materia[]" class="materia-select form-control" required>
+                            <option value="">Selecciona una materia</option>
+                            {% for materia in materias %}
+                                <option value="{{ materia.id_materia }}" data-proveedor="{{ materia.id_proveedor }}" data-precio="{{ materia.precio }}" data-solicitada="{{ '1' if materia.id_materia in materias_solicitadas else '0' }}">
+                                    {{ materia.nombre }}{% if materia.id_materia in materias_solicitadas %} (Solicitada){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="cantidad[]" class="form-control cantidad-input" min="0.01" step="0.01" placeholder="0.00" required>
+                    </td>
+                    <td>
+                        <select name="id_proveedor[]" class="proveedor-select form-control" required>
+                            <option value="">Selecciona un proveedor</option>
+                            {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id_proveedor }}">
+                                    {{ proveedor.persona.nombre if proveedor.persona else 'Proveedor' }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td class="precio-label text-muted">Selecciona una materia</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-eliminar-fila">Eliminar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+        <button type="button" class="btn btn-warning" id="btnAgregarFila">Agregar materia</button>
+        <button type="submit" class="btn btn-success">Guardar solicitud</button>
+        <a href="{{ url_for('produccion.index') if current_user.id_rol == 2 else url_for('compras.index') }}" class="btn btn-secondary">Volver</a>
+    </div>
+</form>
+
+<script id="sugerencias-compra-data" type="application/json">{{ (sugerencias or [])|tojson }}</script>
+<input type="hidden" id="idMateriaAlerta" value="{{ id_materia_alerta or 0 }}">
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cuerpo = document.getElementById('cuerpoSolicitudesCompra');
+    const btnAgregarFila = document.getElementById('btnAgregarFila');
+    const btnAgregarSugeridas = document.getElementById('btnAgregarSugeridas');
+    const form = document.getElementById('formSolicitudCompra');
+    const sugerenciasNode = document.getElementById('sugerencias-compra-data');
+    const idMateriaAlertaNode = document.getElementById('idMateriaAlerta');
+    const sugerencias = sugerenciasNode ? JSON.parse(sugerenciasNode.textContent || '[]') : [];
+    const idMateriaAlerta = idMateriaAlertaNode ? Number(idMateriaAlertaNode.value || 0) : 0;
+
+    function actualizarFila(fila) {
+        const materiaSelect = fila.querySelector('.materia-select');
+        const proveedorSelect = fila.querySelector('.proveedor-select');
+        const precioLabel = fila.querySelector('.precio-label');
+
+        if (!materiaSelect || !proveedorSelect || !precioLabel) {
+            return;
+        }
+
+        const optionSeleccionada = materiaSelect.options[materiaSelect.selectedIndex];
+
+        proveedorSelect.querySelectorAll('option').forEach((opt) => {
+            if (!opt.value) {
+                opt.hidden = false;
+                return;
+            }
+            opt.hidden = false;
+        });
+
+        if (optionSeleccionada && optionSeleccionada.value) {
+            const proveedorDefault = optionSeleccionada.dataset.proveedor;
+            const precio = optionSeleccionada.dataset.precio;
+            const solicitada = optionSeleccionada.dataset.solicitada === '1';
+            const precioTexto = precio ? `$${Number(precio).toFixed(2)}` : 'Sin precio';
+            precioLabel.textContent = solicitada ? `${precioTexto} | Compra solicitada` : precioTexto;
+
+            if (proveedorDefault) {
+                proveedorSelect.querySelectorAll('option').forEach((opt) => {
+                    if (!opt.value) {
+                        opt.hidden = false;
+                        return;
+                    }
+                    opt.hidden = opt.value !== proveedorDefault;
+                });
+                proveedorSelect.value = proveedorDefault;
+            }
+        } else {
+            precioLabel.textContent = 'Selecciona una materia';
+        }
+    }
+
+    function bindFila(fila) {
+        const materiaSelect = fila.querySelector('.materia-select');
+        const botonEliminar = fila.querySelector('.btn-eliminar-fila');
+
+        if (materiaSelect) {
+            materiaSelect.addEventListener('change', () => actualizarFila(fila));
+            actualizarFila(fila);
+        }
+
+        if (botonEliminar) {
+            botonEliminar.addEventListener('click', () => {
+                if (cuerpo.querySelectorAll('tr.fila-compra').length > 1) {
+                    fila.remove();
+                }
+            });
+        }
+    }
+
+    function crearFila() {
+        const filaBase = cuerpo.querySelector('tr.fila-compra');
+        if (!filaBase) return null;
+
+        const fila = filaBase.cloneNode(true);
+        fila.querySelectorAll('input').forEach(input => {
+            input.value = '';
+        });
+        fila.querySelectorAll('select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+        cuerpo.appendChild(fila);
+        bindFila(fila);
+        return fila;
+    }
+
+    function llenarFila(fila, idMateria, cantidad) {
+        const materiaSelect = fila.querySelector('.materia-select');
+        const cantidadInput = fila.querySelector('.cantidad-input');
+
+        if (!materiaSelect || !cantidadInput) {
+            return;
+        }
+
+        materiaSelect.value = String(idMateria);
+        if (cantidad && Number(cantidad) > 0) {
+            cantidadInput.value = Number(cantidad).toFixed(2);
+        }
+        actualizarFila(fila);
+    }
+
+    function agregarSugeridas(usarPrimeraFila) {
+        if (!Array.isArray(sugerencias) || sugerencias.length === 0) {
+            return;
+        }
+
+        sugerencias.forEach((sugerencia, index) => {
+            let fila;
+            if (index === 0 && usarPrimeraFila) {
+                fila = cuerpo.querySelector('tr.fila-compra');
+            } else {
+                fila = crearFila();
+            }
+
+            if (!fila) {
+                return;
+            }
+
+            llenarFila(fila, sugerencia.id_materia, sugerencia.cantidad_sugerida);
+        });
+    }
+
+    bindFila(cuerpo.querySelector('tr.fila-compra'));
+
+    if (idMateriaAlerta) {
+        const filaInicial = cuerpo.querySelector('tr.fila-compra');
+        const primeraVacia = filaInicial && !filaInicial.querySelector('.materia-select').value;
+        agregarSugeridas(primeraVacia);
+    }
+
+    btnAgregarFila.addEventListener('click', crearFila);
+    btnAgregarSugeridas.addEventListener('click', () => {
+        const filaInicial = cuerpo.querySelector('tr.fila-compra');
+        const primeraVacia = filaInicial && !filaInicial.querySelector('.materia-select').value;
+        agregarSugeridas(primeraVacia);
+    });
+
+    form.addEventListener('submit', () => {
+        cuerpo.querySelectorAll('tr.fila-compra').forEach(fila => {
+            const materiaSelect = fila.querySelector('.materia-select');
+            const proveedorSelect = fila.querySelector('.proveedor-select');
+            if (materiaSelect && !materiaSelect.value) materiaSelect.required = true;
+            if (proveedorSelect && !proveedorSelect.value) proveedorSelect.required = true;
+        });
+    });
+});
+</script>
+{% endblock %}

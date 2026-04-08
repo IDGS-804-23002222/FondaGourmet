@@ -18,6 +18,45 @@
     <span class="navbar-toggler-icon"></span>
 </button>
         {% if current_user.is_authenticated %}
+            <div class="dropdown me-3">
+                <a class="btn btn-outline-light position-relative" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                    <i class="bi bi-bell"></i>
+                    {% if alertas_stock_total and alertas_stock_total > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ alertas_stock_total }}
+                        </span>
+                    {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark p-2" style="min-width: 320px;">
+                    <li class="px-2 pb-2 fw-bold">Alertas de stock bajo</li>
+                    {% if alertas_materias or alertas_productos %}
+                        {% for materia in alertas_materias %}
+                            <li>
+                                <a class="dropdown-item text-warning" href="{{ url_for('compras.crear_desde_alerta', id_materia=materia.id) }}">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Materia: {{ materia.nombre }}
+                                    <small class="d-block text-muted">Stock {{ materia.stock_actual }} / mínimo {{ materia.stock_minimo }} {{ materia.unidad_medida }}</small>
+                                    {% if materia.compra_solicitada %}
+                                        <small class="d-block text-info">Compra solicitada</small>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endfor %}
+                        {% for producto in alertas_productos %}
+                            <li>
+                                <a class="dropdown-item text-warning" href="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id) }}">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Producto: {{ producto.nombre }}
+                                    <small class="d-block text-muted">Stock {{ producto.stock_actual }} / mínimo {{ producto.stock_minimo }}</small>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li><span class="dropdown-item-text text-success">Sin alertas de stock.</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+
             <div class="dropdown">
                 <li class="nav-item dropdown">
                 <a class="btn btn-green dropdown-toggle"

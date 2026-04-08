@@ -46,9 +46,9 @@ def obtener_ventas():
                 'stock_actual': row['stock_actual'],
                 'cantidad': row['cantidad']
             })
-            
-            ventas=list(ventas_dict.values())
-            return ventas, None
+
+        ventas = list(ventas_dict.values())
+        return ventas, None
     except Exception as e:
         logger.error(f"Error al obtener ventas: {str(e)}")
         return None, str(e)

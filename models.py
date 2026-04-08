@@ -364,10 +364,25 @@ class Pedido(db.Model):
     cliente = db.relationship('Cliente', back_populates='pedidos')
     produccion = db.relationship('Produccion', back_populates='pedido', uselist=False)
     detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan")
+    meta_pedido = db.relationship('PedidoMeta', back_populates='pedido', uselist=False, cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Producido', 'Completado', 'Cancelado')", name='check_estado_pedido'),
         CheckConstraint('total >= 0', name='check_total_pedido_no_negativo'),
+    )
+
+
+class PedidoMeta(db.Model):
+    __tablename__ = 'pedidos_meta'
+    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido'), primary_key=True)
+    metodo_pago = db.Column(db.String(50), nullable=False, default='Efectivo')
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+
+    pedido = db.relationship('Pedido', back_populates='meta_pedido')
+    usuario = db.relationship('Usuario')
+
+    __table_args__ = (
+        CheckConstraint("metodo_pago IN ('Efectivo', 'Tarjeta', 'Transferencia')", name='check_metodo_pago_pedido_meta'),
     )
     
 class DetallePedido(db.Model):

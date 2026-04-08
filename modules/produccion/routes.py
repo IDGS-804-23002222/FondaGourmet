@@ -5,12 +5,13 @@ from utils.security import role_required
 from .services import (
     obtener_producciones,
     completar_o_solicitar_compra,
-    ver_orden_produccion
+    ver_orden_produccion,
+    crear_solicitud_produccion_desde_alerta
 )
 
 @produccion.route('/', methods=['GET'])
 @login_required
-@role_required(2)
+@role_required(1, 2, 3)
 def index():
     producciones, error = obtener_producciones()
 
@@ -22,7 +23,7 @@ def index():
 
 @produccion.route('/ver/<int:id>')
 @login_required
-@role_required(2)
+@role_required(1, 2, 3)
 def ver(id):
     prod, error = ver_orden_produccion(id)
 
@@ -62,4 +63,18 @@ def cancelar(id):
     else:
         flash(message, "error")
 
+    return redirect(url_for('produccion.index'))
+
+
+@produccion.route('/alerta/<int:id_producto>', methods=['GET'])
+@login_required
+@role_required(1, 2, 3)
+def crear_desde_alerta(id_producto):
+    id_produccion, mensaje = crear_solicitud_produccion_desde_alerta(id_producto, current_user.id_usuario)
+
+    if id_produccion:
+        flash(mensaje, 'success')
+        return redirect(url_for('produccion.ver', id=id_produccion))
+
+    flash(mensaje, 'danger')
     return redirect(url_for('produccion.index'))
