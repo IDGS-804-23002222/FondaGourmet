@@ -91,6 +91,8 @@
 {% block scripts %}
 <script>
 function cancelarPedido(id) {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     Swal.fire({
         title: "¿Estás seguro?",
         text: "¿Quieres cancelar este pedido?",
@@ -101,7 +103,11 @@ function cancelarPedido(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/pedidos/cancelar/${id}`, {
-            method: "POST"
+            method: "POST",
+            headers: {
+                "X-CSRFToken": token
+            }
+
         })
         .then(res => res.json())
         .then(data => {

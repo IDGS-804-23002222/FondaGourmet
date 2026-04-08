@@ -177,9 +177,6 @@ def cancelar_pedido(id_pedido):
     except Exception as e:
         db.session.rollback()
         return False, str(e)
-    
-    from models import db, Pedido, DetallePedido, Producto, Produccion, DetalleProduccion
-from datetime import datetime
 
 def completar_o_producir(id_pedido, id_usuario):
     try:

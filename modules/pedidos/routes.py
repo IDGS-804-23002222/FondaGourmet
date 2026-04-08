@@ -83,3 +83,12 @@ def solicitar_produccion(id):
         current_app.logger.error(f"Error al solicitar producción para pedido {id}: {msg}")
         flash(msg, "danger")
     return redirect(url_for('pedidos.index'))
+
+@pedidos.route('/cancelar/<int:id_pedido>', methods=['POST'])
+def cancelar(id_pedido):
+    success, message = cancelar_pedido(id_pedido)
+
+    if success:
+        return {"success": True, "message": message}
+    else:
+        return {"success": False, "message": message}, 400
