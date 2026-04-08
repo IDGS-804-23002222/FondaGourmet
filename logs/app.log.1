@@ -1,0 +1,47 @@
+2026-04-07 17:19:57,893 ERROR: Error loading user 1: Could not determine join condition between parent/child tables on relationship Categoria.materias_primas - there are no foreign keys linking these tables.  Ensure that referencing columns are associated with a ForeignKey or ForeignKeyConstraint, or specify a 'primaryjoin' expression.
+2026-04-07 17:19:57,911 ERROR: Error loading user 1: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[Categoria(categorias)]'. Original exception was: Could not determine join condition between parent/child tables on relationship Categoria.materias_primas - there are no foreign keys linking these tables.  Ensure that referencing columns are associated with a ForeignKey or ForeignKeyConstraint, or specify a 'primaryjoin' expression.
+2026-04-07 17:23:10,245 INFO: Login exitoso para usuario: admin_test
+2026-04-07 17:23:12,268 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:23:20,491 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:23:26,531 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:23:34,828 ERROR: Error al obtener proveedores: (pymysql.err.ProgrammingError) (1146, "Table 'fonda.categorias_proveedor' doesn't exist")
+[SQL: SELECT proveedores.id_proveedor AS proveedores_id_proveedor, proveedores.id_persona AS proveedores_id_persona, proveedores.id_categoria_proveedor AS proveedores_id_categoria_proveedor, proveedores.estado AS proveedores_estado 
+FROM proveedores INNER JOIN personas ON personas.id_persona = proveedores.id_persona INNER JOIN categorias_proveedor ON categorias_proveedor.id_categoria_proveedor = proveedores.id_categoria_proveedor ORDER BY personas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-07 17:24:53,907 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:32:29,000 WARNING: 404: http://127.0.0.1:5000/favicon.ico
+2026-04-07 17:34:43,462 WARNING: Intento de login fallido para usuario: admin
+2026-04-07 17:34:45,795 WARNING: Intento de login fallido para usuario: admin
+2026-04-07 17:34:57,088 WARNING: Intento de login fallido para usuario: admin
+2026-04-07 17:35:26,128 WARNING: 404: http://127.0.0.1:5000/favicon.ico
+2026-04-07 17:35:53,486 WARNING: Intento de login fallido para usuario: admin123
+2026-04-07 17:36:29,080 INFO: Login exitoso para usuario: admin_test
+2026-04-07 17:36:39,056 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:37:24,604 ERROR: Error: (pymysql.err.OperationalError) (1054, "Unknown column 'materias_primas.id_categoria_ingrediente' in 'SELECT'")
+[SQL: SELECT materias_primas.id_materia AS materias_primas_id_materia, materias_primas.nombre AS materias_primas_nombre, materias_primas.unidad_medida AS materias_primas_unidad_medida, materias_primas.stock_actual AS materias_primas_stock_actual, materias_primas.stock_minimo AS materias_primas_stock_minimo, materias_primas.precio AS materias_primas_precio, materias_primas.porcentaje_merma AS materias_primas_porcentaje_merma, materias_primas.factor_conversion AS materias_primas_factor_conversion, materias_primas.estado AS materias_primas_estado, materias_primas.fecha_creacion AS materias_primas_fecha_creacion, materias_primas.id_categoria_ingrediente AS materias_primas_id_categoria_ingrediente, materias_primas.id_proveedor AS materias_primas_id_proveedor 
+FROM materias_primas ORDER BY materias_primas.nombre ASC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:41:38,632 INFO: Proveedor creado: Pepe
+2026-04-07 17:53:12,739 ERROR: Error al obtener usuarios: (pymysql.err.OperationalError) (1305, 'PROCEDURE fonda.sp_verUsuarios does not exist')
+[SQL: CALL sp_verUsuarios()]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-07 17:54:22,726 INFO: Proveedor creado: nfsidhshbfsuj
+2026-04-07 18:02:01,072 ERROR: Error al crear producto: (pymysql.err.OperationalError) (1364, "Field 'id_categoria' doesn't have a default value")
+[SQL: INSERT INTO productos (nombre, descripcion, precio, stock_actual, stock_minimo, imagen, estado, fecha_creacion, id_categoria_platillo) VALUES (%(nombre)s, %(descripcion)s, %(precio)s, %(stock_actual)s, %(stock_minimo)s, %(imagen)s, %(estado)s, %(fecha_creacion)s, %(id_categoria_platillo)s)]
+[parameters: {'nombre': 'Awua de karla uwu', 'descripcion': 'awua rika', 'precio': 999999.0, 'stock_actual': 1.0, 'stock_minimo': 1.0, 'imagen': 'uploads/productos/9089a1888fe1403bb9f1dae695dc8711.png', 'estado': 1, 'fecha_creacion': datetime.datetime(2026, 4, 7, 18, 2, 1, 70388), 'id_categoria_platillo': 4}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

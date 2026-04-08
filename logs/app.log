@@ -4,7 +4,6 @@ FROM categorias
 WHERE categorias.id_categoria = %(pk_1)s]
 [parameters: {'pk_1': 1}]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
-<<<<<<< HEAD
 2026-04-03 14:54:01,127 INFO: Login exitoso para usuario: cliente1
 2026-04-03 14:54:01,219 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
 2026-04-03 14:54:14,698 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
@@ -63,86 +62,9 @@ WHERE categorias.id_categoria = %(pk_1)s]
 2026-04-03 15:05:09,833 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
 2026-04-03 15:05:09,859 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
 2026-04-03 20:07:05,734 INFO: Pedido 1 completado exitosamente
-=======
-2026-04-06 19:16:24,404 WARNING: 404: http://localhost:5000/favicon.ico
-2026-04-06 19:16:26,611 INFO: Login exitoso para usuario: admin
-2026-04-06 19:24:20,993 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:22,396 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:25,358 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:26,554 WARNING: 404: http://localhost:5000/favicon.ico
-2026-04-06 19:24:27,797 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:30,536 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:31,789 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:36,457 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:24:38,296 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:15,244 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:16,327 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:19,108 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:20,389 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:23,061 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:24,087 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:25,151 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:26,687 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:28,720 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:30,897 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:25:35,752 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:26:56,466 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:26:57,494 WARNING: 404: http://localhost:5000/favicon.ico
-2026-04-06 19:26:58,192 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:00,231 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:03,819 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:04,179 WARNING: 404: http://localhost:5000/favicon.ico
-2026-04-06 19:27:32,477 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:33,678 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:34,985 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:27:36,859 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:11,010 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:12,402 WARNING: 404: http://localhost:5000/favicon.ico
-2026-04-06 19:29:12,647 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:14,741 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:16,341 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:22,909 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:22,935 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:24,138 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:25,209 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:46,047 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:48,982 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:51,291 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:52,332 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:56,555 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:57,620 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:29:58,823 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:02,528 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:09,340 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:10,946 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:12,101 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:13,105 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:15,270 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:31:17,468 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:39,225 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:40,651 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:42,025 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:42,786 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:44,494 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:57,547 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:58,949 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:59,494 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:33:59,672 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:01,563 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:01,809 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:01,997 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:02,169 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:02,342 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:02,526 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:02,747 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:03,065 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:03,246 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:03,429 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:03,598 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:03,766 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:04,784 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:09,078 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:22,761 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:27,708 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
-2026-04-06 19:34:28,792 WARNING: 404: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json
->>>>>>> 0d6d97f67137a5a3e5550f58d9bec19fcfd3b554
+2026-04-07 18:35:45,869 WARNING: 404: http://127.0.0.1:5000/static/style/components/alerts.css
+2026-04-07 18:35:45,894 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-07 18:35:50,416 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-07 18:35:55,924 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
+2026-04-07 18:36:02,527 INFO: Login exitoso para usuario: karla233
+2026-04-07 18:36:02,674 WARNING: 404: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json
