@@ -7,6 +7,7 @@ from .services import (
     crear_producto, obtener_productos, desactivar_producto,
     activar_producto, obtener_producto, actualizar_producto, buscar_productos, obtener_categorias
 )
+from models import MateriaPrima
 
 
 @productos.route('/', methods=['GET'])
@@ -34,7 +35,8 @@ def crear():
         current_app.logger.error(f"Error al obtener categorías: {str(error)}")
         flash(error, 'danger')
         return redirect(url_for('productos.index'))
-    form.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+    form.id_categoria_platillo.choices = [(cat.id_categoria_platillo, cat.nombre) for cat in categorias]
+    materias_primas = MateriaPrima.query.filter_by(estado=True).order_by(MateriaPrima.nombre.asc()).all()
     
     if form.validate_on_submit():
         exito, error = crear_producto(form)
@@ -47,7 +49,7 @@ def crear():
             current_app.logger.error(f"Error al crear producto: {str(error)}")
             flash(error, 'danger')
     
-    return render_template('productos/crear.html', form=form)
+    return render_template('productos/crear.html', form=form, materias_primas=materias_primas)
 
 
 @productos.route('/editar', methods=['GET', 'POST'])
@@ -74,7 +76,7 @@ def editar():
         form.precio.data = producto.get('precio')
         form.stock_actual.data = producto.get('stock_actual')
         form.stock_minimo.data = producto.get('stock_minimo')
-        form.id_categoria.data = producto.get('id_categoria')
+        form.id_categoria_platillo.data = producto.get('id_categoria_platillo')
         form.imagen.data = producto.get('imagen')
     
     if request.method == 'POST' and form.validate_on_submit():

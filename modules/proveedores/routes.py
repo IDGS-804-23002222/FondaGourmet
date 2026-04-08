@@ -114,6 +114,7 @@ def editar():
         form.telefono.data = proveedor.get('telefono')
         form.correo.data = proveedor.get('correo')
         form.direccion.data = proveedor.get('direccion')
+        form.id_categoria_proveedor.data = proveedor.get('id_categoria_proveedor')
     
     if request.method == 'POST' and form.validate_on_submit():
             exito, error = actualizar_proveedor(id_proveedor, request.form)

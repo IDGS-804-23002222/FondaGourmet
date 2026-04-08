@@ -10,7 +10,7 @@
     <p><strong>Stock mínimo:</strong> {{ ingrediente.stock_minimo }}</p>
     <p><strong>Merma:</strong> {{ ingrediente.porcentaje_merma }}%</p>
     <p><strong>Factor conversión:</strong> {{ ingrediente.factor_conversion }}</p>
-    <p><strong>Categoría:</strong> {{ ingrediente.categoria.nombre if ingrediente.categoria else 'N/A' }}</p>
+    <p><strong>Categoría:</strong> {{ ingrediente.categoria_ingrediente.nombre if ingrediente.categoria_ingrediente else 'N/A' }}</p>
     <p><strong>Proveedor:</strong> {{ ingrediente.proveedor.persona.nombre if ingrediente.proveedor and ingrediente.proveedor.persona else 'N/A' }}</p>
     <a href="{{ url_for('ingredientes.index') }}" class="btn-secondary">Volver</a>
 </div>

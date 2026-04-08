@@ -1,5 +1,5 @@
 from . import ingredientes
-from flask import render_template, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from forms import RegistrarIngredienteForm, EditarIngredienteForm
 from utils.security import role_required
@@ -11,8 +11,10 @@ from .services import (
     activar_ingrediente,
     actualizar_ingrediente,
     obtener_ingrediente,
+    sugerir_categoria_ingrediente_por_proveedor,
+    obtener_categorias_ingrediente_por_proveedor,
 )
-from models import Categoria, Proveedor, MateriaPrima
+from models import CategoriaIngrediente, Proveedor, MateriaPrima
 
 
 @ingredientes.route('/', methods=['GET', 'POST'])
@@ -43,9 +45,23 @@ def index():
 def crear():
     form = RegistrarIngredienteForm()
 
-    # cargar selects
-    form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in Categoria.query.all()]
+    # cargar proveedor y categorías dependientes del proveedor seleccionado
     form.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in Proveedor.query.all()]
+
+    proveedor_id = request.values.get('id_proveedor', type=int)
+    form.id_categoria_ingrediente.choices = []
+
+    if proveedor_id:
+        categorias_permitidas = obtener_categorias_ingrediente_por_proveedor(proveedor_id)
+        form.id_categoria_ingrediente.choices = [
+            (c['id_categoria_ingrediente'], c['nombre']) for c in categorias_permitidas
+        ]
+
+    if request.method == 'GET' and proveedor_id:
+        form.id_proveedor.data = proveedor_id
+        categoria_sugerida = sugerir_categoria_ingrediente_por_proveedor(proveedor_id)
+        if categoria_sugerida:
+            form.id_categoria_ingrediente.data = categoria_sugerida
 
     if form.validate_on_submit():
         exito, msg = crear_ingrediente(form)
@@ -70,7 +86,9 @@ def editar(id):
         return redirect(url_for('ingredientes.index'))
 
     # cargar selects
-    form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in Categoria.query.all()]
+    form.id_categoria_ingrediente.choices = [
+        (c.id_categoria_ingrediente, c.nombre) for c in CategoriaIngrediente.query.order_by(CategoriaIngrediente.nombre.asc()).all()
+    ]
     form.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in Proveedor.query.all()]
 
     if request.method == 'GET':
@@ -80,7 +98,7 @@ def editar(id):
         form.stock_minimo.data = ingrediente.get('stock_minimo')
         form.porcentaje_merma.data = ingrediente.get('porcentaje_merma')
         form.factor_conversion.data = ingrediente.get('factor_conversion')
-        form.id_categoria.data = ingrediente.get('id_categoria')
+        form.id_categoria_ingrediente.data = ingrediente.get('id_categoria_ingrediente')
         form.id_proveedor.data = ingrediente.get('id_proveedor')
 
     if request.method == 'POST' and form.validate_on_submit():
@@ -130,3 +148,20 @@ def activar():
 def detalle(id):
     ingrediente = MateriaPrima.query.get_or_404(id)
     return render_template('ingredientes/detalle.html', ingrediente=ingrediente)
+
+
+@ingredientes.route('/sugerir-categoria/<int:id_proveedor>', methods=['GET'])
+@login_required
+@role_required(1)
+def sugerir_categoria(id_proveedor):
+    categoria_id = sugerir_categoria_ingrediente_por_proveedor(id_proveedor)
+    return jsonify({'id_categoria_ingrediente': categoria_id})
+
+
+@ingredientes.route('/categorias-por-proveedor/<int:id_proveedor>', methods=['GET'])
+@login_required
+@role_required(1)
+def categorias_por_proveedor(id_proveedor):
+    categorias = obtener_categorias_ingrediente_por_proveedor(id_proveedor)
+    sugerida = sugerir_categoria_ingrediente_por_proveedor(id_proveedor)
+    return jsonify({'categorias': categorias, 'id_categoria_ingrediente_sugerida': sugerida})
