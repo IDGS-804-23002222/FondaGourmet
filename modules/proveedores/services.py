@@ -1,9 +1,24 @@
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from models import db, Persona, Proveedor
 from flask import current_app
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _normalizar_error_bd(error):
+    original = getattr(error, "orig", None)
+    if original is not None and getattr(original, "args", None):
+        mensaje = str(original.args[1] if len(original.args) > 1 else original.args[0])
+    else:
+        mensaje = str(error)
+
+    if "Correo o telefono ya existen" in mensaje:
+        return "Correo o teléfono ya existen"
+
+    return mensaje
+
 def crear_proveedor(form):
     try:
         
@@ -26,6 +41,12 @@ def crear_proveedor(form):
         db.session.commit()
         logger.info(f"Proveedor creado: {form.nombre.data}")
         return True, "Proveedor creado exitosamente"
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        mensaje = _normalizar_error_bd(e)
+        logger.error(f"Error al crear proveedor: {mensaje}")
+        return False, mensaje
 
     except Exception as e:
         db.session.rollback()

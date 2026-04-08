@@ -160,8 +160,7 @@ class RegistroProveedorForm(FlaskForm):
     correo = EmailField('Correo', [
         validators.DataRequired(message="El correo es obligatorio."),
         validators.Email(message="Ingrese un correo electrónico válido."),
-        validators.Length(min=5, max=100, message="El correo debe tener entre 5 y 100 caracteres."),
-        validators.Regexp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', message="El correo debe tener un formato válido.")
+        validators.Length(min=5, max=100, message="El correo debe tener entre 5 y 100 caracteres.")
         ])
     
     direccion = StringField('Dirección', [
@@ -300,6 +299,13 @@ class RegistrarCategoriaForm(FlaskForm):
         validators.Length(max=200, message="La descripción no puede exceder los 200 caracteres.")
     ])
     
+    tipo_categoria = SelectField('Tipo de categoría', [
+        validators.DataRequired(message="El tipo de categoría es obligatorio.")
+    ], choices=[
+        ('platillo', 'Platillo/Producto'),
+        ('ingrediente', 'Ingrediente')
+    ])
+    
     submit = SubmitField('Registrar categoría')
     
 class EditarCategoriaForm(FlaskForm):
@@ -311,6 +317,13 @@ class EditarCategoriaForm(FlaskForm):
     descripcion = StringField('Descripción', [
         validators.Optional(),
         validators.Length(max=200, message="La descripción no puede exceder los 200 caracteres.")
+    ])
+    
+    tipo_categoria = SelectField('Tipo de categoría', [
+        validators.Optional()
+    ], choices=[
+        ('platillo', 'Platillo/Producto'),
+        ('ingrediente', 'Ingrediente')
     ])
     
     submit = SubmitField('Actualizar categoría')
@@ -336,6 +349,11 @@ class RegistrarIngredienteForm(FlaskForm):
         validators.DataRequired(message="El stock mínimo es obligatorio."),
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo.")
     ])
+
+    precio = FloatField('Precio', [
+        validators.DataRequired(message="El precio es obligatorio."),
+        validators.NumberRange(min=0, message="El precio no puede ser negativo.")
+    ])
     
     porcentaje_merma = FloatField('Porcentaje de mermas', [
         validators.DataRequired(message="El porcentaje de mermas es obligatorio."),
@@ -356,6 +374,14 @@ class RegistrarIngredienteForm(FlaskForm):
     ])
     
     submit = SubmitField('Registrar ingrediente')
+    
+    def __init__(self, *args, **kwargs):
+        super(RegistrarIngredienteForm, self).__init__(*args, **kwargs)
+        from models import Categoria, Proveedor
+        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='ingrediente').all()
+        proveedores = Proveedor.query.all()
+        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        self.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in proveedores]
     
 class EditarIngredienteForm(FlaskForm):
     nombre = StringField('Nombre del ingrediente', [
@@ -383,6 +409,11 @@ class EditarIngredienteForm(FlaskForm):
         validators.Optional(),
         validators.NumberRange(min=0, message="El stock mínimo no puede ser negativo."  )
     ])
+
+    precio = FloatField('Precio', [
+        validators.Optional(),
+        validators.NumberRange(min=0, message="El precio no puede ser negativo.")
+    ])
     
     porcentaje_merma = FloatField('Porcentaje de mermas', [
         validators.Optional(),
@@ -398,6 +429,14 @@ class EditarIngredienteForm(FlaskForm):
     id_proveedor = SelectField('Proveedor', coerce=int, validators=[validators.Optional()])
     
     submit = SubmitField('Actualizar ingrediente')
+    
+    def __init__(self, *args, **kwargs):
+        super(EditarIngredienteForm, self).__init__(*args, **kwargs)
+        from models import Categoria, Proveedor
+        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='ingrediente').all()
+        proveedores = Proveedor.query.all()
+        self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
+        self.id_proveedor.choices = [(p.id_proveedor, p.persona.nombre) for p in proveedores]
 
 
 class RegistrarCompraIngredienteForm(FlaskForm):
@@ -647,7 +686,7 @@ class CrearProductoForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(CrearProductoForm, self).__init__(*args, **kwargs)
         from models import Categoria
-        categorias = Categoria.query.filter_by(estado=True).all()
+        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='platillo').all()
         self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]
 
 
@@ -690,5 +729,5 @@ class EditarProductoForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditarProductoForm, self).__init__(*args, **kwargs)
         from models import Categoria
-        categorias = Categoria.query.filter_by(estado=True).all()
+        categorias = Categoria.query.filter_by(estado=True, tipo_categoria='platillo').all()
         self.id_categoria.choices = [(cat.id_categoria, cat.nombre) for cat in categorias]

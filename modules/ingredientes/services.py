@@ -17,6 +17,7 @@ def _to_dict(materia):
         'unidad_medida': materia.unidad_medida,
         'stock_actual': materia.stock_actual,
         'stock_minimo': materia.stock_minimo,
+        'precio': materia.precio,
         'porcentaje_merma': materia.porcentaje_merma,
         'factor_conversion': materia.factor_conversion,
         'estado': materia.estado,
@@ -38,6 +39,7 @@ def crear_ingrediente(form):
             unidad_medida=form.unidad_medida.data,
             stock_actual=0,
             stock_minimo=form.stock_minimo.data,
+            precio=form.precio.data,
             porcentaje_merma=form.porcentaje_merma.data,
             factor_conversion=form.factor_conversion.data,
             id_categoria=form.id_categoria.data,
@@ -109,6 +111,8 @@ def actualizar_ingrediente(id_ingrediente, form):
             materia.stock_actual = form.stock_actual.data
         if form.stock_minimo.data is not None:
             materia.stock_minimo = form.stock_minimo.data
+        if form.precio.data is not None:
+            materia.precio = form.precio.data
         if form.porcentaje_merma.data is not None:
             materia.porcentaje_merma = form.porcentaje_merma.data
         if form.factor_conversion.data is not None:

@@ -3,30 +3,96 @@
 
 {% block content %}
 <div class="form-page">
-    <div class="form-container">
-        <div class="form-title"><h1>Editar Categoría</h1></div>
+    <div class="form-container" style="max-width: 500px;">
+        <div class="form-title">
+            <h1>✏️ Editar Categoría</h1>
+            <p class="text-muted">ID: #{{ categoria.id_categoria }}</p>
+        </div>
 
         <form method="POST" novalidate>
             {{ form.hidden_tag() }}
             <input type="hidden" name="id_categoria" value="{{ categoria.id_categoria }}">
 
-            <div class="form-grid">
-                <div class="form-group-full">
-                    {{ form.nombre.label(class="form-label") }}
-                    {{ form.nombre(class="form-control") }}
-                    {% for error in form.nombre.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
-                </div>
-
-                <div class="form-group-full">
-                    {{ form.descripcion.label(class="form-label") }}
-                    {{ form.descripcion(class="form-control") }}
-                    {% for error in form.descripcion.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
-                </div>
+            <div class="form-group">
+                {{ form.nombre.label(class="form-label") }}
+                {{ form.nombre(class="form-control") }}
+                {% for error in form.nombre.errors %}<small class="text-danger d-block">{{ error }}</small>{% endfor %}
             </div>
 
-            <div class="button-group">
-                {{ form.submit(class="crear-btn") }}
-                <a href="{{ url_for('categorias.index') }}" class="btn volver-btn">Cancelar</a>
+            <div class="form-group">
+                {{ form.descripcion.label(class="form-label") }}
+                {{ form.descripcion(class="form-control", rows="3") }}
+                {% for error in form.descripcion.errors %}<small class="text-danger d-block">{{ error }}</small>{% endfor %}
+            </div>
+
+            {% if form.tipo_categoria %}
+            <div class="form-group">
+                <label class="form-label">Tipo de Categoría</label>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <!-- Platillo Option -->
+                    <label style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;"
+                           onclick="document.getElementById('tipo_platillo').click(); this.style.borderColor='#007bff'; this.style.backgroundColor='#f0f8ff';"
+                           id="label_platillo">
+                        <input type="radio" id="tipo_platillo" name="tipo_categoria" value="platillo" 
+                               {% if categoria.tipo_categoria == 'platillo' %}checked{% endif %} 
+                               style="cursor: pointer;">
+                        <span><strong>🍽️ Platillo/Producto</strong></span>
+                    </label>
+
+                    <!-- Ingrediente Option -->
+                    <label style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;"
+                           onclick="document.getElementById('tipo_ingrediente').click(); this.style.borderColor='#28a745'; this.style.backgroundColor='#f0fff4';"
+                           id="label_ingrediente">
+                        <input type="radio" id="tipo_ingrediente" name="tipo_categoria" value="ingrediente" 
+                               {% if categoria.tipo_categoria == 'ingrediente' %}checked{% endif %} 
+                               style="cursor: pointer;">
+                        <span><strong>🥬 Ingrediente</strong></span>
+                    </label>
+                </div>
+                <div class="info-box" style="margin-top: 12px; padding: 10px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+                    <small class="text-muted">
+                        <strong>🍽️ Platillo:</strong> Categorías para productos/platos (Tacos, Ensaladas, Postres)<br>
+                        <strong>🥬 Ingrediente:</strong> Categorías para insumos (Verduras, Frutas, Lácteos)
+                    </small>
+                </div>
+                {% for error in form.tipo_categoria.errors %}<small class="text-danger d-block">{{ error }}</small>{% endfor %}
+            </div>
+
+            <script>
+            // Update label styling on load
+            function updateLabelStyle() {
+                const platilloChecked = document.getElementById('tipo_platillo').checked;
+                const ingredienteChecked = document.getElementById('tipo_ingrediente').checked;
+                
+                const labelPlatillo = document.getElementById('label_platillo');
+                const labelIngrediente = document.getElementById('label_ingrediente');
+                
+                if (platilloChecked) {
+                    labelPlatillo.style.borderColor = '#007bff';
+                    labelPlatillo.style.backgroundColor = '#f0f8ff';
+                } else {
+                    labelPlatillo.style.borderColor = '#ddd';
+                    labelPlatillo.style.backgroundColor = 'white';
+                }
+                
+                if (ingredienteChecked) {
+                    labelIngrediente.style.borderColor = '#28a745';
+                    labelIngrediente.style.backgroundColor = '#f0fff4';
+                } else {
+                    labelIngrediente.style.borderColor = '#ddd';
+                    labelIngrediente.style.backgroundColor = 'white';
+                }
+            }
+            
+            document.getElementById('tipo_platillo').addEventListener('change', updateLabelStyle);
+            document.getElementById('tipo_ingrediente').addEventListener('change', updateLabelStyle);
+            updateLabelStyle();
+            </script>
+            {% endif %}
+
+            <div class="button-group" style="display: flex; gap: 10px; margin-top: 20px;">
+                {{ form.submit(class="btn btn-primary", value="💾 Guardar Cambios") }}
+                <a href="{{ url_for('categorias.index') }}" class="btn btn-secondary">❌ Cancelar</a>
             </div>
         </form>
     </div>

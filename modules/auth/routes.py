@@ -51,11 +51,11 @@ def redirect_por_rol(user):
     if user.rol.nombre in ['Administrador']:
         return redirect(url_for('dashboard.index'))
     elif user.rol.nombre == 'Cajero':
-        return redirect(url_for('ventas.index'))
+        return redirect(url_for('pedidos.index'))
     elif user.rol.id_rol == 'Cocinero':
         return redirect(url_for('produccion.index'))
     elif user.rol.nombre == 'Cliente':
-        return redirect(url_for('tienda.index'))
+        return redirect(url_for('tienda.menu'))
     else:
         return redirect(url_for('dashboard.index'))
 

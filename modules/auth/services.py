@@ -28,11 +28,11 @@ def redireccionar_por_rol(user):
     rutas={
         1: 'dashboard.index',
         2: 'produccion.index',
-        3: 'ventas.index',  
+        3: 'pedidos.index',  
         4: 'tienda.menu'
     }
     
-    endpoint = rutas.get(user.id_rol, 'tienda.index')
+    endpoint = rutas.get(user.id_rol, 'index')
 
     if endpoint:
         return redirect(url_for(endpoint))

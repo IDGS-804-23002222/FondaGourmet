@@ -31,7 +31,7 @@ def mis_pedidos():
     if error:
         current_app.logger.error(f"Error al cargar pedidos: {error}")
         flash("Error al cargar los pedidos", "danger")
-        return redirect(url_for('tienda.index'))
+        return redirect(url_for('tienda.menu'))
 
     return render_template('pedidos/mis_pedidos.html', pedidos=pedidos)
 

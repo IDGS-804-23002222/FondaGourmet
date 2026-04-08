@@ -14,6 +14,7 @@ def obtener_pedidos():
                 p.estado,
                 pr.nombre AS nombre_producto,
                 pr.stock_actual,
+                p.requiere_produccion
                 d.cantidad
             FROM pedidos p
             JOIN detalle_pedido d ON p.id_pedido = d.id_pedido
@@ -69,6 +70,7 @@ def obtener_pedido(id_cliente):
                 'id': p.id_pedido,
                 'fecha': p.fecha,
                 'total': p.total,
+                'requiere_produccion':p.requiere_produccion,
                 'estado': p.estado
             })
         logger.info(f"Pedidos obtenidos: {len(resultado)} para cliente: {id_cliente}")
@@ -186,6 +188,7 @@ def completar_o_producir(id_pedido, id_usuario):
 
         necesita_produccion = False
 
+        # 🔍 VALIDAR STOCK
         for detalle in pedido.detalles:
             producto = Producto.query.get(detalle.id_producto)
 
@@ -193,16 +196,20 @@ def completar_o_producir(id_pedido, id_usuario):
                 necesita_produccion = True
                 break
 
+        # 🟢 CASO 1: NO necesita producción
         if not necesita_produccion:
             for detalle in pedido.detalles:
                 producto = Producto.query.get(detalle.id_producto)
                 producto.stock_actual -= detalle.cantidad
 
             pedido.estado = "Completado"
+            pedido.requiere_produccion = False  # 🔥 CLAVE
+
             db.session.commit()
 
-            return True, "Pedido completado correctamente"
+            return True, "Pedido completado sin producción"
 
+        # 🔴 CASO 2: SÍ necesita producción
         produccion = Produccion(
             fecha_solicitud=datetime.now(),
             estado="Solicitada",
@@ -210,20 +217,22 @@ def completar_o_producir(id_pedido, id_usuario):
         )
 
         db.session.add(produccion)
-        db.session.flush()  # para obtener ID
+        db.session.flush()
 
         for detalle in pedido.detalles:
             db.session.add(DetalleProduccion(
                 id_produccion=produccion.id_produccion,
                 id_producto=detalle.id_producto,
-                id_materia=None,  # si no usas materia aquí
+                id_materia=None,
                 cantidad=detalle.cantidad
             ))
 
         pedido.estado = "En Proceso"
+        pedido.requiere_produccion = True  # 🔥 CLAVE
+
         db.session.commit()
 
-        return True, "No hay stock suficiente. Se solicitó producción."
+        return True, "Se envió a producción"
 
     except Exception as e:
         db.session.rollback()

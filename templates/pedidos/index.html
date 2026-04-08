@@ -5,18 +5,18 @@
 <h1>Pedidos de Clientes</h1>
 
 <div class="toolbar">
-    <input type="date" class="search" placeholder="Buscar orden...">
+    <input type="date" class="search" placeholder="Buscar por fecha...">
 </div>
-
 
 <table class="data-table">
     <thead>
         <tr>
             <th>No. Pedido</th>
             <th>Productos</th>
-            <th>Cantidad solicitada</th>
+            <th>Cantidad</th>
             <th>Stock</th>
-            <th>Estado</th>
+            <th>Producción</th>
+            <th>Estado Pedido</th>
             <th>Fecha</th>
             <th>Acciones</th>
         </tr>
@@ -27,80 +27,112 @@
         <tr>
             <td>#{{ pedido.id_pedido }}</td>
 
+            <!-- PRODUCTOS -->
             <td>
-                <ul class="mb-0">
+                <ul>
+                    {% for producto in pedido.productos %}
+                        <li>{{ producto.nombre }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+
+            <!-- CANTIDADES -->
+            <td>
+                <ul>
                     {% for producto in pedido.productos %}
                         <li>
-                            {{ producto.nombre }} 
+                            <span class="badge bg-info">
+                                x{{ producto.cantidad }}
+                            </span>
                         </li>
                     {% endfor %}
                 </ul>
             </td>
-     <td>
-    <ul>
-        {% for producto in pedido.productos %}
-            <li>
-                <span class="badge bg-info">x{{ producto.cantidad }}</span>
-                </span>
-            </li>
-        {% endfor %}
-    </ul>
-</td>
-<td>
-    <ul>
-        {% for producto in pedido.productos %}
-            <li>
-                <span class="badge 
-                    {% if producto.stock_actual < producto.cantidad %}
-                        bg-danger
-                    {% else %}
+
+            <!-- STOCK -->
+            <td>
+                <ul>
+                    {% for producto in pedido.productos %}
+                        <li>
+                            <span class="badge 
+                                {% if producto.stock_actual < producto.cantidad %}
+                                    bg-danger
+                                {% else %}
+                                    bg-success
+                                {% endif %}
+                            ">
+                                {{ producto.stock_actual }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+
+            <!-- PRODUCCIÓN -->
+            <td>
+                {% if pedido.estado == "Completado" %}
+                    <span class="badge bg-success">
+                        ✔ No necesaria
+                    </span>
+
+                {% elif pedido.stock_suficiente %}
+                    <span class="badge bg-primary">
+                        Disponible en stock
+                    </span>
+
+                {% else %}
+                    <span class="badge bg-danger">
+                        Requiere producción
+                    </span>
+                {% endif %}
+            </td>
+
+            <!-- ESTADO -->
+            <td>
+                <span class="badge
+                    {% if pedido.estado == 'Pendiente' %}
+                        bg-warning text-dark
+                    {% elif pedido.estado == 'En Proceso' %}
+                        bg-info
+                    {% elif pedido.estado == 'Completado' %}
                         bg-success
+                    {% elif pedido.estado == 'Cancelado' %}
+                        bg-danger
                     {% endif %}
                 ">
-                    Stock: {{ producto.stock_actual }}
-                </span>
-            </li>
-        {% endfor %}
-    </ul>
-</td>
-<td>
-    {% if pedido.stock_suficiente %}
-        <span class="badge bg-success">
-            ✔ Listo para completar
-        </span>
-    {% else %}
-        <span class="badge bg-danger">
-            ⚠ Requiere producción
-        </span>
-    {% endif %}
-</td>
-
-            <td>
-                <span class="badge bg-warning text-dark">
                     {{ pedido.estado }}
                 </span>
             </td>
 
+            <!-- FECHA -->
             <td>{{ pedido.fecha }}</td>
 
+            <!-- ACCIONES -->
             <td>
-    {% if pedido.stock_suficiente %}
-        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
-                class="btn btn-success">
-            Completar
-        </button>
-    {% else %}
-        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
-                class="btn btn-warning">
-            Enviar a producción
-        </button>
-    {% endif %}
-</td>
+                {% if pedido.estado != "Completado" and pedido.estado != "Cancelado" %}
+                    
+                    {% if pedido.stock_suficiente %}
+                        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
+                                class="btn btn-success">
+                            Completar
+                        </button>
+                    {% else %}
+                        <button onclick="procesarPedido('{{ pedido.id_pedido }}')" 
+                                class="btn btn-warning">
+                            Enviar a producción
+                        </button>
+                    {% endif %}
+
+                {% else %}
+                    <span class="text-muted">Sin acciones</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% endblock %}
+
 {% block scripts %}
 <script>
 function procesarPedido(id) {

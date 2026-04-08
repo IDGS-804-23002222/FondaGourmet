@@ -21,6 +21,7 @@ from modules.produccion import produccion
 from modules.proveedores import proveedores
 from modules.productos import productos
 from modules.tienda import tienda
+
 from modules.usuarios import usuarios
 
 migrate = Migrate()

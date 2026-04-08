@@ -24,12 +24,10 @@
 <header class="cliente-header">
     {% include "includes/_nav.html" %}
 </header>
-        {% if current_user.is_authenticated and current_user.rol and current_user.rol.nombre == 'Cliente' %}
         <main class="cliente-main">
             {% include "includes/_alerts.html" %}
             {% block content %}{% endblock %}
         </main>
-        {%endif %}
     <footer class="cliente-footer">
         {% include "includes/_footer.html" %}
     </footer>

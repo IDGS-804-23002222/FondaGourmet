@@ -11,7 +11,6 @@ def _allowed_image(filename, allowed_extensions):
 
 
 def save_image_file(file_storage, upload_root, subfolder, allowed_extensions):
-    """Save an uploaded image under static/uploads/<subfolder> and return relative path."""
     if not file_storage or not getattr(file_storage, 'filename', None):
         return None, None
 
@@ -28,7 +27,6 @@ def save_image_file(file_storage, upload_root, subfolder, allowed_extensions):
     absolute_path = os.path.join(destination_dir, unique_name)
     file_storage.save(absolute_path)
 
-    # Return path relative to static/ so url_for('static', filename=...) works.
     return os.path.join('uploads', subfolder, unique_name).replace('\\', '/'), None
 
 
