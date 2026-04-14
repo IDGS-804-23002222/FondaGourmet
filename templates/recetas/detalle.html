@@ -7,6 +7,7 @@
 <div class="card mb-3" style="padding:16px;">
     <p><strong>ID:</strong> {{ receta.id_receta }}</p>
     <p><strong>Producto:</strong> {{ receta.producto_nombre }}</p>
+    <p><strong>Numero de porciones:</strong> {{ receta.porciones or 1 }}</p>
     <p><strong>Rendimiento:</strong> {{ '%.2f'|format(receta.rendimiento or 0) }}</p>
     <p><strong>Estado:</strong> {{ 'Activa' if receta.estado else 'Inactiva' }}</p>
     <p><strong>Nota:</strong> {{ receta.nota or 'Sin nota' }}</p>

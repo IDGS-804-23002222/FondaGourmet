@@ -48,6 +48,7 @@ def editar(id_receta):
 
     if request.method == 'POST':
         rendimiento_raw = request.form.get('rendimiento')
+        porciones_raw = request.form.get('porciones')
         nota = request.form.get('nota')
         estado = request.form.get('estado') == 'on'
         ids_materia = request.form.getlist('id_materia[]')
@@ -76,9 +77,18 @@ def editar(id_receta):
             flash('El rendimiento debe ser numérico.', 'warning')
             return render_template('recetas/editar.html', receta=receta, materias=materias)
 
+        try:
+            porciones = int(porciones_raw)
+            if porciones <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            flash('El numero de porciones debe ser un entero mayor a cero.', 'warning')
+            return render_template('recetas/editar.html', receta=receta, materias=materias)
+
         ok, mensaje = actualizar_receta_completa(
             id_receta=id_receta,
             rendimiento=rendimiento,
+            porciones=porciones,
             nota=nota,
             detalles_payload=detalles,
             estado=estado,

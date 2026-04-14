@@ -15,6 +15,11 @@
         </div>
 
         <div>
+            <label for="porciones"><strong>Numero de porciones</strong></label>
+            <input id="porciones" name="porciones" type="number" min="1" step="1" class="form-control" value="{{ receta.porciones or 1 }}" required>
+        </div>
+
+        <div>
             <label for="nota"><strong>Nota</strong></label>
             <textarea id="nota" name="nota" class="form-control" rows="3">{{ receta.nota or '' }}</textarea>
         </div>

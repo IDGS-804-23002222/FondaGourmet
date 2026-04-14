@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.recaptcha import RecaptchaField
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import StringField, IntegerField, SubmitField, RadioField, BooleanField, DateField, SelectField, EmailField, FloatField, PasswordField, TextAreaField, HiddenField
 from wtforms import validators
@@ -14,9 +15,7 @@ class LoginForm(FlaskForm):
         validators.DataRequired(message="La contraseña es obligatoria.")
         ])
     
-    captcha = StringField('Captcha', [
-        validators.DataRequired(message="El captcha es obligatorio.")
-        ])
+    captcha = RecaptchaField()
    
     submit = SubmitField('Iniciar sesión')
 
@@ -647,6 +646,10 @@ class ProductoForm(FlaskForm):
 
 class RecetaForm(FlaskForm):
     id_producto = SelectField('Producto', coerce=int)
+    porciones = IntegerField('Numero de porciones', [
+        validators.DataRequired(message='El numero de porciones es obligatorio.'),
+        validators.NumberRange(min=1, message='El numero de porciones debe ser mayor a 0.')
+    ])
     submit = SubmitField('Crear Receta')
 
 class RecetaDetalleForm(FlaskForm):
@@ -748,6 +751,11 @@ class CrearProductoForm(FlaskForm):
     id_categoria_platillo = SelectField('Categoría platillo', [
         validators.DataRequired(message="Debe seleccionar una categoría.")
     ], coerce=int)
+
+    porciones = IntegerField('Numero de porciones', [
+        validators.DataRequired(message="El numero de porciones es obligatorio."),
+        validators.NumberRange(min=1, message="El numero de porciones debe ser mayor a 0.")
+    ], default=1)
 
     ingredientes_json = HiddenField('Ingredientes receta')
     

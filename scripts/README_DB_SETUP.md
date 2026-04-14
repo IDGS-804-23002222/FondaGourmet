@@ -23,6 +23,7 @@ powershell -ExecutionPolicy Bypass -File scripts\setup_db_windows.ps1
 2. Sincroniza esquema con `scripts/sync_db_schema.py`
    - crea tablas nuevas de categorias separadas si faltan
    - agrega columnas FK nuevas si faltan
+   - agrega/normaliza `recetas.porciones` (default 1, no nulo)
    - hace nullable las columnas legacy `id_categoria` en `productos` y `materias_primas`
    - rellena datos iniciales de categorias
    - agrega constraints FK faltantes

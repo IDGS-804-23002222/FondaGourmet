@@ -9,6 +9,7 @@
 		<tr>
 			<th>ID</th>
 			<th>Producto</th>
+			<th>Porciones</th>
 			<th>Estado</th>
 			<th>Fecha</th>
 			<th>Ingredientes</th>
@@ -20,6 +21,7 @@
 		<tr>
 			<td>{{ receta.id_receta }}</td>
 			<td>{{ receta.producto_nombre }}</td>
+			<td>{{ receta.porciones or 1 }}</td>
 			<td>{{ 'Activa' if receta.estado else 'Inactiva' }}</td>
 			<td>{{ receta.fecha_creacion.strftime('%d/%m/%Y %H:%M') if receta.fecha_creacion else 'N/A' }}</td>
 			<td>
@@ -37,7 +39,7 @@
 			</td>
 		</tr>
 		{% else %}
-		<tr><td colspan="6" style="text-align:center;">No hay recetas registradas.</td></tr>
+		<tr><td colspan="7" style="text-align:center;">No hay recetas registradas.</td></tr>
 		{% endfor %}
 	</tbody>
 </table>

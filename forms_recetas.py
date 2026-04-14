@@ -6,6 +6,11 @@ class CrearRecetaForm(FlaskForm):
         validators.DataRequired(message="El rendimiento es obligatorio."),
         validators.NumberRange(min=0, max=100, message="El rendimiento debe estar entre 0 y 100%.")
     ])
+
+    porciones = IntegerField('Numero de porciones', [
+        validators.DataRequired(message="El numero de porciones es obligatorio."),
+        validators.NumberRange(min=1, message="El numero de porciones debe ser mayor a 0.")
+    ])
     
     nota = TextAreaField('Notas (opcional)', [
         validators.Optional(),
@@ -19,8 +24,13 @@ class EditarRecetaForm(FlaskForm):
     """Formulario para editar una receta"""
     
     rendimiento = FloatField('Rendimiento (%)', [
-        validators.Optional(),
+        validators.DataRequired(message="El rendimiento es obligatorio."),
         validators.NumberRange(min=0, max=100, message="El rendimiento debe estar entre 0 y 100%.")
+    ])
+
+    porciones = IntegerField('Numero de porciones', [
+        validators.DataRequired(message="El numero de porciones es obligatorio."),
+        validators.NumberRange(min=1, message="El numero de porciones debe ser mayor a 0.")
     ])
     
     nota = TextAreaField('Notas (opcional)', [

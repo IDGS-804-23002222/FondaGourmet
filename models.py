@@ -220,12 +220,17 @@ class Receta(db.Model):
     id_receta = db.Column(db.Integer, primary_key=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
     rendimiento = db.Column(db.Float, default=0, nullable=False)  # Porcentaje de rendimiento (0-100)
+    porciones = db.Column(db.Integer, default=1, nullable=False)
     nota = db.Column(db.Text)  # Notas opcionales sobre la receta
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     
     detalles = db.relationship('RecetaDetalle', back_populates='receta', cascade="all, delete-orphan")
     producto = db.relationship('Producto', back_populates='recetas')
+
+    __table_args__ = (
+        CheckConstraint('porciones > 0', name='check_receta_porciones_positivas'),
+    )
     
     def calcular_rendimiento_automatico(self):
         """Calcula el rendimiento basado en el total de ingredientes"""

@@ -10,6 +10,7 @@ This script aligns an existing MySQL schema with the current app models for:
 - productos.id_categoria_platillo
 
 It also keeps legacy columns (id_categoria) nullable so mixed deployments do not fail.
+It also ensures recetas.porciones exists and is valid (> 0 at data level).
 """
 
 from sqlalchemy import text
@@ -77,6 +78,23 @@ def has_fk(session, table_name, fk_name):
             """
         ),
         {"table_name": table_name, "fk_name": fk_name},
+    ).scalar()
+    return bool(row)
+
+
+def has_check_constraint(session, table_name, constraint_name):
+    row = session.execute(
+        text(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.table_constraints
+            WHERE constraint_schema = DATABASE()
+              AND table_name = :table_name
+              AND constraint_name = :constraint_name
+              AND constraint_type = 'CHECK'
+            """
+        ),
+        {"table_name": table_name, "constraint_name": constraint_name},
     ).scalar()
     return bool(row)
 
@@ -162,6 +180,26 @@ def run():
         if has_table(s, "productos") and not has_column(s, "productos", "id_categoria_platillo"):
             s.execute(text("ALTER TABLE productos ADD COLUMN id_categoria_platillo INT NULL"))
 
+        # Recetas: ensure porciones exists for compatibility with current models
+        if has_table(s, "recetas"):
+            if not has_column(s, "recetas", "porciones"):
+                s.execute(text("ALTER TABLE recetas ADD COLUMN porciones INT NOT NULL DEFAULT 1"))
+            else:
+                # Normalize data first so the NOT NULL/default alteration can be applied safely.
+                s.execute(text("UPDATE recetas SET porciones = 1 WHERE porciones IS NULL OR porciones <= 0"))
+                s.execute(text("ALTER TABLE recetas MODIFY COLUMN porciones INT NOT NULL DEFAULT 1"))
+
+            if not has_check_constraint(s, "recetas", "check_receta_porciones_positivas"):
+                s.execute(
+                    text(
+                        """
+                        ALTER TABLE recetas
+                        ADD CONSTRAINT check_receta_porciones_positivas
+                        CHECK (porciones > 0)
+                        """
+                    )
+                )
+
         # 4) Keep legacy id_categoria nullable (avoids insert crashes in mixed environments)
         if has_column(s, "materias_primas", "id_categoria") and not is_nullable(s, "materias_primas", "id_categoria"):
             s.execute(text("ALTER TABLE materias_primas MODIFY COLUMN id_categoria INT NULL"))
@@ -187,42 +225,74 @@ def run():
             )
 
         if has_column(s, "materias_primas", "id_categoria_ingrediente"):
-            s.execute(
-                text(
-                    """
-                    UPDATE materias_primas mp
-                    LEFT JOIN categorias c ON c.id_categoria = mp.id_categoria
-                    LEFT JOIN categorias_ingrediente ci ON LOWER(ci.nombre) = LOWER(c.nombre)
-                    SET mp.id_categoria_ingrediente = COALESCE(
-                        mp.id_categoria_ingrediente,
-                        ci.id_categoria_ingrediente,
-                        (SELECT id_categoria_ingrediente
-                         FROM categorias_ingrediente
-                         WHERE nombre = 'Abarrotes'
-                         LIMIT 1)
+            if has_column(s, "materias_primas", "id_categoria"):
+                s.execute(
+                    text(
+                        """
+                        UPDATE materias_primas mp
+                        LEFT JOIN categorias c ON c.id_categoria = mp.id_categoria
+                        LEFT JOIN categorias_ingrediente ci ON LOWER(ci.nombre) = LOWER(c.nombre)
+                        SET mp.id_categoria_ingrediente = COALESCE(
+                            mp.id_categoria_ingrediente,
+                            ci.id_categoria_ingrediente,
+                            (SELECT id_categoria_ingrediente
+                             FROM categorias_ingrediente
+                             WHERE nombre = 'Abarrotes'
+                             LIMIT 1)
+                        )
+                        """
                     )
-                    """
                 )
-            )
+            else:
+                s.execute(
+                    text(
+                        """
+                        UPDATE materias_primas
+                        SET id_categoria_ingrediente = COALESCE(
+                            id_categoria_ingrediente,
+                            (SELECT id_categoria_ingrediente
+                             FROM categorias_ingrediente
+                             WHERE nombre = 'Abarrotes'
+                             LIMIT 1)
+                        )
+                        """
+                    )
+                )
 
         if has_column(s, "productos", "id_categoria_platillo"):
-            s.execute(
-                text(
-                    """
-                    UPDATE productos p
-                    LEFT JOIN categorias c ON c.id_categoria = p.id_categoria
-                    LEFT JOIN categorias_platillo cp ON LOWER(cp.nombre) = LOWER(c.nombre)
-                    SET p.id_categoria_platillo = COALESCE(
-                        p.id_categoria_platillo,
-                        cp.id_categoria_platillo,
-                        (SELECT id_categoria_platillo
-                         FROM categorias_platillo
-                         WHERE nombre = 'Platos fuertes'
-                         LIMIT 1)
+            if has_column(s, "productos", "id_categoria"):
+                s.execute(
+                    text(
+                        """
+                        UPDATE productos p
+                        LEFT JOIN categorias c ON c.id_categoria = p.id_categoria
+                        LEFT JOIN categorias_platillo cp ON LOWER(cp.nombre) = LOWER(c.nombre)
+                        SET p.id_categoria_platillo = COALESCE(
+                            p.id_categoria_platillo,
+                            cp.id_categoria_platillo,
+                            (SELECT id_categoria_platillo
+                             FROM categorias_platillo
+                             WHERE nombre = 'Platos fuertes'
+                             LIMIT 1)
+                        )
+                        """
                     )
-                    """
                 )
-            )
+            else:
+                s.execute(
+                    text(
+                        """
+                        UPDATE productos
+                        SET id_categoria_platillo = COALESCE(
+                            id_categoria_platillo,
+                            (SELECT id_categoria_platillo
+                             FROM categorias_platillo
+                             WHERE nombre = 'Platos fuertes'
+                             LIMIT 1)
+                        )
+                        """
+                    )
+                )
 
         # 6) Add FK constraints when missing
         if has_column(s, "proveedores", "id_categoria_proveedor") and not has_fk(

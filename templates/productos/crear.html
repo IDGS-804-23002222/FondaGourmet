@@ -52,6 +52,13 @@
                 </h3>
                 <div class="form-grid">
                     <div class="form-group-half">
+                        {{ form.porciones.label(class="form-label") }}
+                        {{ form.porciones(class="form-control", min="1", step="1", placeholder="Ej: 4") }}
+                        {% for error in form.porciones.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group-half">
                         <label class="form-label" for="id_materia_select">Materia prima</label>
                         <select id="id_materia_select" class="form-control">
                             <option value="">Selecciona una materia prima</option>
