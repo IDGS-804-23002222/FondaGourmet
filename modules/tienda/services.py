@@ -11,7 +11,12 @@ logger = logging.getLogger(__name__)
 # ===============================
 def obtener_menu():
     try:
-        productos = Producto.query.filter_by(estado=True).all()
+        productos = (
+            Producto.query
+            .filter(Producto.estado.is_(True), Producto.stock_actual > 0)
+            .order_by(Producto.nombre.asc())
+            .all()
+        )
 
         resultado = []
         for p in productos:

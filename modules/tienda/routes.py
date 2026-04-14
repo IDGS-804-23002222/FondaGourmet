@@ -29,8 +29,7 @@ def menu():
 
     return render_template(
         'tienda/menu.html',
-        productos=productos,
-        name=current_user.username
+        productos=productos
     )
     
 @tienda.route('/carrito')
