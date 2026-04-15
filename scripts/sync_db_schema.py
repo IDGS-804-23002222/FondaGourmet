@@ -16,6 +16,7 @@ It also ensures product freshness fields exist for automatic waste policy.
 It also applies SQL DDL scripts in scripts/ for caja compatibility.
 It also applies recetas/inventario terminado compatibility SQL scripts.
 It also applies compras/proveedores robust compatibility SQL scripts.
+It also applies mermas/ajustes compatibility SQL scripts.
 """
 
 from pathlib import Path
@@ -207,6 +208,7 @@ def run():
         apply_sql_file(s, scripts_dir / "schema_caja_sesiones_movimientos.sql")
         apply_sql_file(s, scripts_dir / "schema_recetas_inventario_terminado.sql")
         apply_sql_file(s, scripts_dir / "schema_compras_proveedores_robusto.sql")
+        apply_sql_file(s, scripts_dir / "schema_mermas_ajustes.sql")
 
         # 1) Category tables
         s.execute(
@@ -410,10 +412,14 @@ def run():
         if has_column(s, "productos", "dias_duracion"):
             s.execute(text("UPDATE productos SET dias_duracion = 2 WHERE dias_duracion IS NULL OR dias_duracion < 2"))
 
-        if has_column(s, "productos", "fecha_produccion"):
+        if has_column(s, "productos", "fecha_produccion") and has_column(s, "productos", "stock_actual"):
             s.execute(text("UPDATE productos SET fecha_produccion = COALESCE(fecha_produccion, fecha_creacion) WHERE stock_actual > 0"))
 
-        if has_column(s, "productos", "fecha_produccion") and has_column(s, "productos", "fecha_merma"):
+        if (
+            has_column(s, "productos", "fecha_produccion")
+            and has_column(s, "productos", "fecha_merma")
+            and has_column(s, "productos", "stock_actual")
+        ):
             s.execute(
                 text(
                     """

@@ -47,11 +47,33 @@ CREATE TABLE IF NOT EXISTS inventario_terminado (
 ALTER TABLE inventario_terminado
 MODIFY COLUMN fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
--- 3) Semilla inicial desde stock_actual de productos para no perder disponibilidad al migrar.
-INSERT INTO inventario_terminado (id_producto, cantidad_disponible)
-SELECT p.id_producto, GREATEST(CAST(COALESCE(p.stock_actual, 0) AS SIGNED), 0)
-FROM productos p
-LEFT JOIN inventario_terminado it ON it.id_producto = p.id_producto
-WHERE it.id_producto IS NULL;
+-- 3) Semilla inicial de inventario terminado.
+-- Compatibilidad:
+-- - Si existe productos.stock_actual (legacy), se usa para inicializar.
+-- - Si no existe (esquema actual), inicializa en 0 para no romper despliegues.
+SET @col_stock_actual := (
+        SELECT COUNT(*)
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'productos'
+            AND COLUMN_NAME = 'stock_actual'
+);
+
+SET @sql_seed_inventario := IF(
+        @col_stock_actual > 0,
+        'INSERT INTO inventario_terminado (id_producto, cantidad_disponible)
+         SELECT p.id_producto, GREATEST(CAST(COALESCE(p.stock_actual, 0) AS SIGNED), 0)
+         FROM productos p
+         LEFT JOIN inventario_terminado it ON it.id_producto = p.id_producto
+         WHERE it.id_producto IS NULL',
+        'INSERT INTO inventario_terminado (id_producto, cantidad_disponible)
+         SELECT p.id_producto, 0
+         FROM productos p
+         LEFT JOIN inventario_terminado it ON it.id_producto = p.id_producto
+         WHERE it.id_producto IS NULL'
+);
+PREPARE stmt_seed_inventario FROM @sql_seed_inventario;
+EXECUTE stmt_seed_inventario;
+DEALLOCATE PREPARE stmt_seed_inventario;
 
 COMMIT;
