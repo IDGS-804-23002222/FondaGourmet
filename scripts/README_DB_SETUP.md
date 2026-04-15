@@ -21,6 +21,8 @@ powershell -ExecutionPolicy Bypass -File scripts\setup_db_windows.ps1
 ## Que hace
 1. Instala dependencias de `requirements.txt`
 2. Sincroniza esquema con `scripts/sync_db_schema.py`
+   - aplica `scripts/schema_caja_sesiones_movimientos.sql` (tablas `caja_sesiones` y `caja_movimientos`)
+   - evita conflicto con entornos legacy que ya tengan tablas `caja`/`movimientos_caja`
    - crea tablas nuevas de categorias separadas si faltan
    - agrega columnas FK nuevas si faltan
    - agrega/normaliza `recetas.porciones` (default 1, no nulo)

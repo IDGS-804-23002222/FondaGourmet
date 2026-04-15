@@ -13,7 +13,10 @@ It also keeps legacy columns (id_categoria) nullable so mixed deployments do not
 It also ensures recetas.porciones exists and is valid (> 0 at data level).
 It also recreates auth-related stored procedures to match the current schema.
 It also ensures product freshness fields exist for automatic waste policy.
+It also applies SQL DDL scripts in scripts/ for caja compatibility.
 """
+
+from pathlib import Path
 
 from sqlalchemy import text
 
@@ -101,10 +104,100 @@ def has_check_constraint(session, table_name, constraint_name):
     return bool(row)
 
 
+def has_base_table(session, table_name):
+    row = session.execute(
+        text(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+              AND table_name = :table_name
+              AND table_type = 'BASE TABLE'
+            """
+        ),
+        {"table_name": table_name},
+    ).scalar()
+    return bool(row)
+
+
+def parse_sql_statements(script_text):
+    """Split a SQL script into statements, ignoring semicolons inside quoted strings."""
+    filtered_lines = []
+    for raw_line in script_text.splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("--"):
+            continue
+        filtered_lines.append(raw_line)
+
+    sql = "\n".join(filtered_lines)
+    statements = []
+    buffer = []
+    in_single = False
+    in_double = False
+    in_backtick = False
+    prev = ""
+
+    for ch in sql:
+        if ch == "'" and not in_double and not in_backtick and prev != "\\":
+            in_single = not in_single
+        elif ch == '"' and not in_single and not in_backtick and prev != "\\":
+            in_double = not in_double
+        elif ch == "`" and not in_single and not in_double:
+            in_backtick = not in_backtick
+
+        if ch == ";" and not in_single and not in_double and not in_backtick:
+            statement = "".join(buffer).strip()
+            if statement:
+                statements.append(statement)
+            buffer = []
+        else:
+            buffer.append(ch)
+
+        prev = ch
+
+    tail = "".join(buffer).strip()
+    if tail:
+        statements.append(tail)
+
+    return statements
+
+
+def apply_sql_file(session, sql_file_path):
+    if not sql_file_path.exists():
+        print(f"SQL script not found, skipping: {sql_file_path}")
+        return
+
+    script_text = sql_file_path.read_text(encoding="utf-8")
+    statements = parse_sql_statements(script_text)
+
+    applied = 0
+    skipped = 0
+    for stmt in statements:
+        normalized = " ".join(stmt.strip().split())
+        upper = normalized.upper()
+
+        # If legacy table objects already exist, skip compatibility views.
+        if upper.startswith("CREATE OR REPLACE VIEW CAJA AS") and has_base_table(session, "caja"):
+            skipped += 1
+            continue
+        if upper.startswith("CREATE OR REPLACE VIEW MOVIMIENTOS_CAJA AS") and has_base_table(session, "movimientos_caja"):
+            skipped += 1
+            continue
+
+        session.execute(text(stmt))
+        applied += 1
+
+    print(f"Applied SQL script: {sql_file_path.name} (applied={applied}, skipped={skipped})")
+
+
 def run():
     app = create_app()
     with app.app_context():
         s = db.session
+        scripts_dir = Path(__file__).resolve().parent
+
+        # 0) Apply SQL schema scripts requested for caja/movimientos compatibility.
+        apply_sql_file(s, scripts_dir / "schema_caja_sesiones_movimientos.sql")
 
         # 1) Category tables
         s.execute(

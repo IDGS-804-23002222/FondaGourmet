@@ -25,6 +25,7 @@ from modules.proveedores import proveedores
 from modules.productos import productos
 from modules.inventario import inventario
 from modules.tienda import tienda
+from modules.caja.routes import ejecutar_automatizacion_caja
 
 from modules.usuarios import usuarios
 
@@ -35,6 +36,7 @@ login_manager = LoginManager()  # Inicializar LoginManager
 def create_app():
     app = Flask(__name__)
     app.config.from_object(DevelopmentConfig)
+    app.config.setdefault('MONGO_URI', os.getenv('MONGO_URI', 'mongodb://localhost:27017/fondaGourmet'))
     
     # Configuración adicional
     app.config['REMEMBER_COOKIE_DURATION'] = 30 * 24 * 3600  # 30 días
@@ -109,6 +111,13 @@ def create_app():
             return redirect(url_for('auth.redireccionar_por_rol', user=current_user))
         else:
             return redirect(url_for('auth.login'))
+
+    @app.before_request
+    def caja_auto_open_close():
+        if request.endpoint and request.endpoint.startswith('static'):
+            return None
+        ejecutar_automatizacion_caja()
+        return None
     
     return app
 
