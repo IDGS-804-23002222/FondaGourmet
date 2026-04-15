@@ -25,6 +25,7 @@ from modules.proveedores import proveedores
 from modules.productos import productos
 from modules.inventario import inventario
 from modules.tienda import tienda
+from modules.mermas import mermas
 from modules.caja.routes import ejecutar_automatizacion_caja
 
 from modules.usuarios import usuarios
@@ -81,6 +82,7 @@ def create_app():
     app.register_blueprint(proveedores, url_prefix='/proveedores')
     app.register_blueprint(ingredientes, url_prefix='/ingredientes')
     app.register_blueprint(pedidos, url_prefix='/pedidos')
+    app.register_blueprint(mermas, url_prefix='/mermas')
 
     init_alertas(app)
     
