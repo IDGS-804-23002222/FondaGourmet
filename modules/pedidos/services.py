@@ -12,6 +12,7 @@ from models import (
     Cliente,
     DetallePedido,
     DetalleProduccion,
+    InventarioTerminado,
     Pedido,
     PedidoMeta,
     Persona,
@@ -478,6 +479,42 @@ def procesar_pago_pedido(id_pedido, id_usuario, metodo_pago=None, datos_tarjeta=
         if not pedido.meta_pedido:
             pedido.meta_pedido = PedidoMeta(id_pedido=pedido.id_pedido, metodo_pago=metodo_pago, id_usuario=id_usuario)
 
+        # Revalidar y reservar stock al momento del pago para evitar sobreventa.
+        requerimientos = {}
+        for detalle in pedido.detalles:
+            if not detalle.id_producto:
+                continue
+            requerimientos[detalle.id_producto] = requerimientos.get(detalle.id_producto, 0) + int(detalle.cantidad or 0)
+
+        if requerimientos:
+            inventarios_bloqueados = (
+                InventarioTerminado.query
+                .filter(InventarioTerminado.id_producto.in_(list(requerimientos.keys())))
+                .order_by(InventarioTerminado.id_producto.asc())
+                .with_for_update()
+                .all()
+            )
+            inventario_por_producto = {inv.id_producto: inv for inv in inventarios_bloqueados}
+
+            for id_producto, cantidad_requerida in requerimientos.items():
+                inventario = inventario_por_producto.get(id_producto)
+                disponible = int(inventario.cantidad_disponible or 0) if inventario else 0
+                if disponible < cantidad_requerida:
+                    producto = next((d.producto for d in pedido.detalles if d.id_producto == id_producto), None)
+                    nombre = producto.nombre if producto else f'Producto #{id_producto}'
+                    return False, f'Stock insuficiente para {nombre}. Disponibles: {disponible}, requeridos: {cantidad_requerida}'
+
+            for id_producto, cantidad_requerida in requerimientos.items():
+                inventario = inventario_por_producto[id_producto]
+                inventario.cantidad_disponible = max(0, int(inventario.cantidad_disponible or 0) - cantidad_requerida)
+                inventario.fecha_actualizacion = datetime.utcnow()
+
+            productos = (
+                Producto.query
+                .filter(Producto.id_producto.in_(list(requerimientos.keys())))
+                .all()
+            )
+
         pedido.meta_pedido.metodo_pago = metodo_pago
         pedido.meta_pedido.tarjeta_titular = tarjeta_titular
         pedido.meta_pedido.tarjeta_ultimos4 = tarjeta_ultimos4
@@ -666,7 +703,15 @@ def completar_o_producir(id_pedido, id_usuario, fecha_necesaria=None, metodo_pag
         if not necesita_produccion:
             for item in requerimientos_por_producto.values():
                 producto = item['producto']
-                producto.stock_actual -= item['cantidad_pedida']
+                inventario = InventarioTerminado.query.filter_by(id_producto=producto.id_producto).first()
+                disponible = int(inventario.cantidad_disponible or 0) if inventario else 0
+                requerido = int(item['cantidad_pedida'] or 0)
+
+                if disponible < requerido:
+                    return False, f"Stock insuficiente para el producto {producto.nombre}"
+
+                inventario.cantidad_disponible = max(0, disponible - requerido)
+                inventario.fecha_actualizacion = datetime.utcnow()
 
             pedido.estado = 'Completado'
             pedido.fecha_entrega = datetime.now()

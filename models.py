@@ -5,6 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime 
 import uuid
+from constants import MotivoMerma
 
 db = SQLAlchemy()
 from sqlalchemy import CheckConstraint
@@ -191,7 +192,6 @@ class Producto(db.Model):
     nombre = db.Column(db.String(100), nullable=False, unique=True)
     descripcion = db.Column(db.Text)
     precio = db.Column(db.Float, nullable=False)
-    stock_actual = db.Column(db.Float, default=0, nullable=False)
     stock_minimo = db.Column(db.Float, nullable=False)
     fecha_produccion = db.Column(db.DateTime)
     dias_duracion = db.Column(db.Integer, default=2, nullable=False)
@@ -212,11 +212,15 @@ class Producto(db.Model):
     
     __table_args__ = (
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
-        CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
         CheckConstraint('dias_duracion >= 2', name='check_dias_duracion_producto_minimo'),
         CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
     )   
+
+    @property
+    def stock_actual(self):
+        inventario = InventarioTerminado.query.filter_by(id_producto=self.id_producto).first()
+        return int(inventario.cantidad_disponible or 0) if inventario else 0
 
 
 class InventarioTerminado(db.Model):
@@ -231,6 +235,29 @@ class InventarioTerminado(db.Model):
     __table_args__ = (
         CheckConstraint('cantidad_disponible >= 0', name='check_inventario_terminado_no_negativo'),
     )
+
+
+class Merma(db.Model):
+    __tablename__ = 'mermas'
+
+    id = db.Column('id_merma', db.Integer, primary_key=True)
+    tipo_articulo = db.Column(db.String(50), nullable=False)
+    articulo_id = db.Column(db.Integer, nullable=False)
+    cantidad = db.Column(db.Float, nullable=False)
+    motivo = db.Column(
+        db.Enum(
+            MotivoMerma,
+            native_enum=False,
+            values_callable=lambda enum_cls: [item.value for item in enum_cls],
+            name='motivo_merma_enum',
+        ),
+        nullable=False,
+    )
+    costo_perdida = db.Column(db.Numeric(12, 2), nullable=False, default=0)
+    fecha_registro = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario', ondelete='RESTRICT'), nullable=False)
+
+    usuario = db.relationship('Usuario', passive_deletes=True)
 
 
 #Creacion de los prodcutos a concluido, pero pq guardamos en modo IMG?

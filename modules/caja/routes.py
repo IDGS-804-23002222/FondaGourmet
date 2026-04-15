@@ -1,12 +1,8 @@
 import os
 from datetime import datetime, timedelta
 
-from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
+from flask import abort, current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-try:
-    from pymongo import MongoClient
-except Exception:
-    MongoClient = None
 from sqlalchemy import text
 
 from models import Caja as CajaModel
@@ -180,18 +176,8 @@ def _guardar_snapshot_mongo(caja_sesion, resumen, total_egresos, id_usuario_cier
     mongo_db = getattr(current_app, 'mongo', None)
 
     if mongo_db is None:
-        if MongoClient is None:
-            current_app.logger.warning('Mongo snapshot omitido: pymongo no instalado')
-            return False
-        uri = current_app.config.get('MONGO_URI') or os.getenv('MONGO_URI') or 'mongodb://localhost:27017/fondaGourmet'
-        try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=2500)
-            default_db = client.get_default_database()
-            mongo_db = default_db if default_db is not None else client.get_database('fondaGourmet')
-            client.admin.command('ping')
-        except Exception as exc:
-            current_app.logger.warning(f'Mongo snapshot omitido (sin conexion): {exc}')
-            return False
+        current_app.logger.warning('Mongo snapshot omitido: instancia global no disponible')
+        return False
 
     try:
         mongo_db.caja_snapshots.insert_one({
@@ -627,6 +613,10 @@ def ver_cierre(id_caja):
 @role_required(1, 3)
 def anular_venta(id_venta):
     pedido = Pedido.query.get_or_404(id_venta)
+    if int(getattr(current_user, 'id_rol', 0) or 0) == 3:
+        id_usuario_pedido = int(pedido.meta_pedido.id_usuario) if pedido.meta_pedido and pedido.meta_pedido.id_usuario else None
+        if id_usuario_pedido != int(current_user.id_usuario):
+            abort(403)
     return render_template('caja/anular_venta.html', venta=pedido, id=id_venta)
 
 
@@ -642,6 +632,11 @@ def confirmar_anular_venta(id_venta):
         pedido = Pedido.query.get(id_venta)
         if not pedido:
             return jsonify({'success': False, 'message': 'Pedido no encontrado'}), 404
+
+        if int(getattr(current_user, 'id_rol', 0) or 0) == 3:
+            id_usuario_pedido = int(pedido.meta_pedido.id_usuario) if pedido.meta_pedido and pedido.meta_pedido.id_usuario else None
+            if id_usuario_pedido != int(current_user.id_usuario):
+                abort(403)
 
         if (pedido.estado or '').strip().lower() == 'cancelado' or (pedido.estado_pago or '').strip().lower() == 'cancelado':
             return jsonify({'success': False, 'message': 'El pedido ya estaba cancelado'}), 409

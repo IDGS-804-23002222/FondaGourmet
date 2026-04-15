@@ -1,5 +1,5 @@
 import json
-from models import db, Producto, CategoriaPlatillo, MateriaPrima, Receta, RecetaDetalle
+from models import db, Producto, CategoriaPlatillo, MateriaPrima, Receta, RecetaDetalle, InventarioTerminado
 from flask import current_app
 import logging
 import os
@@ -36,7 +36,6 @@ def crear_producto(form):
             nombre=form.nombre.data,
             descripcion=form.descripcion.data if form.descripcion.data else None,
             precio=form.precio.data,
-            stock_actual=form.stock_actual.data,
             stock_minimo=form.stock_minimo.data,
             fecha_produccion=datetime.utcnow() if float(form.stock_actual.data or 0) > 0 else None,
             dias_duracion=2,
@@ -48,6 +47,13 @@ def crear_producto(form):
         
         db.session.add(nuevo_producto)
         db.session.flush()
+
+        inventario_inicial = max(0, int(float(form.stock_actual.data or 0)))
+        db.session.add(InventarioTerminado(
+            id_producto=nuevo_producto.id_producto,
+            cantidad_disponible=inventario_inicial,
+            fecha_actualizacion=datetime.utcnow(),
+        ))
 
         receta = Receta(
             id_producto=nuevo_producto.id_producto,
@@ -177,7 +183,17 @@ def actualizar_producto(id_producto, form):
         if form.precio.data:
             producto.precio = form.precio.data
         if form.stock_actual.data is not None:
-            producto.stock_actual = form.stock_actual.data
+            inventario = InventarioTerminado.query.filter_by(id_producto=producto.id_producto).first()
+            if not inventario:
+                inventario = InventarioTerminado(
+                    id_producto=producto.id_producto,
+                    cantidad_disponible=0,
+                    fecha_actualizacion=datetime.utcnow(),
+                )
+                db.session.add(inventario)
+
+            inventario.cantidad_disponible = max(0, int(float(form.stock_actual.data or 0)))
+            inventario.fecha_actualizacion = datetime.utcnow()
         if form.stock_minimo.data is not None:
             producto.stock_minimo = form.stock_minimo.data
         if form.id_categoria_platillo.data:

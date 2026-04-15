@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from flask import current_app, has_app_context
 from sqlalchemy import text
 
-from models import db, Producto
+from models import db, Producto, InventarioTerminado
 
 
 def _tabla_mermas_disponible():
@@ -111,7 +111,10 @@ def aplicar_merma_automatica_productos():
             costo_unitario = _costo_unitario_merma_producto(producto)
             costo_perdida = round(stock_vencido * costo_unitario, 2)
 
-            producto.stock_actual = 0
+            inventario = InventarioTerminado.query.filter_by(id_producto=producto.id_producto).first()
+            if inventario:
+                inventario.cantidad_disponible = 0
+                inventario.fecha_actualizacion = ahora
             producto.fecha_merma = ahora
             actualizados += 1
 

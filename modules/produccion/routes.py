@@ -9,7 +9,46 @@ from .services import (
     ver_orden_produccion,
     crear_solicitud_produccion_desde_alerta
 )
-from models import Producto
+from models import Producto, Produccion, db
+
+
+def iniciar_produccion(id_produccion):
+    try:
+        produccion_obj = Produccion.query.get(id_produccion)
+        if not produccion_obj:
+            return False, 'Produccion no encontrada'
+
+        estado_actual = (produccion_obj.estado or '').strip()
+        if estado_actual == 'Completada':
+            return False, 'La produccion ya fue completada'
+        if estado_actual == 'En Proceso':
+            return True, 'La produccion ya estaba en proceso'
+
+        produccion_obj.estado = 'En Proceso'
+        db.session.commit()
+        return True, 'Produccion iniciada correctamente'
+    except Exception as exc:
+        db.session.rollback()
+        return False, str(exc)
+
+
+def cancelar_produccion(id_produccion):
+    try:
+        produccion_obj = Produccion.query.get(id_produccion)
+        if not produccion_obj:
+            return False, 'Produccion no encontrada'
+
+        estado_actual = (produccion_obj.estado or '').strip()
+        if estado_actual == 'Completada':
+            return False, 'No se puede cancelar una produccion completada'
+
+        produccion_obj.estado = 'Solicitada'
+        produccion_obj.fecha_completada = None
+        db.session.commit()
+        return True, 'Produccion regresada a estado Solicitada'
+    except Exception as exc:
+        db.session.rollback()
+        return False, str(exc)
 
 @produccion.route('/', methods=['GET'])
 @login_required
@@ -54,6 +93,8 @@ def ver(id):
 
     return render_template('produccion/ver.html', produccion=prod)
 @produccion.route('/iniciar/<int:id>')
+@login_required
+@role_required(1, 2, 3)
 def iniciar(id):
     success, message = iniciar_produccion(id)
 
@@ -65,6 +106,8 @@ def iniciar(id):
     return redirect(url_for('produccion.index'))
 
 @produccion.route('/completar/<int:id>')
+@login_required
+@role_required(1, 2, 3)
 def completar(id):
     success, message = completar_produccion(id, id_usuario=current_user.id_usuario)
 
@@ -76,6 +119,8 @@ def completar(id):
     return redirect(url_for('produccion.index'))
 
 @produccion.route('/cancelar/<int:id>')
+@login_required
+@role_required(1, 2, 3)
 def cancelar(id):
     success, message = cancelar_produccion(id)
 

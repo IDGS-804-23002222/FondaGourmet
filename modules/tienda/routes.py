@@ -92,7 +92,7 @@ def aumentar_cantidad(id):
 
     return redirect(url_for('tienda.carrito'))
 
-@tienda.route('/actualizar_cantidad/', methods=['POST'])
+@tienda.route('/actualizar_cantidad/<int:id>', methods=['POST'])
 @login_required
 @role_required(3, 4)
 def actualizar_cantidad(id):

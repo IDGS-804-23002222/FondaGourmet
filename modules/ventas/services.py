@@ -145,58 +145,70 @@ def crear_venta(id_usuario, metodo_pago, productos):
         aplicar_merma_automatica_productos()
 
         if not productos:
-            return False, "No hay productos en la venta"
+            return False, "No hay productos en la venta", None
 
-        total = 0
-        detalles = []
+        requerimientos = {}
+        total = 0.0
 
-        # 🔍 VALIDACIÓN
         for item in productos:
-
             if not item.get("id_producto") or not item.get("cantidad"):
-                return False, "Producto inválido"
+                return False, "Producto inválido", None
 
             try:
                 id_producto = int(item["id_producto"])
-                cantidad = float(item["cantidad"])
-            except:
-                return False, "Datos incorrectos"
+                cantidad = int(float(item["cantidad"]))
+            except Exception:
+                return False, "Datos incorrectos", None
 
             if cantidad <= 0:
-                return False, "Cantidad inválida"
+                return False, "Cantidad inválida", None
 
             producto = Producto.query.get(id_producto)
-
             if not producto:
-                return False, f"Producto {id_producto} no existe"
-
+                return False, f"Producto {id_producto} no existe", None
             if not producto.estado:
-                return False, f"{producto.nombre} no disponible"
+                return False, f"{producto.nombre} no disponible", None
 
-            inventario = _obtener_o_crear_inventario_terminado(producto.id_producto)
+            req = requerimientos.setdefault(id_producto, {"producto": producto, "cantidad": 0})
+            req["cantidad"] += cantidad
+
+        ids_producto = list(requerimientos.keys())
+        inventarios_bloqueados = (
+            InventarioTerminado.query
+            .filter(InventarioTerminado.id_producto.in_(ids_producto))
+            .order_by(InventarioTerminado.id_producto.asc())
+            .with_for_update()
+            .all()
+        )
+        inventario_por_producto = {inv.id_producto: inv for inv in inventarios_bloqueados}
+
+        for id_producto in ids_producto:
+            if id_producto not in inventario_por_producto:
+                nuevo_inv = InventarioTerminado(
+                    id_producto=id_producto,
+                    cantidad_disponible=0,
+                    fecha_actualizacion=datetime.utcnow(),
+                )
+                db.session.add(nuevo_inv)
+                db.session.flush()
+                inventario_por_producto[id_producto] = nuevo_inv
+
+        for id_producto, req in requerimientos.items():
+            inventario = inventario_por_producto[id_producto]
             disponible = int(inventario.cantidad_disponible or 0)
-            cantidad_int = int(cantidad)
+            requerido = int(req["cantidad"])
 
-            if disponible < cantidad_int:
+            if disponible < requerido:
+                nombre = req["producto"].nombre
                 if disponible <= 0:
-                    return False, f"{producto.nombre} agotado. Produce un nuevo lote para habilitar venta.", None
-                return False, f"Stock insuficiente de porciones para {producto.nombre}. Disponibles: {disponible}", None
-
-            subtotal = producto.precio * cantidad_int
-            total += subtotal
-
-            detalles.append({
-                "producto": producto,
-                "cantidad": cantidad_int,
-                "subtotal": subtotal,
-                "inventario": inventario,
-            })
+                    return False, f"{nombre} agotado. Produce un nuevo lote para habilitar venta.", None
+                return False, f"Stock insuficiente de porciones para {nombre}. Disponibles: {disponible}", None
 
         # 🧾 CREAR VENTA
         venta = Venta(
             id_usuario=id_usuario,
             fecha=datetime.utcnow(),
-            total=total,
+            total=0,
             metodo_pago=metodo_pago,
             estado="Completada"
         )
@@ -204,20 +216,24 @@ def crear_venta(id_usuario, metodo_pago, productos):
         db.session.add(venta)
         db.session.flush()
 
-        # 📦 DETALLES + INVENTARIO TERMINADO
-        for d in detalles:
+        for id_producto, req in requerimientos.items():
+            producto = req["producto"]
+            cantidad = int(req["cantidad"])
+            subtotal = float(producto.precio or 0) * cantidad
+            total += subtotal
+
             db.session.add(DetalleVenta(
                 id_venta=venta.id_venta,
-                id_producto=d["producto"].id_producto,
-                cantidad=d["cantidad"],
-                subtotal=d["subtotal"]
+                id_producto=producto.id_producto,
+                cantidad=cantidad,
+                subtotal=subtotal
             ))
 
-            d["inventario"].cantidad_disponible = max(0, int(d["inventario"].cantidad_disponible or 0) - int(d["cantidad"]))
-            d["inventario"].fecha_actualizacion = datetime.utcnow()
+            inventario = inventario_por_producto[id_producto]
+            inventario.cantidad_disponible = max(0, int(inventario.cantidad_disponible or 0) - cantidad)
+            inventario.fecha_actualizacion = datetime.utcnow()
 
-            # Compatibilidad temporal con consultas legacy.
-            d["producto"].stock_actual = float(d["inventario"].cantidad_disponible)
+        venta.total = total
 
         db.session.commit()
 
@@ -293,8 +309,13 @@ def disminuir_stock_productos(id_venta):
 
         for detalle in venta.detalles:
             producto = Producto.query.get(detalle.id_producto)
-            if producto.stock_actual >= detalle.cantidad:
-                producto.stock_actual -= detalle.cantidad
+            inventario = _obtener_o_crear_inventario_terminado(detalle.id_producto)
+            disponible = int(inventario.cantidad_disponible or 0)
+            requerido = int(detalle.cantidad or 0)
+
+            if disponible >= requerido:
+                inventario.cantidad_disponible = max(0, disponible - requerido)
+                inventario.fecha_actualizacion = datetime.utcnow()
             else:
                 return False, f"Stock insuficiente para el producto {producto.nombre}"
 

@@ -229,9 +229,6 @@ def completar_produccion(id_produccion, id_usuario):
 
                 inventario.cantidad_disponible = int(inventario.cantidad_disponible or 0) + max(0, porciones_generadas)
                 inventario.fecha_actualizacion = datetime.utcnow()
-
-                # Compatibilidad temporal con consultas legacy que dependen de stock_actual.
-                producto.stock_actual = float(inventario.cantidad_disponible)
                 producto.fecha_produccion = datetime.utcnow()
                 producto.fecha_merma = None
 

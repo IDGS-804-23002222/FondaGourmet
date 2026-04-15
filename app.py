@@ -7,7 +7,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user  # Solo flask_login
 from config import DevelopmentConfig
-from extensions import init_extensions
+from db_mongo import init_mongo
 from models import db, Usuario
 from modules.auth import auth
 from modules.alertas import alertas, init_alertas
@@ -44,7 +44,7 @@ def create_app():
     app.config['REMEMBER_COOKIE_DURATION'] = 30 * 24 * 3600  # 30 días
 
     # Inicializar MongoDB antes de registrar blueprints
-    init_extensions(app)
+    init_mongo(app)
     
     # Inicializar extensiones
     db.init_app(app)

@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from models import DetalleVenta, Venta, db
 
@@ -26,35 +27,43 @@ def guardar_log(app, action, descripcion, id_usuario, ip):
     if getattr(app, 'mongo', None) is None:
         return False
 
-    app.mongo.logs.insert_one({
-        'fecha': datetime.datetime.utcnow(),
-        'accion': action,
-        'descripcion': descripcion,
-        'id_usuario': id_usuario,
-        'ip': ip,
-    })
-    return True
+    try:
+        app.mongo.logs.insert_one({
+            'fecha': datetime.datetime.utcnow(),
+            'accion': action,
+            'descripcion': descripcion,
+            'id_usuario': id_usuario,
+            'ip': ip,
+        })
+        return True
+    except Exception as e:
+        logging.error(f'Error al guardar log en Mongo: {e}')
+        return False
 
 
 def guardar_ticket(app, venta, detalles):
     if getattr(app, 'mongo', None) is None:
         return False
 
-    app.mongo.tickets.insert_one({
-        'id_venta': venta.id_venta,
-        'fecha': venta.fecha.strftime('%Y-%m-%d %H:%M:%S') if venta.fecha else datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
-        'total': float(venta.total or 0),
-        'id_usuario': venta.id_usuario,
-        'detalles': [
-            {
-                'id_producto': detalle.id_producto,
-                'cantidad': float(detalle.cantidad or 0),
-                'precio_unitario': float(detalle.precio_unitario or 0),
-            }
-            for detalle in detalles
-        ],
-    })
-    return True
+    try:
+        app.mongo.tickets.insert_one({
+            'id_venta': venta.id_venta,
+            'fecha': venta.fecha.strftime('%Y-%m-%d %H:%M:%S') if venta.fecha else datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+            'total': float(venta.total or 0),
+            'id_usuario': venta.id_usuario,
+            'detalles': [
+                {
+                    'id_producto': detalle.id_producto,
+                    'cantidad': float(detalle.cantidad or 0),
+                    'precio_unitario': float(detalle.precio_unitario or 0),
+                }
+                for detalle in detalles
+            ],
+        })
+        return True
+    except Exception as e:
+        logging.error(f'Error al guardar ticket de venta en Mongo: {e}')
+        return False
 
 
 def guardar_log_pedido(app, accion, pedido, id_usuario, monto, detalle=None):
@@ -73,8 +82,12 @@ def guardar_log_pedido(app, accion, pedido, id_usuario, monto, detalle=None):
     if detalle:
         documento.update(detalle)
 
-    app.mongo.logs.insert_one(documento)
-    return True
+    try:
+        app.mongo.logs.insert_one(documento)
+        return True
+    except Exception as e:
+        logging.error(f'Error al guardar log de pedido en Mongo: {e}')
+        return False
 
 
 def guardar_ticket_pedido(app, pedido, detalles, id_usuario):
@@ -90,48 +103,57 @@ def guardar_ticket_pedido(app, pedido, detalles, id_usuario):
         ]
         cliente_nombre = ' '.join(parte for parte in partes if parte).strip() or None
 
-    app.mongo.tickets.insert_one({
-        'id_pedido': pedido.id_pedido,
-        'fecha': datetime.datetime.utcnow(),
-        'fecha_pedido': pedido.fecha,
-        'fecha_entrega': pedido.fecha_entrega,
-        'id_usuario': id_usuario,
-        'cliente': cliente_nombre,
-        'estado_pedido': pedido.estado,
-        'estado_pago': getattr(pedido, 'estado_pago', None),
-        'metodo_pago': pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D',
-        'total': float(pedido.total or 0),
-        'detalles': detalles,
-    })
-    return True
+    try:
+        app.mongo.tickets.insert_one({
+            'id_pedido': pedido.id_pedido,
+            'fecha': datetime.datetime.utcnow(),
+            'fecha_pedido': pedido.fecha,
+            'fecha_entrega': pedido.fecha_entrega,
+            'id_usuario': id_usuario,
+            'cliente': cliente_nombre,
+            'estado_pedido': pedido.estado,
+            'estado_pago': getattr(pedido, 'estado_pago', None),
+            'metodo_pago': pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D',
+            'total': float(pedido.total or 0),
+            'detalles': detalles,
+        })
+        return True
+    except Exception as e:
+        logging.error(f'Error al guardar ticket de pedido en Mongo: {e}')
+        return False
 
 
 def actualizar_dashboard(app):
-    _ensure_resumen_ventas_ttl_index(app)
+    try:
+        _ensure_resumen_ventas_ttl_index(app)
 
-    productos_mas_vendidos_query = (
-        db.session.query(
-            DetalleVenta.id_producto,
-            db.func.sum(DetalleVenta.cantidad).label('cantidad_total'),
+        productos_mas_vendidos_query = (
+            db.session.query(
+                DetalleVenta.id_producto,
+                db.func.sum(DetalleVenta.cantidad).label('cantidad_total'),
+            )
+            .group_by(DetalleVenta.id_producto)
+            .order_by(db.desc('cantidad_total'))
+            .limit(5)
+            .all()
         )
-        .group_by(DetalleVenta.id_producto)
-        .order_by(db.desc('cantidad_total'))
-        .limit(5)
-        .all()
-    )
 
-    resumen_ventas = {
-        'fecha': datetime.datetime.utcnow(),
-        'total_ventas': Venta.query.count(),
-        'total_ingresos': float(db.session.query(db.func.sum(Venta.total)).scalar() or 0.0),
-        'productos_mas_vendidos': [
-            {
-                'id_producto': row.id_producto,
-                'cantidad_total': float(row.cantidad_total or 0),
-            }
-            for row in productos_mas_vendidos_query
-        ],
-    }
+        resumen_ventas = {
+            'fecha': datetime.datetime.utcnow(),
+            'total_ventas': Venta.query.count(),
+            'total_ingresos': float(db.session.query(db.func.sum(Venta.total)).scalar() or 0.0),
+            'productos_mas_vendidos': [
+                {
+                    'id_producto': row.id_producto,
+                    'cantidad_total': float(row.cantidad_total or 0),
+                }
+                for row in productos_mas_vendidos_query
+            ],
+        }
 
-    app.mongo.resumen_ventas.insert_one(dict(resumen_ventas))
-    app.mongo.dashboard_cache.replace_one({}, resumen_ventas, upsert=True)
+        app.mongo.resumen_ventas.insert_one(dict(resumen_ventas))
+        app.mongo.dashboard_cache.replace_one({}, resumen_ventas, upsert=True)
+        return True
+    except Exception as e:
+        logging.error(f'Error al actualizar dashboard en Mongo: {e}')
+        return False

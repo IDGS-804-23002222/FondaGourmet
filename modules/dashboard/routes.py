@@ -10,11 +10,6 @@ from models import Cliente, MovimientoCaja, Pedido, Persona, db
 from utils.security import role_required
 from . import dashboard
 
-try:
-    from pymongo import MongoClient
-except Exception:
-    MongoClient = None
-
 
 @dashboard.route('/', methods=['GET', 'POST'])
 @login_required
@@ -139,16 +134,6 @@ def index():
     # Mongo: ultimos 10 logs para actividad reciente
     logs_feed = []
     mongo_db = getattr(current_app, 'mongo', None)
-
-    if mongo_db is None and MongoClient is not None:
-        uri = current_app.config.get('MONGO_URI') or os.getenv('MONGO_URI') or 'mongodb://localhost:27017/fondaGourmet'
-        try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=2500)
-            db_default = client.get_default_database()
-            mongo_db = db_default if db_default is not None else client.get_database('fondaGourmet')
-            client.admin.command('ping')
-        except Exception:
-            mongo_db = None
 
     if mongo_db is not None:
         try:
