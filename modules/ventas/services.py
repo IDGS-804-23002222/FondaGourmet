@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import text
 from datetime import datetime
 from flask import current_app, flash, jsonify, redirect, url_for
+from utils.product_freshness import aplicar_merma_automatica_productos
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,7 @@ def obtener_detalle_venta(id_venta):
 def crear_venta(id_usuario, metodo_pago, productos):
     try:
         logger.info(f"Creando venta usuario={id_usuario}")
+        aplicar_merma_automatica_productos()
 
         if not productos:
             return False, "No hay productos en la venta"

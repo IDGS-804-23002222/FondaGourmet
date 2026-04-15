@@ -213,6 +213,8 @@ def completar_o_solicitar_compra(id_produccion, id_usuario):
                     materia.stock_actual -= requerido
 
                 producto.stock_actual += cantidad
+                producto.fecha_produccion = datetime.utcnow()
+                producto.fecha_merma = None
             
             prod.estado = "Completada"
             prod.fecha_completada = datetime.now()

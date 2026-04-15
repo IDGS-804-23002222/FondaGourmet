@@ -3,6 +3,7 @@ from models import db, Producto, CategoriaPlatillo, MateriaPrima, Receta, Receta
 from flask import current_app
 import logging
 import os
+from datetime import datetime
 
 from utils.file_uploads import save_image_file
 
@@ -37,6 +38,9 @@ def crear_producto(form):
             precio=form.precio.data,
             stock_actual=form.stock_actual.data,
             stock_minimo=form.stock_minimo.data,
+            fecha_produccion=datetime.utcnow() if float(form.stock_actual.data or 0) > 0 else None,
+            dias_duracion=2,
+            fecha_merma=None,
             id_categoria_platillo=form.id_categoria_platillo.data,
             imagen=imagen_relativa,
             estado=True

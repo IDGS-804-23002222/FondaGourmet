@@ -12,6 +12,7 @@ This script aligns an existing MySQL schema with the current app models for:
 It also keeps legacy columns (id_categoria) nullable so mixed deployments do not fail.
 It also ensures recetas.porciones exists and is valid (> 0 at data level).
 It also recreates auth-related stored procedures to match the current schema.
+It also ensures product freshness fields exist for automatic waste policy.
 """
 
 from sqlalchemy import text
@@ -181,6 +182,15 @@ def run():
         if has_table(s, "productos") and not has_column(s, "productos", "id_categoria_platillo"):
             s.execute(text("ALTER TABLE productos ADD COLUMN id_categoria_platillo INT NULL"))
 
+        if has_table(s, "productos") and not has_column(s, "productos", "fecha_produccion"):
+            s.execute(text("ALTER TABLE productos ADD COLUMN fecha_produccion DATETIME NULL"))
+
+        if has_table(s, "productos") and not has_column(s, "productos", "dias_duracion"):
+            s.execute(text("ALTER TABLE productos ADD COLUMN dias_duracion INT NOT NULL DEFAULT 2"))
+
+        if has_table(s, "productos") and not has_column(s, "productos", "fecha_merma"):
+            s.execute(text("ALTER TABLE productos ADD COLUMN fecha_merma DATETIME NULL"))
+
         # Recetas: ensure porciones exists for compatibility with current models
         if has_table(s, "recetas"):
             if not has_column(s, "recetas", "porciones"):
@@ -295,6 +305,26 @@ def run():
                     )
                 )
 
+        if has_column(s, "productos", "dias_duracion"):
+            s.execute(text("UPDATE productos SET dias_duracion = 2 WHERE dias_duracion IS NULL OR dias_duracion < 2"))
+
+        if has_column(s, "productos", "fecha_produccion"):
+            s.execute(text("UPDATE productos SET fecha_produccion = COALESCE(fecha_produccion, fecha_creacion) WHERE stock_actual > 0"))
+
+        if has_column(s, "productos", "fecha_produccion") and has_column(s, "productos", "fecha_merma"):
+            s.execute(
+                text(
+                    """
+                    UPDATE productos
+                    SET stock_actual = 0,
+                        fecha_merma = COALESCE(fecha_merma, NOW())
+                    WHERE stock_actual > 0
+                      AND fecha_produccion IS NOT NULL
+                      AND fecha_produccion < DATE_SUB(NOW(), INTERVAL 3 DAY)
+                    """
+                )
+            )
+
         # 6) Add FK constraints when missing
         if has_column(s, "proveedores", "id_categoria_proveedor") and not has_fk(
             s, "proveedores", "fk_proveedores_categoria_proveedor"
@@ -334,6 +364,19 @@ def run():
                     ADD CONSTRAINT fk_productos_categoria_platillo
                     FOREIGN KEY (id_categoria_platillo)
                     REFERENCES categorias_platillo (id_categoria_platillo)
+                    """
+                )
+            )
+
+        if has_column(s, "productos", "dias_duracion") and not has_check_constraint(
+            s, "productos", "check_dias_duracion_producto_minimo"
+        ):
+            s.execute(
+                text(
+                    """
+                    ALTER TABLE productos
+                    ADD CONSTRAINT check_dias_duracion_producto_minimo
+                    CHECK (dias_duracion >= 2)
                     """
                 )
             )

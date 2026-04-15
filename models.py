@@ -193,6 +193,9 @@ class Producto(db.Model):
     precio = db.Column(db.Float, nullable=False)
     stock_actual = db.Column(db.Float, default=0, nullable=False)
     stock_minimo = db.Column(db.Float, nullable=False)
+    fecha_produccion = db.Column(db.DateTime)
+    dias_duracion = db.Column(db.Integer, default=2, nullable=False)
+    fecha_merma = db.Column(db.DateTime)
     imagen = db.Column(db.String(255))
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
@@ -210,6 +213,7 @@ class Producto(db.Model):
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
         CheckConstraint('stock_actual >= 0', name='check_stock_actual_producto_no_negativo'),
         CheckConstraint('stock_minimo >= 0', name='check_stock_minimo_producto_no_negativo'),
+        CheckConstraint('dias_duracion >= 2', name='check_dias_duracion_producto_minimo'),
         CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
     )   
 

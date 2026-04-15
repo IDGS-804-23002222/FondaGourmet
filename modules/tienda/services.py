@@ -3,6 +3,7 @@ from flask_login import current_user
 from datetime import datetime
 import re
 import logging
+from utils.product_freshness import aplicar_merma_automatica_productos
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,8 @@ logger = logging.getLogger(__name__)
 # ===============================
 def obtener_menu():
     try:
+        aplicar_merma_automatica_productos()
+
         productos = (
             Producto.query
             .filter(Producto.estado.is_(True), Producto.stock_actual > 0)
@@ -76,6 +79,8 @@ def obtener_o_crear_carrito():
 # ===============================
 def agregar_producto_carrito(id_producto, cantidad=1):
     try:
+        aplicar_merma_automatica_productos()
+
         carrito, error = obtener_o_crear_carrito()
         if error:
             return False, error
