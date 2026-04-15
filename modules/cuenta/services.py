@@ -3,8 +3,9 @@ from flask_login import login_user
 from models import db, Usuario
 from sqlalchemy import text, or_
 from werkzeug.security import generate_password_hash
-from models import db, Usuario, Persona, Rol
+from models import db, Usuario, Persona, Rol, Cliente
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -37,24 +38,49 @@ WHERE u.id_usuario = :id_usuario
 
 def crear_cliente(form):
     try:
-        password_hash = generate_password_hash(form.contrasena.data)
+        correo = (form.correo.data or '').strip().lower()
+        telefono = (form.telefono.data or '').strip()
+        username = (form.username.data or '').strip()
 
-        db.session.execute(text("""
-            CALL sp_crearCliente(
-                :nombre, :ap_p, :ap_m,
-                :telefono, :correo, :direccion,
-                :username, :password
-            )
-        """), {
-            "nombre": form.nombre.data,
-            "ap_p": form.apellido_p.data,
-            "ap_m": form.apellido_m.data,
-            "telefono": form.telefono.data,
-            "correo": form.correo.data,
-            "direccion": form.direccion.data,
-            "username": form.username.data,
-            "password": password_hash
-        })
+        if Usuario.query.filter_by(username=username).first():
+            return False, 'El nombre de usuario ya esta registrado.'
+
+        if Persona.query.filter_by(correo=correo).first():
+            return False, 'El correo ya esta registrado.'
+
+        if Persona.query.filter_by(telefono=telefono).first():
+            return False, 'El telefono ya esta registrado.'
+
+        rol_cliente = Rol.query.filter_by(nombre='Cliente').first()
+        if not rol_cliente:
+            return False, 'No existe el rol Cliente configurado en el sistema.'
+
+        persona = Persona(
+            nombre=(form.nombre.data or '').strip(),
+            apellido_p=(form.apellido_p.data or '').strip(),
+            apellido_m=(form.apellido_m.data or '').strip() or None,
+            telefono=telefono,
+            correo=correo,
+            direccion=(form.direccion.data or '').strip() or None,
+        )
+        db.session.add(persona)
+        db.session.flush()
+
+        usuario = Usuario(
+            username=username,
+            contrasena=generate_password_hash(form.contrasena.data),
+            estado=True,
+            fs_uniquifier=str(uuid.uuid4()),
+            id_rol=rol_cliente.id_rol,
+        )
+        db.session.add(usuario)
+        db.session.flush()
+
+        cliente = Cliente(
+            id_usuario=usuario.id_usuario,
+            id_persona=persona.id_persona,
+        )
+        db.session.add(cliente)
 
         db.session.commit()
         logger.info(f"Cliente creado: {form.username.data}")

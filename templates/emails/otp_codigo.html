@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Codigo de verificacion</title>
+</head>
+<body style="margin:0; padding:0; background:#f7f3e7; font-family:Segoe UI, Tahoma, Arial, sans-serif; color:#1f2d20;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f3e7; padding:24px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px; background:#ffffff; border-radius:18px; overflow:hidden; border:1px solid #e7decb; box-shadow:0 10px 24px rgba(31,45,32,0.12);">
+                    <tr>
+                        <td style="background:linear-gradient(135deg, #1f3f33, #2f6b4f); padding:22px 24px; color:#ffffff;">
+                            <div style="font-size:12px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.9;">Casa Gourmet</div>
+                            <h1 style="margin:8px 0 0; font-size:24px; line-height:1.2;">Verificacion en dos pasos</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:24px;">
+                            <p style="margin:0 0 12px; font-size:16px;">Hola {{ username }},</p>
+                            <p style="margin:0 0 18px; font-size:15px; color:#4f5f53;">
+                                Usa el siguiente codigo para completar tu inicio de sesion.
+                            </p>
+
+                            <div style="text-align:center; margin:14px 0 18px;">
+                                <span style="display:inline-block; background:#f5ead9; border:1px solid #ebd2b5; color:#7a3e1f; font-size:34px; letter-spacing:0.24em; font-weight:700; border-radius:14px; padding:14px 24px;">
+                                    {{ codigo }}
+                                </span>
+                            </div>
+
+                            <p style="margin:0 0 8px; font-size:14px; color:#5e6d61;">
+                                Este codigo expira en {{ minutos_expiracion }} minutos.
+                            </p>
+                            <p style="margin:0; font-size:14px; color:#5e6d61;">
+                                Si no intentaste iniciar sesion, puedes ignorar este correo.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:16px 24px; background:#faf7ef; border-top:1px solid #eee5d3; font-size:12px; color:#6a776c; text-align:center;">
+                            Casa Gourmet · Mensaje automatico de seguridad
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

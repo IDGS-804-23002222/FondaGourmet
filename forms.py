@@ -19,6 +19,15 @@ class LoginForm(FlaskForm):
    
     submit = SubmitField('Iniciar sesión')
 
+
+class OTPVerificationForm(FlaskForm):
+    codigo = StringField('Codigo de verificacion', [
+        validators.DataRequired(message='El codigo es obligatorio.'),
+        validators.Regexp(r'^\d{6}$', message='El codigo debe tener 6 digitos numericos.')
+    ])
+
+    submit = SubmitField('Verificar codigo')
+
 class RegistroUsuarioForm(FlaskForm):
     nombre = StringField('Nombre', [
         validators.DataRequired(message="El nombre es obligatorio."),

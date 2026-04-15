@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Verificar Codigo{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/login.css') }}">
+{% endblock %}
+
+{% block container %}
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-logo">
+            <img src="{{ url_for('static', filename='imagen/logoFonda.jpg') }}" alt="Fonda Gourmet">
+        </div>
+        <div class="login-titles">
+            <h2>Verificacion en dos pasos</h2>
+            <p class="text-muted">Ingresa el codigo de 6 digitos que enviamos a tu correo.</p>
+        </div>
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.codigo.label(class="form-label fw-bold") }}
+                {{ form.codigo(class="form-control form-control-lg", placeholder="000000", maxlength="6", inputmode="numeric", autocomplete="one-time-code") }}
+            </div>
+            <div class="button-group">
+                <button type="submit" class="login-btn">Verificar</button>
+                <a href="{{ url_for('auth.login') }}" class="btn volver-btn">Cancelar</a>
+            </div>
+        </form>
+
+        <form method="POST" action="{{ url_for('auth.reenviar_otp') }}" class="mt-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-link w-100">Reenviar codigo</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

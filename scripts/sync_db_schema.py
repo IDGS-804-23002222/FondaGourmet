@@ -11,6 +11,7 @@ This script aligns an existing MySQL schema with the current app models for:
 
 It also keeps legacy columns (id_categoria) nullable so mixed deployments do not fail.
 It also ensures recetas.porciones exists and is valid (> 0 at data level).
+It also recreates auth-related stored procedures to match the current schema.
 """
 
 from sqlalchemy import text
@@ -336,6 +337,122 @@ def run():
                     """
                 )
             )
+
+        # 7) Recreate legacy stored procedures aligned with current schema
+        s.execute(text("DROP PROCEDURE IF EXISTS sp_crearCliente"))
+        s.execute(
+            text(
+                """
+                CREATE PROCEDURE sp_crearCliente(
+                    IN p_nombre VARCHAR(100),
+                    IN p_ap_p VARCHAR(50),
+                    IN p_ap_m VARCHAR(50),
+                    IN p_telefono VARCHAR(10),
+                    IN p_correo VARCHAR(100),
+                    IN p_direccion VARCHAR(200),
+                    IN p_username VARCHAR(100),
+                    IN p_password TEXT
+                )
+                BEGIN
+                    DECLARE v_id_persona INT;
+                    DECLARE v_id_usuario INT;
+                    DECLARE v_id_rol_cliente INT;
+
+                    START TRANSACTION;
+
+                    SELECT id_rol INTO v_id_rol_cliente
+                    FROM roles
+                    WHERE nombre = 'Cliente'
+                    LIMIT 1;
+
+                    IF v_id_rol_cliente IS NULL THEN
+                        SIGNAL SQLSTATE '45000'
+                            SET MESSAGE_TEXT = 'No existe el rol Cliente.';
+                    END IF;
+
+                    INSERT INTO personas (
+                        nombre, apellido_p, apellido_m,
+                        telefono, correo, direccion, fecha_creacion
+                    ) VALUES (
+                        p_nombre, p_ap_p, NULLIF(p_ap_m, ''),
+                        p_telefono, p_correo, NULLIF(p_direccion, ''), NOW()
+                    );
+
+                    SET v_id_persona = LAST_INSERT_ID();
+
+                    INSERT INTO usuarios (
+                        username, contrasena, estado,
+                        fs_uniquifier, fecha_creacion, id_rol
+                    ) VALUES (
+                        p_username, p_password, 1,
+                        UUID(), NOW(), v_id_rol_cliente
+                    );
+
+                    SET v_id_usuario = LAST_INSERT_ID();
+
+                    INSERT INTO clientes (id_usuario, id_persona)
+                    VALUES (v_id_usuario, v_id_persona);
+
+                    COMMIT;
+                END
+                """
+            )
+        )
+
+        s.execute(text("DROP PROCEDURE IF EXISTS sp_actualizarMiCuenta"))
+        s.execute(
+            text(
+                """
+                CREATE PROCEDURE sp_actualizarMiCuenta(
+                    IN p_id_usuario INT,
+                    IN p_nombre VARCHAR(100),
+                    IN p_ap_p VARCHAR(50),
+                    IN p_ap_m VARCHAR(50),
+                    IN p_telefono VARCHAR(10),
+                    IN p_correo VARCHAR(100),
+                    IN p_direccion VARCHAR(200),
+                    IN p_username VARCHAR(100),
+                    IN p_password TEXT
+                )
+                BEGIN
+                    DECLARE v_id_persona INT;
+
+                    START TRANSACTION;
+
+                    SELECT COALESCE(e.id_persona, c.id_persona) INTO v_id_persona
+                    FROM usuarios u
+                    LEFT JOIN empleados e ON e.id_usuario = u.id_usuario
+                    LEFT JOIN clientes c ON c.id_usuario = u.id_usuario
+                    WHERE u.id_usuario = p_id_usuario
+                    LIMIT 1;
+
+                    IF v_id_persona IS NULL THEN
+                        SIGNAL SQLSTATE '45000'
+                            SET MESSAGE_TEXT = 'No se encontro persona vinculada al usuario.';
+                    END IF;
+
+                    UPDATE personas
+                    SET nombre = p_nombre,
+                        apellido_p = p_ap_p,
+                        apellido_m = NULLIF(p_ap_m, ''),
+                        telefono = p_telefono,
+                        correo = p_correo,
+                        direccion = NULLIF(p_direccion, '')
+                    WHERE id_persona = v_id_persona;
+
+                    UPDATE usuarios
+                    SET username = p_username,
+                        contrasena = CASE
+                            WHEN p_password IS NULL OR p_password = '' THEN contrasena
+                            ELSE p_password
+                        END
+                    WHERE id_usuario = p_id_usuario;
+
+                    COMMIT;
+                END
+                """
+            )
+        )
 
         s.commit()
         print("DB sync completed successfully.")

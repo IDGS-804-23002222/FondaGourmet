@@ -275,33 +275,62 @@
 
 <style>
     :root {
-        --dash-bg: #f4f6ef;
+        --dash-bg: #f6f4eb;
         --dash-card: #ffffff;
-        --dash-text: #1f2d20;
-        --dash-muted: #5e6a5f;
-        --dash-border: #d9dfd2;
-        --dash-accent: #d55f2a;
-        --dash-accent-soft: #fff1e7;
-        --dash-dark: #1f3a2f;
+        --dash-text: #1f3127;
+        --dash-muted: #5f6d61;
+        --dash-border: #e2ddcf;
+        --dash-accent: #cf5a2b;
+        --dash-accent-soft: #fff2e8;
+        --dash-dark: #1f3f33;
+        --dash-shadow: 0 16px 38px rgba(27, 44, 36, 0.08);
     }
 
     /* Dashboard styles */
     .dashboard-container {
-        padding: 8px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 14px;
         color: var(--dash-text);
         background:
-            radial-gradient(circle at top right, #fce9dc 0%, transparent 35%),
-            radial-gradient(circle at bottom left, #e9f2ea 0%, transparent 30%),
+            radial-gradient(circle at 92% 4%, #fde6d5 0%, transparent 34%),
+            radial-gradient(circle at 6% 86%, #e4f0e6 0%, transparent 32%),
             var(--dash-bg);
-        border-radius: 20px;
+        border-radius: 30px;
+        border: 1px solid #e6e1d3;
     }
 
     .welcome-section {
-        background: linear-gradient(130deg, #203b31 0%, #2f5a45 55%, #3a6a52 100%);
-        border-radius: 22px;
-        padding: 26px;
+        background: linear-gradient(132deg, #1e3b32 0%, #2c5c47 56%, #3e7157 100%);
+        border-radius: 28px;
+        padding: 30px;
         color: #f6f8f2;
-        box-shadow: 0 20px 40px rgba(35, 58, 50, 0.22);
+        box-shadow: 0 24px 42px rgba(35, 58, 50, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-section::before,
+    .welcome-section::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        pointer-events: none;
+    }
+
+    .welcome-section::before {
+        width: 220px;
+        height: 220px;
+        right: -70px;
+        top: -70px;
+    }
+
+    .welcome-section::after {
+        width: 160px;
+        height: 160px;
+        left: 42%;
+        bottom: -95px;
     }
 
     .welcome-kicker {
@@ -314,6 +343,7 @@
 
     .welcome-title {
         color: #ffffff;
+        letter-spacing: -0.02em;
     }
 
     .welcome-subtitle {
@@ -324,16 +354,16 @@
     /* Tarjetas de estadísticas */
     .stat-card {
         background: var(--dash-card);
-        border-radius: 18px;
-        padding: 20px;
+        border-radius: 24px;
+        padding: 22px;
         display: flex;
         align-items: center;
         gap: 16px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
         position: relative;
         overflow: hidden;
-        border: 1px solid var(--dash-border);
-        box-shadow: 0 10px 26px rgba(34, 45, 33, 0.08);
+        border: 1px solid #e8e2d5;
+        box-shadow: var(--dash-shadow);
     }
 
     .stat-card::before {
@@ -342,24 +372,26 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: 4px;
-        background: var(--dash-accent);
+        height: 5px;
+        background: linear-gradient(90deg, #de6e3a, #f0ad64);
     }
 
     .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 16px 32px rgba(34, 45, 33, 0.14);
+        transform: translateY(-6px);
+        box-shadow: 0 22px 40px rgba(31, 49, 39, 0.16);
+        border-color: #deccb5;
     }
 
     .stat-card-icon {
-        width: 52px;
-        height: 52px;
+        width: 58px;
+        height: 58px;
         background: var(--dash-accent-soft);
-        border-radius: 14px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.6rem;
+        font-size: 1.65rem;
+        border: 1px solid #f5dcc9;
     }
 
     .stat-card-content {
@@ -375,7 +407,7 @@
     }
 
     .stat-card-value {
-        font-size: 1.45rem;
+        font-size: clamp(1.35rem, 1.6vw, 1.65rem);
         font-weight: bold;
         color: var(--dash-text);
         margin-bottom: 5px;
@@ -395,33 +427,33 @@
         color: #ef4444;
     }
 
-    .stat-card-primary .stat-card-icon { color: #1f3a2f; }
-    .stat-card-success .stat-card-icon { color: #267955; }
-    .stat-card-warning .stat-card-icon { color: #d37a1f; }
-    .stat-card-info .stat-card-icon { color: #2f637f; }
+    .stat-card-primary .stat-card-icon { color: #1f3a2f; background: #ebf3ee; border-color: #d6e7dc; }
+    .stat-card-success .stat-card-icon { color: #267955; background: #e8f5ef; border-color: #d4e9dd; }
+    .stat-card-warning .stat-card-icon { color: #cf6f1d; background: #fff3e5; border-color: #f7dfc4; }
+    .stat-card-info .stat-card-icon { color: #2f637f; background: #e9f2f8; border-color: #d4e3ed; }
 
     /* Tarjetas modernas */
     .card-modern {
         background: var(--dash-card);
-        border-radius: 18px;
+        border-radius: 24px;
         overflow: hidden;
         transition: transform 0.3s ease;
-        border: 1px solid var(--dash-border);
-        box-shadow: 0 10px 26px rgba(34, 45, 33, 0.08);
+        border: 1px solid #e8e2d5;
+        box-shadow: var(--dash-shadow);
     }
 
     .card-modern:hover {
-        transform: translateY(-3px);
+        transform: translateY(-4px);
     }
 
     .card-header-custom {
-        padding: 18px 22px;
-        border-bottom: 1px solid var(--dash-border);
-        background: #fbfcf8;
+        padding: 20px 24px;
+        border-bottom: 1px solid #eee8db;
+        background: linear-gradient(180deg, #fffdf7 0%, #fbf8ef 100%);
     }
 
     .card-body-custom {
-        padding: 18px 22px;
+        padding: 20px 24px;
     }
 
     /* Lista de productos */
@@ -435,23 +467,23 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        padding: 10px;
-        background: #f8faf6;
-        border-radius: 12px;
+        padding: 12px;
+        background: #faf8f1;
+        border-radius: 16px;
         transition: all 0.3s ease;
-        border: 1px solid #e5ebdd;
+        border: 1px solid #e9e4d8;
     }
 
     .product-item:hover {
-        background: #eef5eb;
-        transform: translateX(5px);
+        background: #f3eee1;
+        transform: translateX(4px);
     }
 
     .product-rank {
         width: 35px;
         height: 35px;
-        background: #edf2e7;
-        border-radius: 10px;
+        background: #f3eee2;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -493,12 +525,12 @@
         align-items: center;
         gap: 15px;
         padding: 15px 20px;
-        border-bottom: 1px solid #ecf0e8;
+        border-bottom: 1px solid #eee8db;
         transition: all 0.3s ease;
     }
 
     .activity-item:hover {
-        background: #f8faf6;
+        background: #faf8f2;
     }
 
     .activity-icon {
@@ -533,7 +565,7 @@
 
     /* Acciones rápidas */
     .quick-actions {
-        margin-top: 30px;
+        margin-top: 34px;
     }
 
     .quick-action-btn {
@@ -543,19 +575,21 @@
         gap: 10px;
         padding: 20px;
         background: var(--dash-card);
-        border-radius: 15px;
+        border-radius: 20px;
         text-decoration: none;
         color: var(--dash-dark);
         transition: all 0.3s ease;
         text-align: center;
-        border: 1px solid var(--dash-border);
-        box-shadow: 0 8px 18px rgba(34, 45, 33, 0.06);
+        border: 1px solid #e9e3d7;
+        box-shadow: 0 12px 24px rgba(34, 45, 33, 0.07);
     }
 
     .quick-action-btn:hover {
-        transform: translateY(-5px);
-        background: linear-gradient(135deg, #f8b25d, #ef8c40);
+        transform: translateY(-6px);
+        background: linear-gradient(135deg, #ef9645, #d56833);
         color: white;
+        border-color: transparent;
+        box-shadow: 0 18px 30px rgba(213, 95, 42, 0.28);
     }
 
     .quick-action-btn i {
@@ -564,12 +598,13 @@
 
     /* Fecha y hora */
     .date-time-card {
-        background: rgba(255,255,255,0.9);
+        background: rgba(255, 255, 255, 0.92);
         padding: 12px 20px;
-        border-radius: 15px;
+        border-radius: 18px;
         backdrop-filter: blur(6px);
         color: #1f2d20;
-        border: 1px solid rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.35);
+        box-shadow: 0 10px 24px rgba(12, 33, 23, 0.16);
     }
 
     .list-group-item {
@@ -583,16 +618,18 @@
 
     @media (max-width: 768px) {
         .dashboard-container {
-            padding: 2px;
-            border-radius: 14px;
+            padding: 8px;
+            border-radius: 18px;
         }
 
         .welcome-section {
-            padding: 18px;
+            padding: 20px;
+            border-radius: 20px;
         }
 
         .stat-card {
             padding: 16px;
+            border-radius: 18px;
         }
 
         .stat-card-value {
@@ -601,6 +638,15 @@
 
         .quick-action-btn {
             padding: 14px;
+            border-radius: 15px;
+        }
+
+        .card-modern {
+            border-radius: 18px;
+        }
+
+        .date-time-card {
+            width: 100%;
         }
     }
 </style>
