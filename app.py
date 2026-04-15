@@ -19,6 +19,7 @@ from modules.compras import compras
 from modules.caja import caja
 from modules.ventas import ventas
 from modules.pedidos import pedidos
+from modules.clientes import clientes_bp
 from modules.produccion import produccion
 from modules.proveedores import proveedores
 from modules.productos import productos
@@ -69,6 +70,7 @@ def create_app():
     app.register_blueprint(caja, url_prefix='/caja')
     app.register_blueprint(ventas, url_prefix='/ventas')
     app.register_blueprint(produccion, url_prefix='/produccion')
+    app.register_blueprint(clientes_bp, url_prefix='/clientes')
     app.register_blueprint(compras, url_prefix='/compras')
     app.register_blueprint(tienda, url_prefix='/tienda')
     app.register_blueprint(usuarios, url_prefix='/usuarios')
