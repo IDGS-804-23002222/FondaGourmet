@@ -310,6 +310,10 @@ class Compra(db.Model):
     total = db.Column(db.Float, nullable=False)
     fecha_entrega = db.Column(db.DateTime)
     metodo_pago = db.Column(db.String(50))
+    tipo_pago = db.Column(db.String(20), nullable=False, default='Contado')
+    tarjeta_titular = db.Column(db.String(120))
+    tarjeta_ultimos4 = db.Column(db.String(4))
+    tarjeta_vencimiento = db.Column(db.String(5))
     estado = db.Column(db.String(50), nullable=False, default='Solicitada')
     desde_produccion = db.Column(db.Boolean, nullable=False, default=False)
     id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'))
@@ -323,6 +327,7 @@ class Compra(db.Model):
     __table_args__ = (
         CheckConstraint("estado IN ('Solicitada', 'En Camino', 'Completada', 'Cancelada')", name='check_estado_compra'),
         CheckConstraint("metodo_pago IN ('Efectivo', 'Tarjeta', 'Transferencia')", name='check_metodo_pago_compra'),
+        CheckConstraint("tipo_pago IN ('Contado', 'Credito')", name='check_tipo_pago_compra'),
         CheckConstraint('total >= 0', name='check_total_compra_no_negativo'),
     )
     
@@ -334,6 +339,7 @@ class DetalleCompra(db.Model):
     cantidad = db.Column(db.Float, nullable=False)
     precio_u = db.Column(db.Float, nullable=False)
     subtotal = db.Column(db.Float, nullable=False)
+    recibido = db.Column(db.Boolean, nullable=False, default=False)
   
     compra = db.relationship('Compra', back_populates='detalles')
     materia_prima = db.relationship('MateriaPrima', back_populates='detalle_compras')

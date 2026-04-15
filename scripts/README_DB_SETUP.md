@@ -23,6 +23,7 @@ powershell -ExecutionPolicy Bypass -File scripts\setup_db_windows.ps1
 2. Sincroniza esquema con `scripts/sync_db_schema.py`
    - aplica `scripts/schema_caja_sesiones_movimientos.sql` (tablas `caja_sesiones` y `caja_movimientos`)
    - aplica `scripts/schema_recetas_inventario_terminado.sql` (columna `recetas.rendimiento_porciones` + tabla `inventario_terminado`)
+   - aplica `scripts/schema_compras_proveedores_robusto.sql` (compras/detalle robustos: contado/credito, tarjeta, recepcion por linea)
    - evita conflicto con entornos legacy que ya tengan tablas `caja`/`movimientos_caja`
    - crea tablas nuevas de categorias separadas si faltan
    - agrega columnas FK nuevas si faltan

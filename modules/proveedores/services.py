@@ -1,6 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from models import db, Persona, Proveedor, CategoriaProveedor, CategoriaIngrediente
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
