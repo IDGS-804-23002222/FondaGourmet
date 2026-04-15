@@ -1,4 +1,4 @@
-from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido, PedidoMeta
+from models import db, Producto, Categoria, Carrito, DetalleCarrito, Pedido, DetallePedido, PedidoMeta, InventarioTerminado
 from flask_login import current_user
 from datetime import datetime
 import re
@@ -6,6 +6,19 @@ import logging
 from utils.product_freshness import aplicar_merma_automatica_productos
 
 logger = logging.getLogger(__name__)
+
+
+def _obtener_o_crear_inventario_terminado(id_producto):
+    inventario = InventarioTerminado.query.filter_by(id_producto=id_producto).first()
+    if not inventario:
+        inventario = InventarioTerminado(
+            id_producto=id_producto,
+            cantidad_disponible=0,
+            fecha_actualizacion=datetime.utcnow(),
+        )
+        db.session.add(inventario)
+        db.session.flush()
+    return inventario
 
 # ===============================
 # OBTENER MENÚ
@@ -16,20 +29,26 @@ def obtener_menu():
 
         productos = (
             Producto.query
-            .filter(Producto.estado.is_(True), Producto.stock_actual > 0)
+            .filter(Producto.estado.is_(True))
             .order_by(Producto.nombre.asc())
             .all()
         )
 
         resultado = []
         for p in productos:
+            inventario = InventarioTerminado.query.filter_by(id_producto=p.id_producto).first()
+            porciones_disponibles = int(inventario.cantidad_disponible or 0) if inventario else 0
+            agotado = porciones_disponibles <= 0
+
             resultado.append({
                 "id": p.id_producto,
                 "nombre": p.nombre,
                 "descripcion": p.descripcion,
                 "precio": p.precio,
                 "imagen": p.imagen,
-                "categoria": p.categoria_platillo.nombre if p.categoria_platillo else "Sin categoria"
+                "categoria": p.categoria_platillo.nombre if p.categoria_platillo else "Sin categoria",
+                "agotado": agotado,
+                "porciones_disponibles": porciones_disponibles,
             })
 
         return resultado, None
@@ -93,15 +112,24 @@ def agregar_producto_carrito(id_producto, cantidad=1):
         if not producto.estado:
             return False, "Producto no disponible"
 
+        inventario = _obtener_o_crear_inventario_terminado(producto.id_producto)
+        disponible = int(inventario.cantidad_disponible or 0)
+        if disponible <= 0:
+            return False, "Producto agotado. No hay porciones listas para venta"
+
         detalle = DetalleCarrito.query.filter_by(
             id_carrito=carrito.id_carrito,
             id_producto=id_producto
         ).first()
 
         if detalle:
+            if (detalle.cantidad + cantidad) > disponible:
+                return False, f"Solo hay {disponible} porciones disponibles"
             detalle.cantidad += cantidad
             detalle.subtotal = detalle.cantidad * producto.precio
         else:
+            if cantidad > disponible:
+                return False, f"Solo hay {disponible} porciones disponibles"
             detalle = DetalleCarrito(
                 id_carrito=carrito.id_carrito,
                 id_producto=id_producto,
@@ -192,6 +220,11 @@ def agregar_cantidad_carrito(id_detalle):
             return False, "Detalle no encontrado"
 
         carrito = detalle.carrito
+
+        inventario = _obtener_o_crear_inventario_terminado(detalle.id_producto)
+        disponible = int(inventario.cantidad_disponible or 0)
+        if detalle.cantidad + 1 > disponible:
+            return False, f"Solo hay {disponible} porciones disponibles"
 
         detalle.cantidad += 1
         detalle.subtotal = detalle.cantidad * detalle.producto.precio
@@ -294,6 +327,12 @@ def finalizar_pedido(metodo_pago='Efectivo', datos_tarjeta=None):
 
         if not carrito.detalles:
             return False, "El carrito está vacío"
+
+        for detalle in carrito.detalles:
+            inventario = _obtener_o_crear_inventario_terminado(detalle.id_producto)
+            disponible = int(inventario.cantidad_disponible or 0)
+            if disponible < int(detalle.cantidad or 0):
+                return False, f"{detalle.producto.nombre} quedó sin porciones suficientes. Disponibles: {disponible}"
 
         pedido = Pedido(
             id_cliente=cliente.id_cliente,

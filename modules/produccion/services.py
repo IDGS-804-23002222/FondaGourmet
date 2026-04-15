@@ -1,10 +1,19 @@
-from models import db, Pedido, Produccion, Compra, DetalleCompra, Producto, DetalleProduccion
+from models import db, Pedido, Produccion, Compra, DetalleCompra, Producto, DetalleProduccion, InventarioTerminado
 from datetime import datetime, timedelta
 from flask import current_app
 from sqlalchemy import text, func
 import logging
 import os
 logger = logging.getLogger(__name__)
+
+
+def _obtener_receta_activa(producto):
+    if not producto:
+        return None
+    recetas_activas = [r for r in (producto.recetas or []) if bool(getattr(r, 'estado', True))]
+    if recetas_activas:
+        return recetas_activas[0]
+    return producto.recetas[0] if producto.recetas else None
 
 
 def crear_solicitud_produccion_desde_alerta(id_producto, id_usuario, cantidad=10):
@@ -83,7 +92,7 @@ def obtener_producciones():
         logger.error(f"Error al obtener producciones: {str(e)}")
         return None, str(e)
     
-def completar_o_solicitar_compra(id_produccion, id_usuario):
+def completar_produccion(id_produccion, id_usuario):
     try:
         prod = Produccion.query.get(id_produccion)
 
@@ -95,18 +104,16 @@ def completar_o_solicitar_compra(id_produccion, id_usuario):
         # validar materia prima de cada detalle
         for detalle in prod.detalles:
             producto = detalle.producto
-            cantidad = float(detalle.cantidad or 0)
+            lotes_producidos = float(detalle.cantidad or 0)
             
-            recetas = producto.recetas[0] if producto.recetas else None
+            receta = _obtener_receta_activa(producto)
             
-            if not recetas:
+            if not receta or lotes_producidos <= 0:
                 continue
             
-            veces = cantidad / recetas.rendimiento if recetas.rendimiento > 0 else 0
-            
-            for r in recetas.detalles:
+            for r in receta.detalles:
                 materia = r.materia_prima
-                requerido = r.cantidad * veces
+                requerido = float(r.cantidad or 0) * lotes_producidos
 
                 if not materia:
                     continue
@@ -200,36 +207,52 @@ def completar_o_solicitar_compra(id_produccion, id_usuario):
             # si todo sale bien, se completa la producción
         for detalle in prod.detalles:
             producto = detalle.producto
-            cantidad = float(detalle.cantidad or 0)
-            receta = producto.recetas[0] if producto.recetas else None
+            lotes_producidos = float(detalle.cantidad or 0)
+            receta = _obtener_receta_activa(producto)
             
-            if receta:
-                veces = cantidad / receta.rendimiento if receta.rendimiento > 0 else 0
-
+            if receta and lotes_producidos > 0:
                 for r in receta.detalles:
                     materia = r.materia_prima
-                    requerido = r.cantidad * veces
+                    requerido = float(r.cantidad or 0) * lotes_producidos
                     
                     materia.stock_actual -= requerido
 
-                producto.stock_actual += cantidad
+                porciones_generadas = int(round(lotes_producidos * float(receta.rendimiento_porciones or 1)))
+                inventario = InventarioTerminado.query.filter_by(id_producto=producto.id_producto).first()
+                if not inventario:
+                    inventario = InventarioTerminado(
+                        id_producto=producto.id_producto,
+                        cantidad_disponible=0,
+                        fecha_actualizacion=datetime.utcnow(),
+                    )
+                    db.session.add(inventario)
+
+                inventario.cantidad_disponible = int(inventario.cantidad_disponible or 0) + max(0, porciones_generadas)
+                inventario.fecha_actualizacion = datetime.utcnow()
+
+                # Compatibilidad temporal con consultas legacy que dependen de stock_actual.
+                producto.stock_actual = float(inventario.cantidad_disponible)
                 producto.fecha_produccion = datetime.utcnow()
                 producto.fecha_merma = None
-            
-            prod.estado = "Completada"
-            prod.fecha_completada = datetime.now()
-            db.session.commit()
+
+        prod.estado = "Completada"
+        prod.fecha_completada = datetime.now()
         
         if prod.pedido:
             pedido=Pedido.query.get(prod.pedido.id_pedido)
             prod.pedido.estado = "Producido"
         
         db.session.commit()
-        return True, "Producción completada y stock actualizado"
+        return True, "Producción completada y porciones transferidas a inventario terminado"
 
     except Exception as e:
         db.session.rollback()
         return False, str(e)
+
+
+def completar_o_solicitar_compra(id_produccion, id_usuario):
+    # Alias de compatibilidad para rutas existentes.
+    return completar_produccion(id_produccion, id_usuario)
     
 def ver_orden_produccion(id_produccion):
     try:
@@ -242,17 +265,19 @@ def ver_orden_produccion(id_produccion):
 
         for detalle in prod.detalles:
             producto = detalle.producto
-            cantidad = detalle.cantidad
+            lotes_producidos = float(detalle.cantidad or 0)
 
-            receta = producto.recetas[0] if producto.recetas else None
+            receta = _obtener_receta_activa(producto)
 
             ingredientes = []
+
+            if not receta:
+                continue
 
             for r in receta.detalles:
                 materia = r.materia_prima
 
-                veces = cantidad / receta.rendimiento if receta.rendimiento > 0 else 0
-                requerido = r.cantidad * veces
+                requerido = float(r.cantidad or 0) * lotes_producidos
                 stock = materia.stock_actual
 
                 ingredientes.append({
@@ -266,7 +291,7 @@ def ver_orden_produccion(id_produccion):
             filas.append({
                 "id_detalle": detalle.id_detalle,
                 "producto": producto.nombre,
-                "cantidad": cantidad,
+                "cantidad": lotes_producidos,
                 "ingredientes": ingredientes,
                 "completado": False  
             })
@@ -289,19 +314,17 @@ def validar_materia_prima_produccion(detalle):
     faltantes = []
 
     producto = detalle.producto
-    cantidad = detalle.cantidad
+    lotes_producidos = float(detalle.cantidad or 0)
 
-    receta = producto.recetas[0] if producto.recetas else None
+    receta = _obtener_receta_activa(producto)
 
     if not receta:
         return []
 
-    veces = cantidad / receta.rendimiento if receta.rendimiento > 0 else 0
-
     for r in receta.detalles:
         materia = r.materia_prima
 
-        requerido = r.cantidad * veces
+        requerido = float(r.cantidad or 0) * lotes_producidos
 
         if materia.stock_actual < requerido:
             faltantes.append({

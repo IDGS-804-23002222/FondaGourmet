@@ -49,12 +49,23 @@
         <div class="producto-info">
             <h3 class="menu-product-title">{{ producto.nombre }}</h3>
             <p class="menu-category-chip">{{ producto.categoria or 'Sin categoria' }}</p>
+            {% if producto.agotado %}
+                <p class="menu-category-chip" style="background:#ffe6e6;color:#9b1c1c;">Agotado</p>
+            {% else %}
+                <p class="menu-category-chip" style="background:#e8fff1;color:#0f5132;">{{ producto.porciones_disponibles }} porciones</p>
+            {% endif %}
             <p class="descripcion">{{ producto.descripcion }}</p>
             <div class="menu-card-footer">
                 <p class="precio mb-0">${{ "%.2f"|format(producto.precio) }}</p>
-                <a href="{{ url_for('tienda.agregar_carrito', id=producto.id) }}" class="btn-success btn-add menu-btn-add">
-                    <i class="bi bi-cart-plus"></i> Agregar
-                </a>
+                {% if producto.agotado %}
+                    <button type="button" class="btn-secondary btn-add menu-btn-add" disabled>
+                        <i class="bi bi-x-circle"></i> Agotado
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('tienda.agregar_carrito', id=producto.id) }}" class="btn-success btn-add menu-btn-add">
+                        <i class="bi bi-cart-plus"></i> Agregar
+                    </a>
+                {% endif %}
             </div>
         </div>
 

@@ -14,6 +14,7 @@ It also ensures recetas.porciones exists and is valid (> 0 at data level).
 It also recreates auth-related stored procedures to match the current schema.
 It also ensures product freshness fields exist for automatic waste policy.
 It also applies SQL DDL scripts in scripts/ for caja compatibility.
+It also applies recetas/inventario terminado compatibility SQL scripts.
 """
 
 from pathlib import Path
@@ -176,6 +177,11 @@ def apply_sql_file(session, sql_file_path):
         normalized = " ".join(stmt.strip().split())
         upper = normalized.upper()
 
+        # Keep transaction ownership in SQLAlchemy session.
+        if upper in {"START TRANSACTION", "COMMIT", "ROLLBACK"}:
+            skipped += 1
+            continue
+
         # If legacy table objects already exist, skip compatibility views.
         if upper.startswith("CREATE OR REPLACE VIEW CAJA AS") and has_base_table(session, "caja"):
             skipped += 1
@@ -198,6 +204,7 @@ def run():
 
         # 0) Apply SQL schema scripts requested for caja/movimientos compatibility.
         apply_sql_file(s, scripts_dir / "schema_caja_sesiones_movimientos.sql")
+        apply_sql_file(s, scripts_dir / "schema_recetas_inventario_terminado.sql")
 
         # 1) Category tables
         s.execute(

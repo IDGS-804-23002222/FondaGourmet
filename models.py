@@ -208,6 +208,7 @@ class Producto(db.Model):
     detalle_producciones = db.relationship('DetalleProduccion', back_populates='producto', lazy=True)
     detalle_pedidos = db.relationship('DetallePedido', back_populates='producto', lazy=True)    
     detalle_carritos = db.relationship('DetalleCarrito', back_populates='producto', lazy=True)
+    inventario_terminado = db.relationship('InventarioTerminado', back_populates='producto', uselist=False, cascade='all, delete-orphan')
     
     __table_args__ = (
         CheckConstraint('precio >= 0', name='check_precio_producto_no_negativo'),
@@ -218,6 +219,20 @@ class Producto(db.Model):
     )   
 
 
+class InventarioTerminado(db.Model):
+    __tablename__ = 'inventario_terminado'
+    id_inventario = db.Column(db.Integer, primary_key=True)
+    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False, unique=True)
+    cantidad_disponible = db.Column(db.Integer, nullable=False, default=0)
+    fecha_actualizacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+
+    producto = db.relationship('Producto', back_populates='inventario_terminado')
+
+    __table_args__ = (
+        CheckConstraint('cantidad_disponible >= 0', name='check_inventario_terminado_no_negativo'),
+    )
+
+
 #Creacion de los prodcutos a concluido, pero pq guardamos en modo IMG?
 class Receta(db.Model):
     __tablename__ = 'recetas'
@@ -225,6 +240,7 @@ class Receta(db.Model):
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
     rendimiento = db.Column(db.Float, default=0, nullable=False)  # Porcentaje de rendimiento (0-100)
     porciones = db.Column(db.Integer, default=1, nullable=False)
+    rendimiento_porciones = db.Column(db.Integer, default=1, nullable=False)
     nota = db.Column(db.Text)  # Notas opcionales sobre la receta
     estado = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
@@ -234,6 +250,7 @@ class Receta(db.Model):
 
     __table_args__ = (
         CheckConstraint('porciones > 0', name='check_receta_porciones_positivas'),
+        CheckConstraint('rendimiento_porciones > 0', name='check_receta_rendimiento_porciones_positivo'),
     )
     
     def calcular_rendimiento_automatico(self):

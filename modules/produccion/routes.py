@@ -5,7 +5,7 @@ from utils.security import role_required
 from datetime import datetime
 from .services import (
     obtener_producciones,
-    completar_o_solicitar_compra,
+    completar_produccion,
     ver_orden_produccion,
     crear_solicitud_produccion_desde_alerta
 )
@@ -66,7 +66,7 @@ def iniciar(id):
 
 @produccion.route('/completar/<int:id>')
 def completar(id):
-    success, message = completar_o_solicitar_compra(id, id_usuario=current_user.id_usuario)
+    success, message = completar_produccion(id, id_usuario=current_user.id_usuario)
 
     if success:
         flash(message, "success")

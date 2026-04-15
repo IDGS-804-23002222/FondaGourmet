@@ -15,6 +15,7 @@ def obtener_recetas():
                 'producto_nombre': receta.producto.nombre if receta.producto else 'N/A',
                 'rendimiento': receta.rendimiento,
                 'porciones': int(receta.porciones or 1),
+                'rendimiento_porciones': int(receta.rendimiento_porciones or receta.porciones or 1),
                 'estado': receta.estado,
                 'fecha_creacion': receta.fecha_creacion,
                 'detalles': [
@@ -31,7 +32,7 @@ def obtener_recetas():
         return None, str(e)
 
 
-def crear_receta(id_producto, rendimiento=100, porciones=1, nota=None, detalles=None):
+def crear_receta(id_producto, rendimiento=100, porciones=1, rendimiento_porciones=1, nota=None, detalles=None):
     """Crea una receta para un producto"""
     try:
         producto = Producto.query.get(id_producto)
@@ -42,6 +43,7 @@ def crear_receta(id_producto, rendimiento=100, porciones=1, nota=None, detalles=
             id_producto=id_producto,
             rendimiento=rendimiento,
             porciones=porciones,
+            rendimiento_porciones=rendimiento_porciones,
             nota=nota,
             estado=True
         )
@@ -65,7 +67,7 @@ def crear_receta(id_producto, rendimiento=100, porciones=1, nota=None, detalles=
         return None, str(e)
 
 
-def actualizar_receta(id_receta, rendimiento=None, porciones=None, nota=None):
+def actualizar_receta(id_receta, rendimiento=None, porciones=None, rendimiento_porciones=None, nota=None):
     """Actualiza una receta existente"""
     try:
         receta = Receta.query.get(id_receta)
@@ -76,6 +78,8 @@ def actualizar_receta(id_receta, rendimiento=None, porciones=None, nota=None):
             receta.rendimiento = rendimiento
         if porciones is not None:
             receta.porciones = porciones
+        if rendimiento_porciones is not None:
+            receta.rendimiento_porciones = rendimiento_porciones
         if nota is not None:
             receta.nota = nota
         
@@ -161,6 +165,7 @@ def serializar_receta(receta):
         'producto_nombre': receta.producto.nombre if receta.producto else None,
         'rendimiento': receta.rendimiento,
         'porciones': int(receta.porciones or 1),
+        'rendimiento_porciones': int(receta.rendimiento_porciones or receta.porciones or 1),
         'nota': receta.nota,
         'estado': receta.estado,
         'fecha_creacion': receta.fecha_creacion.isoformat(),
@@ -191,6 +196,7 @@ def obtener_receta_detalle(id_receta):
             'producto_nombre': receta.producto.nombre if receta.producto else 'N/A',
             'rendimiento': float(receta.rendimiento or 0),
             'porciones': int(receta.porciones or 1),
+            'rendimiento_porciones': int(receta.rendimiento_porciones or receta.porciones or 1),
             'nota': receta.nota,
             'estado': bool(receta.estado),
             'fecha_creacion': receta.fecha_creacion,
@@ -228,7 +234,7 @@ def obtener_materias_activas():
         return None, str(e)
 
 
-def actualizar_receta_completa(id_receta, rendimiento, porciones, nota, detalles_payload, estado=True):
+def actualizar_receta_completa(id_receta, rendimiento, porciones, nota, detalles_payload, estado=True, rendimiento_porciones=None):
     try:
         receta = Receta.query.get(id_receta)
         if not receta:
@@ -261,6 +267,7 @@ def actualizar_receta_completa(id_receta, rendimiento, porciones, nota, detalles
 
         receta.rendimiento = float(rendimiento)
         receta.porciones = int(porciones)
+        receta.rendimiento_porciones = int(rendimiento_porciones or porciones)
         receta.nota = (nota or '').strip() or None
         receta.estado = bool(estado)
 

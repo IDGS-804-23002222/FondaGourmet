@@ -36,9 +36,9 @@ def crear_producto(form):
             nombre=form.nombre.data,
             descripcion=form.descripcion.data if form.descripcion.data else None,
             precio=form.precio.data,
-            stock_actual=0,
+            stock_actual=form.stock_actual.data,
             stock_minimo=form.stock_minimo.data,
-            fecha_produccion=None,
+            fecha_produccion=datetime.utcnow() if float(form.stock_actual.data or 0) > 0 else None,
             dias_duracion=2,
             fecha_merma=None,
             id_categoria_platillo=form.id_categoria_platillo.data,
@@ -53,6 +53,7 @@ def crear_producto(form):
             id_producto=nuevo_producto.id_producto,
             rendimiento=1,
             porciones=int(form.porciones.data or 1),
+            rendimiento_porciones=int(form.porciones.data or 1),
             estado=True,
         )
         db.session.add(receta)

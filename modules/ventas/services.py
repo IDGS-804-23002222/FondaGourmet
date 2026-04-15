@@ -1,4 +1,4 @@
-from models import db, Venta, DetalleVenta, Producto, Produccion, DetalleProduccion
+from models import db, Venta, DetalleVenta, Producto, InventarioTerminado
 import logging
 from sqlalchemy import text
 from datetime import datetime
@@ -6,6 +6,19 @@ from flask import current_app, flash, jsonify, redirect, url_for
 from utils.product_freshness import aplicar_merma_automatica_productos
 
 logger = logging.getLogger(__name__)
+
+
+def _obtener_o_crear_inventario_terminado(id_producto):
+    inventario = InventarioTerminado.query.filter_by(id_producto=id_producto).first()
+    if not inventario:
+        inventario = InventarioTerminado(
+            id_producto=id_producto,
+            cantidad_disponible=0,
+            fecha_actualizacion=datetime.utcnow(),
+        )
+        db.session.add(inventario)
+        db.session.flush()
+    return inventario
 
 
 def calcular_costo_unitario_producto(producto):
@@ -135,7 +148,6 @@ def crear_venta(id_usuario, metodo_pago, productos):
             return False, "No hay productos en la venta"
 
         total = 0
-        necesita_produccion = False
         detalles = []
 
         # 🔍 VALIDACIÓN
@@ -161,16 +173,23 @@ def crear_venta(id_usuario, metodo_pago, productos):
             if not producto.estado:
                 return False, f"{producto.nombre} no disponible"
 
-            subtotal = producto.precio * cantidad
-            total += subtotal
+            inventario = _obtener_o_crear_inventario_terminado(producto.id_producto)
+            disponible = int(inventario.cantidad_disponible or 0)
+            cantidad_int = int(cantidad)
 
-            if producto.stock_actual < cantidad:
-                necesita_produccion = True
+            if disponible < cantidad_int:
+                if disponible <= 0:
+                    return False, f"{producto.nombre} agotado. Produce un nuevo lote para habilitar venta.", None
+                return False, f"Stock insuficiente de porciones para {producto.nombre}. Disponibles: {disponible}", None
+
+            subtotal = producto.precio * cantidad_int
+            total += subtotal
 
             detalles.append({
                 "producto": producto,
-                "cantidad": cantidad,
-                "subtotal": subtotal
+                "cantidad": cantidad_int,
+                "subtotal": subtotal,
+                "inventario": inventario,
             })
 
         # 🧾 CREAR VENTA
@@ -179,13 +198,13 @@ def crear_venta(id_usuario, metodo_pago, productos):
             fecha=datetime.utcnow(),
             total=total,
             metodo_pago=metodo_pago,
-            estado="Pendiente" if necesita_produccion else "Completada"
+            estado="Completada"
         )
 
         db.session.add(venta)
         db.session.flush()
 
-        # 📦 DETALLES + STOCK
+        # 📦 DETALLES + INVENTARIO TERMINADO
         for d in detalles:
             db.session.add(DetalleVenta(
                 id_venta=venta.id_venta,
@@ -194,33 +213,11 @@ def crear_venta(id_usuario, metodo_pago, productos):
                 subtotal=d["subtotal"]
             ))
 
-            if d["producto"].stock_actual >= d["cantidad"]:
-                d["producto"].stock_actual -= d["cantidad"]
-            else:
-                d["producto"].stock_actual = 0
+            d["inventario"].cantidad_disponible = max(0, int(d["inventario"].cantidad_disponible or 0) - int(d["cantidad"]))
+            d["inventario"].fecha_actualizacion = datetime.utcnow()
 
-        # 🏭 PRODUCCIÓN
-        if necesita_produccion:
-            produccion = Produccion(
-                estado="Solicitada",
-                fecha_solicitud=datetime.utcnow(),
-                id_usuario=id_usuario
-            )
-            db.session.add(produccion)
-            db.session.flush()
-
-            for d in detalles:
-                producto = d["producto"]
-
-                if producto.stock_actual < d["cantidad"]:
-                    faltante = d["cantidad"] - producto.stock_actual
-
-                    db.session.add(DetalleProduccion(
-                        id_produccion=produccion.id_produccion,
-                        id_producto=producto.id_producto,
-                        id_materia=1,  # ajustar
-                        cantidad=faltante
-                    ))
+            # Compatibilidad temporal con consultas legacy.
+            d["producto"].stock_actual = float(d["inventario"].cantidad_disponible)
 
         db.session.commit()
 

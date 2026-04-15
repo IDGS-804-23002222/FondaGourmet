@@ -1,7 +1,8 @@
 from . import ventas
 from flask import render_template, request, jsonify, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
-from models import Producto, Cliente
+from sqlalchemy import func
+from models import db, Producto, Cliente, InventarioTerminado
 from .services import(
     crear_venta, obtener_ventas, obtener_detalle_venta
 )
@@ -35,7 +36,16 @@ def detalles(id_venta):
 @ventas.route('/nueva')
 @login_required
 def nueva():
-    productos = Producto.query.filter_by(estado=1).all()
+    productos = (
+        db.session.query(Producto)
+        .outerjoin(InventarioTerminado, InventarioTerminado.id_producto == Producto.id_producto)
+        .filter(
+            Producto.estado == 1,
+            func.coalesce(InventarioTerminado.cantidad_disponible, 0) > 0,
+        )
+        .order_by(Producto.nombre.asc())
+        .all()
+    )
     clientes = Cliente.query.all()
     return render_template('ventas/crear.html', productos=productos, clientes=clientes)
 
