@@ -24,6 +24,7 @@ def index():
     inicio_hoy = datetime.combine(ahora.date(), datetime.min.time())
     fin_hoy = inicio_hoy + timedelta(days=1)
     inicio_semana = inicio_hoy - timedelta(days=6)
+    inicio_mes = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     # SQL: ingresos hoy, pedidos pendientes y ticket promedio
     resumen_sql = db.session.execute(
@@ -112,6 +113,29 @@ def index():
         chart_labels.append(dia.strftime('%d/%m'))
         chart_data.append(mapa_semana.get(str(dia), 0.0))
 
+    # SQL: total de perdidas del mes (si existe tabla mermas)
+    total_perdidas_mes = 0.0
+    mermas_mes = 0
+    try:
+        merma_sql = db.session.execute(
+            text(
+                """
+                SELECT
+                    COALESCE(SUM(m.costo_perdida), 0) AS total_perdidas_mes,
+                    COALESCE(COUNT(m.id_merma), 0) AS mermas_mes
+                FROM mermas m
+                WHERE m.fecha >= :inicio_mes
+                  AND m.fecha < :fin_hoy
+                """
+            ),
+            {'inicio_mes': inicio_mes, 'fin_hoy': fin_hoy},
+        ).mappings().first()
+        total_perdidas_mes = float((merma_sql or {}).get('total_perdidas_mes', 0) or 0)
+        mermas_mes = int((merma_sql or {}).get('mermas_mes', 0) or 0)
+    except Exception:
+        total_perdidas_mes = 0.0
+        mermas_mes = 0
+
     # Mongo: ultimos 10 logs para actividad reciente
     logs_feed = []
     mongo_db = getattr(current_app, 'mongo', None)
@@ -161,6 +185,8 @@ def index():
         balance_caja=balance_caja,
         chart_labels=chart_labels,
         chart_data=chart_data,
+        total_perdidas_mes=total_perdidas_mes,
+        mermas_mes=mermas_mes,
         logs_feed=logs_feed,
         caja_abierta=bool(caja_abierta),
     )

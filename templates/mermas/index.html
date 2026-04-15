@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Mermas y Ajustes{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-3 py-6 sm:px-6">
+  <div class="mb-5 rounded-2xl bg-slate-900 p-5 text-white shadow-lg">
+    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Control de Perdidas</p>
+    <h1 class="mt-1 text-2xl font-black">Mermas y Ajustes</h1>
+    <p class="mt-2 text-sm text-slate-200">Registra mermas en ingredientes o inventario terminado con trazabilidad y costo de perdida.</p>
+  </div>
+
+  <form method="POST" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="tipo_origen" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Origen</label>
+        <select id="tipo_origen" name="tipo_origen" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+          <option value="MateriaPrima">Ingrediente</option>
+          <option value="InventarioTerminado">Inventario terminado</option>
+        </select>
+      </div>
+      <div>
+        <label for="cantidad" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad</label>
+        <input id="cantidad" name="cantidad" type="number" min="1" step="0.01" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+      </div>
+    </div>
+
+    <div id="bloqueMateria" class="mt-4">
+      <label for="buscarMateria" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Buscar ingrediente</label>
+      <input id="buscarMateria" type="text" placeholder="Ej. Jitomate" class="mb-2 block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+      <select id="id_materia" name="id_materia" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+        <option value="">Selecciona ingrediente</option>
+        {% for materia in materias %}
+          <option value="{{ materia.id_materia }}" data-search="{{ materia.nombre|lower }}">{{ materia.nombre }} · Stock {{ '%.2f'|format(materia.stock_actual or 0) }} · ${{ '%.2f'|format(materia.precio or 0) }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div id="bloqueInventario" class="mt-4 hidden">
+      <label for="buscarInventario" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Buscar producto terminado</label>
+      <input id="buscarInventario" type="text" placeholder="Ej. Salsa Verde" class="mb-2 block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+      <select id="id_inventario" name="id_inventario" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+        <option value="">Selecciona inventario terminado</option>
+        {% for inv, producto in inventarios %}
+          <option value="{{ inv.id_inventario }}" data-search="{{ producto.nombre|lower }}">{{ producto.nombre }} · Porciones {{ inv.cantidad_disponible }} · Precio venta ${{ '%.2f'|format(producto.precio or 0) }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="motivo" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Motivo</label>
+        <select id="motivo" name="motivo" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+          {% for motivo in motivos %}
+            <option value="{{ motivo }}">{{ motivo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+        Mermas mayores a <strong>${{ '%.2f'|format(monto_admin) }}</strong> requieren autorizacion de rol Admin.
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <label for="observaciones" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Observaciones</label>
+      <textarea id="observaciones" name="observaciones" rows="3" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" placeholder="Describe lo sucedido..."></textarea>
+    </div>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+      <button type="submit" class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">Registrar merma</button>
+      <a href="{{ url_for('mermas.historial') }}" class="rounded-lg border border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Ver historial</a>
+      <a href="{{ url_for('dashboard.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Volver</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js"></script>
+<script>
+(function () {
+  const tipoOrigen = document.getElementById('tipo_origen');
+  const bloqueMateria = document.getElementById('bloqueMateria');
+  const bloqueInventario = document.getElementById('bloqueInventario');
+  const selectMateria = document.getElementById('id_materia');
+  const selectInventario = document.getElementById('id_inventario');
+
+  function syncBloques() {
+    const isMateria = tipoOrigen.value === 'MateriaPrima';
+    bloqueMateria.classList.toggle('hidden', !isMateria);
+    bloqueInventario.classList.toggle('hidden', isMateria);
+    selectMateria.required = isMateria;
+    selectInventario.required = !isMateria;
+  }
+
+  function filtrarOpciones(inputId, selectId) {
+    const input = document.getElementById(inputId);
+    const select = document.getElementById(selectId);
+    if (!input || !select) return;
+
+    input.addEventListener('input', () => {
+      const q = (input.value || '').toLowerCase().trim();
+      Array.from(select.options).forEach((opt, index) => {
+        if (index === 0) {
+          opt.hidden = false;
+          return;
+        }
+        const hay = (opt.dataset.search || '').includes(q);
+        opt.hidden = !hay;
+      });
+    });
+  }
+
+  tipoOrigen.addEventListener('change', syncBloques);
+  syncBloques();
+  filtrarOpciones('buscarMateria', 'id_materia');
+  filtrarOpciones('buscarInventario', 'id_inventario');
+})();
+</script>
+{% endblock %}
