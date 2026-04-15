@@ -121,8 +121,10 @@
 </style>
 
 {% set total_final = namespace(value=0.0) %}
-{% for cierre in cierres %}
-    {% set total_final.value = total_final.value + (cierre.monto_final or 0) %}
+{% set total_ventas = namespace(value=0.0) %}
+{% for item in cierres_detalle %}
+    {% set total_final.value = total_final.value + (item.caja.monto_final or 0) %}
+    {% set total_ventas.value = total_ventas.value + (item.resumen.total_ventas or 0) %}
 {% endfor %}
 
 <div class="hist-shell">
@@ -149,6 +151,10 @@
             <h3>Suma monto final</h3>
             <div class="value">${{ '%.2f'|format(total_final.value) }}</div>
         </article>
+        <article class="stat-card">
+            <h3>Total ventas acumuladas</h3>
+            <div class="value">${{ '%.2f'|format(total_ventas.value) }}</div>
+        </article>
     </section>
 
     <section class="table-wrap">
@@ -165,19 +171,24 @@
                         <th>Hora</th>
                         <th>Usuario</th>
                         <th>Monto inicial</th>
+                        <th>Ventas</th>
+                        <th>Cancelado</th>
                         <th>Monto final</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for cierre in cierres %}
+                    {% for item in cierres_detalle %}
+                    {% set cierre = item.caja %}
                     <tr>
                         <td>#{{ cierre.id_caja }}</td>
                         <td>{{ cierre.fecha.strftime('%d/%m/%Y') if cierre.fecha else '' }}</td>
                         <td>{{ cierre.fecha.strftime('%H:%M') if cierre.fecha else '' }}</td>
                         <td>{{ cierre.usuario.username if cierre.usuario else 'N/D' }}</td>
                         <td class="money">${{ '%.2f'|format(cierre.monto_inicial or 0) }}</td>
+                        <td class="money">${{ '%.2f'|format(item.resumen.total_ventas or 0) }}</td>
+                        <td class="money">${{ '%.2f'|format(item.resumen.total_cancelado or 0) }}</td>
                         <td class="money">${{ '%.2f'|format(cierre.monto_final or 0) }}</td>
                         <td>
                             <span class="status-badge status-closed">{{ cierre.estado }}</span>
@@ -188,7 +199,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No hay cierres registrados.</td>
+                        <td colspan="10" class="text-center text-muted">No hay cierres registrados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
