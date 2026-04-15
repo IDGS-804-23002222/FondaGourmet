@@ -2,147 +2,160 @@
     <div class="container-fluid px-4">
 
         <!-- LOGO -->
-        <a class="navbar-brand d-flex align-items-center gap-2"
-           href="{{ url_for('dashboard.index') if current_user.is_authenticated else '#' }}">
-            <img class="brand-logo"
-                 src="{{ url_for('static', filename='imagen/logoFonda.jpg') }}">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}#inicio">
+            <img class="brand-logo" src="{{ url_for('static', filename='imagen/logoFonda.jpg') }}">
             <span class="brand-text">Casa Gourmet</span>
         </a>
 
-    <button id="mobileMenuToggle" class="navbar-toggler" type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarMenu"
-        aria-controls="navbarMenu"
-        aria-expanded="false"
-        aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-</button>
+        <button id="mobileMenuToggle" class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         {% if current_user.is_authenticated %}
-            <div id="alertsDropdown" class="dropdown me-3">
-                <a id="alertsBellButton" class="btn btn-outline-light position-relative" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                    <i class="bi bi-bell"></i>
-                    {% if alertas_stock_total and alertas_stock_total > 0 %}
-                        <span id="alertsCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {{ alertas_stock_total }}
-                        </span>
-                    {% endif %}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark p-2" style="min-width: 320px;">
-                    {% if current_user.id_rol == 4 %}
-                        <li class="px-2 pb-2 fw-bold">Actualizaciones de tus pedidos</li>
-                        {% if alertas_pedidos_cliente %}
-                            {% for alerta in alertas_pedidos_cliente %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=alerta.id_pedido) }}">
-                                        <i class="bi bi-receipt-cutoff me-2"></i>
-                                        Pedido #{{ alerta.id_pedido }}
-                                        <small class="d-block text-muted">Estado actual: {{ alerta.estado }}</small>
-                                        {% if alerta.fecha %}
-                                            <small class="d-block text-muted">{{ alerta.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
-                                        {% endif %}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            <li><span class="dropdown-item-text text-success">Sin cambios en tus pedidos.</span></li>
+        <div id="alertsDropdown" class="dropdown me-3">
+            <a id="alertsBellButton" class="btn btn-outline-light position-relative" data-bs-toggle="dropdown" href="#"
+                role="button" aria-expanded="false">
+                <i class="bi bi-bell"></i>
+                {% if alertas_stock_total and alertas_stock_total > 0 %}
+                <span id="alertsCountBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ alertas_stock_total }}
+                </span>
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark p-2" style="min-width: 320px;">
+                {% if current_user.id_rol == 4 %}
+                <li class="px-2 pb-2 fw-bold">Actualizaciones de tus pedidos</li>
+                {% if alertas_pedidos_cliente %}
+                {% for alerta in alertas_pedidos_cliente %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=alerta.id_pedido) }}">
+                        <i class="bi bi-receipt-cutoff me-2"></i>
+                        Pedido #{{ alerta.id_pedido }}
+                        <small class="d-block text-muted">Estado actual: {{ alerta.estado }}</small>
+                        {% if alerta.fecha %}
+                        <small class="d-block text-muted">{{ alerta.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
                         {% endif %}
-                    {% elif current_user.id_rol == 2 %}
-                        <li class="px-2 pb-2 fw-bold">Solicitudes de producción</li>
-                        {% if alertas_producciones_solicitadas %}
-                            {% for alerta in alertas_producciones_solicitadas %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('produccion.ver', id=alerta.id_produccion) }}">
-                                        <i class="bi bi-bag-check me-2"></i>
-                                        Producción #{{ alerta.id_produccion }}
-                                        <small class="d-block text-muted">Estado: {{ alerta.estado }}</small>
-                                        {% if alerta.fecha_necesaria %}
-                                            <small class="d-block text-muted">Necesaria: {{ alerta.fecha_necesaria.strftime('%d/%m/%Y') }}</small>
-                                        {% endif %}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            <li><span class="dropdown-item-text text-success">Sin solicitudes de producción.</span></li>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li><span class="dropdown-item-text text-success">Sin cambios en tus pedidos.</span></li>
+                {% endif %}
+                {% elif current_user.id_rol == 2 %}
+                <li class="px-2 pb-2 fw-bold">Solicitudes de producción</li>
+                {% if alertas_producciones_solicitadas %}
+                {% for alerta in alertas_producciones_solicitadas %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('produccion.ver', id=alerta.id_produccion) }}">
+                        <i class="bi bi-bag-check me-2"></i>
+                        Producción #{{ alerta.id_produccion }}
+                        <small class="d-block text-muted">Estado: {{ alerta.estado }}</small>
+                        {% if alerta.fecha_necesaria %}
+                        <small class="d-block text-muted">Necesaria: {{ alerta.fecha_necesaria.strftime('%d/%m/%Y')
+                            }}</small>
                         {% endif %}
-                    {% elif current_user.id_rol == 3 %}
-                        <li class="px-2 pb-2 fw-bold">Stock bajo y compras</li>
-                        {% if alertas_materias or alertas_productos or alertas_compras_solicitadas %}
-                            {% for materia in alertas_materias %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('compras.crear_desde_alerta', id_materia=materia.id) }}">
-                                        <i class="bi bi-box-seam me-2"></i>
-                                        Materia: {{ materia.nombre }}
-                                        <small class="d-block text-muted">Stock {{ materia.stock_actual }} / mínimo {{ materia.stock_minimo }} {{ materia.unidad_medida }}</small>
-                                        {% if materia.compra_solicitada %}
-                                            <small class="d-block text-info">Compra ya solicitada</small>
-                                        {% endif %}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            {% if alertas_materias and (alertas_productos or alertas_compras_solicitadas) %}
-                                <li><hr class="dropdown-divider"></li>
-                            {% endif %}
-                            {% for producto in alertas_productos %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id) }}">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        Producto: {{ producto.nombre }}
-                                        <small class="d-block text-muted">Stock {{ producto.stock_actual }} / mínimo {{ producto.stock_minimo }}</small>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            {% if alertas_productos and alertas_compras_solicitadas %}
-                                <li><hr class="dropdown-divider"></li>
-                            {% endif %}
-                            {% for alerta in alertas_compras_solicitadas %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('compras.ver', id=alerta.id_compra) }}">
-                                        <i class="bi bi-cart-check me-2"></i>
-                                        Compra #{{ alerta.id_compra }}
-                                        <small class="d-block text-muted">Estado: {{ alerta.estado }}</small>
-                                        <small class="d-block text-muted">Total: ${{ '%.2f'|format(alerta.total or 0) }}</small>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            <li><span class="dropdown-item-text text-success">Sin alertas de stock ni solicitudes de compra.</span></li>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li><span class="dropdown-item-text text-success">Sin solicitudes de producción.</span></li>
+                {% endif %}
+                {% elif current_user.id_rol == 3 %}
+                <li class="px-2 pb-2 fw-bold">Stock bajo y compras</li>
+                {% if alertas_materias or alertas_productos or alertas_compras_solicitadas %}
+                {% for materia in alertas_materias %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('compras.crear_desde_alerta', id_materia=materia.id) }}">
+                        <i class="bi bi-box-seam me-2"></i>
+                        Materia: {{ materia.nombre }}
+                        <small class="d-block text-muted">Stock {{ materia.stock_actual }} / mínimo {{
+                            materia.stock_minimo }} {{ materia.unidad_medida }}</small>
+                        {% if materia.compra_solicitada %}
+                        <small class="d-block text-info">Compra ya solicitada</small>
                         {% endif %}
-                    {% else %}
-                        <li class="px-2 pb-2 fw-bold">Alertas de stock bajo</li>
-                        {% if alertas_materias or alertas_productos %}
-                            {% for materia in alertas_materias %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('compras.crear_desde_alerta', id_materia=materia.id) }}">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        Materia: {{ materia.nombre }}
-                                        <small class="d-block text-muted">Stock {{ materia.stock_actual }} / mínimo {{ materia.stock_minimo }} {{ materia.unidad_medida }}</small>
-                                        {% if materia.compra_solicitada %}
-                                            <small class="d-block text-info">Compra solicitada</small>
-                                        {% endif %}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            {% for producto in alertas_productos %}
-                                <li>
-                                    <a class="dropdown-item text-warning" href="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id) }}">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        Producto: {{ producto.nombre }}
-                                        <small class="d-block text-muted">Stock {{ producto.stock_actual }} / mínimo {{ producto.stock_minimo }}</small>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            <li><span class="dropdown-item-text text-success">Sin alertas de stock.</span></li>
+                    </a>
+                </li>
+                {% endfor %}
+                {% if alertas_materias and (alertas_productos or alertas_compras_solicitadas) %}
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                {% endif %}
+                {% for producto in alertas_productos %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id) }}">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Producto: {{ producto.nombre }}
+                        <small class="d-block text-muted">Stock {{ producto.stock_actual }} / mínimo {{
+                            producto.stock_minimo }}</small>
+                    </a>
+                </li>
+                {% endfor %}
+                {% if alertas_productos and alertas_compras_solicitadas %}
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                {% endif %}
+                {% for alerta in alertas_compras_solicitadas %}
+                <li>
+                    <a class="dropdown-item text-warning" href="{{ url_for('compras.ver', id=alerta.id_compra) }}">
+                        <i class="bi bi-cart-check me-2"></i>
+                        Compra #{{ alerta.id_compra }}
+                        <small class="d-block text-muted">Estado: {{ alerta.estado }}</small>
+                        <small class="d-block text-muted">Total: ${{ '%.2f'|format(alerta.total or 0) }}</small>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li><span class="dropdown-item-text text-success">Sin alertas de stock ni solicitudes de compra.</span>
+                </li>
+                {% endif %}
+                {% else %}
+                <li class="px-2 pb-2 fw-bold">Alertas de stock bajo</li>
+                {% if alertas_materias or alertas_productos %}
+                {% for materia in alertas_materias %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('compras.crear_desde_alerta', id_materia=materia.id) }}">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Materia: {{ materia.nombre }}
+                        <small class="d-block text-muted">Stock {{ materia.stock_actual }} / mínimo {{
+                            materia.stock_minimo }} {{ materia.unidad_medida }}</small>
+                        {% if materia.compra_solicitada %}
+                        <small class="d-block text-info">Compra solicitada</small>
                         {% endif %}
-                    {% endif %}
-                </ul>
-            </div>
-        {% else %}       
-<div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
+                    </a>
+                </li>
+                {% endfor %}
+                {% for producto in alertas_productos %}
+                <li>
+                    <a class="dropdown-item text-warning"
+                        href="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id) }}">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Producto: {{ producto.nombre }}
+                        <small class="d-block text-muted">Stock {{ producto.stock_actual }} / mínimo {{
+                            producto.stock_minimo }}</small>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li><span class="dropdown-item-text text-success">Sin alertas de stock.</span></li>
+                {% endif %}
+                {% endif %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
             <ul class="navbar-nav gap-lg-3">
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#inicio">Inicio</a>
+                    <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
                 </li>
 
                 <li class="nav-item">
@@ -150,11 +163,11 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#nosotros">Nosotros</a>
+                    <a class="nav-link" href="{{ url_for('index') }}#nosotros">Nosotros</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#contacto">Contacto</a>
+                    <a class="nav-link" href="{{ url_for('index') }}#contacto">Contacto</a>
                 </li>
 
                 <li class="nav-item">
@@ -163,7 +176,7 @@
                     </a>
                 </li>
             </ul>
-            </div>
+        </div>
         {% endif %}
     </div>
 </nav>
@@ -186,7 +199,7 @@
                         alertsCountBadge.remove();
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         });
     });
 </script>
