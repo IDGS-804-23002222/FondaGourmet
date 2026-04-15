@@ -148,7 +148,7 @@
                         {% endif %}
                         {% endif %}
                         {% if current_user.id_rol==3 %}
-                        <a href="{{ url_for('ventas.agregar_carrito', id=producto.id_producto) }}" class="btn btn-success btn-add">
+                        <a href="{{ url_for('tienda.agregar_carrito', id=producto.id_producto) }}" class="btn btn-success btn-add">
                 Agregar al carrito
             </a>
             {%endif%}
