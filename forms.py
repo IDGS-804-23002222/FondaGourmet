@@ -747,10 +747,7 @@ class CrearProductoForm(FlaskForm):
         validators.NumberRange(min=0.01, message="El precio debe ser mayor a 0.")
     ])
     
-    stock_actual = FloatField('Stock Actual', [
-        validators.DataRequired(message="El stock actual es obligatorio."),
-        validators.NumberRange(min=0, message="El stock no puede ser negativo.")
-    ])
+    stock_actual = FloatField('Stock Actual', default=0, render_kw={'readonly': True})
     
     stock_minimo = FloatField('Stock Mínimo', [
         validators.DataRequired(message="El stock mínimo es obligatorio."),

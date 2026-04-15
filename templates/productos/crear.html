@@ -2,7 +2,7 @@
 {% block title %}Crear Nuevo Producto{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -11,7 +11,7 @@
         <div class="form-title">
             <h1>Crear Nuevo Producto</h1>
         </div>
-        
+
         <form method="POST" enctype="multipart/form-data" novalidate>
             {{ form.hidden_tag() }}
 
@@ -24,7 +24,7 @@
                         {{ form.nombre.label(class="form-label") }}
                         {{ form.nombre(class="form-control", placeholder="Ej: Tacos al Pastor") }}
                         {% for error in form.nombre.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
 
@@ -32,7 +32,7 @@
                         {{ form.descripcion.label(class="form-label") }}
                         {{ form.descripcion(class="form-control", rows="3", placeholder="Descripción o ingredientes principales") }}
                         {% for error in form.descripcion.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
 
@@ -40,7 +40,7 @@
                         {{ form.id_categoria_platillo.label(class="form-label") }}
                         {{ form.id_categoria_platillo(class="form-control") }}
                         {% for error in form.id_categoria_platillo.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                         {{ form.porciones.label(class="form-label") }}
                         {{ form.porciones(class="form-control", min="1", step="1", placeholder="Ej: 4") }}
                         {% for error in form.porciones.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
                     <div class="form-group-half">
@@ -63,13 +63,15 @@
                         <select id="id_materia_select" class="form-control">
                             <option value="">Selecciona una materia prima</option>
                             {% for materia in materias_primas %}
-                                <option value="{{ materia.id_materia }}">{{ materia.nombre }} ({{ materia.unidad_medida }})</option>
+                            <option value="{{ materia.id_materia }}">{{ materia.nombre }} ({{ materia.unidad_medida }})
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group-half">
                         <label class="form-label" for="cantidad_materia">Cantidad</label>
-                        <input id="cantidad_materia" type="number" min="0.01" step="0.01" class="form-control" placeholder="0.00">
+                        <input id="cantidad_materia" type="number" min="0.01" step="0.01" class="form-control"
+                            placeholder="0.00">
                     </div>
                     <div class="form-group-full">
                         <button type="button" id="agregar_materia_btn" class="btn-secondary">Agregar materia prima</button>
@@ -84,7 +86,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr id="fila_vacia_receta"><td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td></tr>
+                                <tr id="fila_vacia_receta">
+                                    <td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -102,23 +106,20 @@
                         {{ form.precio.label(class="form-label") }}
                         {{ form.precio(class="form-control", step="0.01", min="0.01", placeholder="0.00") }}
                         {% for error in form.precio.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
 
                     <div class="form-group-half">
-                        {{ form.stock_actual.label(class="form-label") }}
-                        {{ form.stock_actual(class="form-control", step="0.1", min="0", placeholder="0") }}
-                        {% for error in form.stock_actual.errors %}
-                            <small class="text-danger">{{ error }}</small>
-                        {% endfor %}
+                        <label class="form-label">Stock Actual</label>
+                        <input type="number" class="form-control" value="{{ form.stock_actual.data or 0 }}" readonly>
                     </div>
 
                     <div class="form-group-half">
                         {{ form.stock_minimo.label(class="form-label") }}
                         {{ form.stock_minimo(class="form-control", step="0.1", min="0", placeholder="0") }}
                         {% for error in form.stock_minimo.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>
                 </div>
@@ -133,9 +134,10 @@
                         {{ form.imagen.label(class="form-label") }}
                         {{ form.imagen(class="form-control", accept=".jpg,.jpeg,.png,.webp") }}
                         {% for error in form.imagen.errors %}
-                            <small class="text-danger">{{ error }}</small>
+                        <small class="text-danger">{{ error }}</small>
                         {% endfor %}
-                        <small class="text-gray-500">Selecciona una imagen local (JPG, JPEG, PNG o WEBP). Tamaño máximo: 3MB.</small>
+                        <small class="text-gray-500">Selecciona una imagen local (JPG, JPEG, PNG o WEBP). Tamaño máximo:
+                            3MB.</small>
                     </div>
                 </div>
             </div>
@@ -152,72 +154,72 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ingredientes = [];
-    const selectMateria = document.getElementById('id_materia_select');
-    const cantidadInput = document.getElementById('cantidad_materia');
-    const agregarBtn = document.getElementById('agregar_materia_btn');
-    const tablaBody = document.querySelector('#tabla_receta tbody');
-    const campoJson = document.getElementById('ingredientes_json');
+    document.addEventListener('DOMContentLoaded', function () {
+        const ingredientes = [];
+        const selectMateria = document.getElementById('id_materia_select');
+        const cantidadInput = document.getElementById('cantidad_materia');
+        const agregarBtn = document.getElementById('agregar_materia_btn');
+        const tablaBody = document.querySelector('#tabla_receta tbody');
+        const campoJson = document.getElementById('ingredientes_json');
 
-    function syncJson() {
-        campoJson.value = JSON.stringify(ingredientes);
-    }
-
-    function renderTabla() {
-        tablaBody.innerHTML = '';
-        if (!ingredientes.length) {
-            tablaBody.innerHTML = '<tr id="fila_vacia_receta"><td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td></tr>';
-            syncJson();
-            return;
+        function syncJson() {
+            campoJson.value = JSON.stringify(ingredientes);
         }
 
-        ingredientes.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+        function renderTabla() {
+            tablaBody.innerHTML = '';
+            if (!ingredientes.length) {
+                tablaBody.innerHTML = '<tr id="fila_vacia_receta"><td colspan="3" style="text-align:center;">No hay materias primas agregadas.</td></tr>';
+                syncJson();
+                return;
+            }
+
+            ingredientes.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td>${item.nombre}</td>
                 <td>${item.cantidad}</td>
                 <td><button type="button" class="btn-delete" data-index="${index}">Quitar</button></td>
             `;
-            tablaBody.appendChild(tr);
-        });
-
-        tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const idx = Number(this.dataset.index);
-                ingredientes.splice(idx, 1);
-                renderTabla();
+                tablaBody.appendChild(tr);
             });
-        });
 
-        syncJson();
-    }
+            tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = Number(this.dataset.index);
+                    ingredientes.splice(idx, 1);
+                    renderTabla();
+                });
+            });
 
-    agregarBtn.addEventListener('click', function() {
-        const idMateria = Number(selectMateria.value);
-        const nombreMateria = selectMateria.options[selectMateria.selectedIndex]?.text || '';
-        const cantidad = Number(cantidadInput.value);
-
-        if (!idMateria || !cantidad || cantidad <= 0) {
-            return;
+            syncJson();
         }
 
-        const existente = ingredientes.find(i => i.id_materia === idMateria);
-        if (existente) {
-            existente.cantidad = Number((existente.cantidad + cantidad).toFixed(2));
-        } else {
-            ingredientes.push({
-                id_materia: idMateria,
-                nombre: nombreMateria,
-                cantidad: Number(cantidad.toFixed(2))
-            });
-        }
+        agregarBtn.addEventListener('click', function () {
+            const idMateria = Number(selectMateria.value);
+            const nombreMateria = selectMateria.options[selectMateria.selectedIndex]?.text || '';
+            const cantidad = Number(cantidadInput.value);
 
-        cantidadInput.value = '';
+            if (!idMateria || !cantidad || cantidad <= 0) {
+                return;
+            }
+
+            const existente = ingredientes.find(i => i.id_materia === idMateria);
+            if (existente) {
+                existente.cantidad = Number((existente.cantidad + cantidad).toFixed(2));
+            } else {
+                ingredientes.push({
+                    id_materia: idMateria,
+                    nombre: nombreMateria,
+                    cantidad: Number(cantidad.toFixed(2))
+                });
+            }
+
+            cantidadInput.value = '';
+            renderTabla();
+        });
+
         renderTabla();
     });
-
-    renderTabla();
-});
 </script>
 {% endblock %}
