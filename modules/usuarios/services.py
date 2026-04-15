@@ -48,19 +48,22 @@ def ver_usuarios():
     try:
         resultados = db.session.execute(text("CALL sp_verUsuarios()"))
         
-        usuarios= []
+        usuarios = []
+        
         for row in resultados.fetchall():
-            # Convertir estado a formato booleano o string
-            estado = row[2]
-            # Si es 1/0, convertir a True/False; si es string, dejar como está
-            if isinstance(estado, (int, bool)):
-                estado_display = 'Activo' if estado else 'Inactivo'
-                estado_bool = bool(estado)
-            else:
-                estado_display = estado
-                estado_bool = estado.lower() in ['Activo', 'True', '1', 'yes']
             
-            usuarios.append({'id_usuario': row[0],
+            estado = row[2]
+
+            try:
+                estado_int = int(estado)
+            except:
+                estado_int = 0
+
+            estado_bool = (estado_int == 1)
+            estado_display = 'Activo' if estado_bool else 'Inactivo'
+
+            usuarios.append({
+                'id_usuario': row[0],
                 'username': row[1],
                 'estado_display': estado_display,
                 'estado_bool': estado_bool,
@@ -69,7 +72,9 @@ def ver_usuarios():
                 'apellido_materno': row[5] if len(row) > 5 else None,
                 'rol_nombre': row[6] if len(row) > 6 else None,
             })
+
         return usuarios, None
+
     except Exception as e:
         return None, str(e)
 
