@@ -58,13 +58,13 @@
                 <td>#{{ p.id }}</td>
 
                 <td>
-                    {{ p.fecha.strftime('%d/%m/%Y') if p.fecha else '' }}
+                    {{ p.fecha_str or p.fecha or '' }}
                 </td>
               <td>
     {% if p.estado == "Completado" %}
-        {{ p.fecha_entrega.strftime('%d/%m/%Y') if p.fecha_entrega else 'No definida' }}
+        {{ p.fecha_entrega_str or p.fecha_entrega or 'No definida' }}
     {% elif p.estado == "En Proceso" %}
-        {{ p.fecha_estimada.strftime('%d/%m/%Y') if p.fecha_estimada else 'No definida' }}
+        {{ p.fecha_estimada_str or p.fecha_estimada or 'No definida' }}
     {% else %}
         <span class="text-gray-500 italic">No definida</span>
     {% endif %}

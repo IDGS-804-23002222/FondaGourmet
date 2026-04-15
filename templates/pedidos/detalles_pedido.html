@@ -40,6 +40,7 @@
         <li><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y') if pedido.fecha else 'No disponible' }}</li>
         <li><strong>Cliente:</strong> {{ (pedido.cliente.persona.nombre ~ ' ' ~ (pedido.cliente.persona.apellido_p or '')) if pedido.cliente and pedido.cliente.persona else 'No disponible' }}</li>
         <li><strong>Estado:</strong> {{ pedido.estado }}</li>
+        <li><strong>Estado de pago:</strong> {{ pedido.estado_pago if pedido.estado_pago else 'Pendiente' }}</li>
         <li><strong>Método de pago:</strong> {{ pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D' }}</li>
         {% if pedido.meta_pedido and pedido.meta_pedido.metodo_pago == 'Tarjeta' %}
         <li><strong>Titular:</strong> {{ pedido.meta_pedido.tarjeta_titular or 'N/D' }}</li>

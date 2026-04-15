@@ -368,23 +368,25 @@ class Pedido(db.Model):
     fecha = db.Column(db.DateTime, nullable=False)
     fecha_entrega = db.Column(db.DateTime)
     estado = db.Column(db.String(50), nullable=False, default='Pendiente')
+    estado_pago = db.Column(db.String(50), nullable=False, default='Pendiente')
     id_cliente = db.Column(db.Integer, db.ForeignKey('clientes.id_cliente'), nullable=False, default=1)
     requiere_produccion = db.Column(db.Boolean, default=False)
     total = db.Column(db.Float, nullable=False)
     cliente = db.relationship('Cliente', back_populates='pedidos')
     produccion = db.relationship('Produccion', back_populates='pedido', uselist=False)
-    detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan")
-    meta_pedido = db.relationship('PedidoMeta', back_populates='pedido', uselist=False, cascade="all, delete-orphan")
+    detalles = db.relationship('DetallePedido', back_populates='pedido', cascade="all, delete-orphan", passive_deletes=True)
+    meta_pedido = db.relationship('PedidoMeta', back_populates='pedido', uselist=False, cascade="all, delete-orphan", passive_deletes=True)
 
     __table_args__ = (
         CheckConstraint("estado IN ('Pendiente', 'En Proceso', 'Producido', 'Completado', 'Cancelado')", name='check_estado_pedido'),
+        CheckConstraint("estado_pago IN ('Pendiente', 'Pagado', 'Cancelado')", name='check_estado_pago_pedido'),
         CheckConstraint('total >= 0', name='check_total_pedido_no_negativo'),
     )
 
 
 class PedidoMeta(db.Model):
     __tablename__ = 'pedidos_meta'
-    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido'), primary_key=True)
+    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido', ondelete='CASCADE'), primary_key=True)
     metodo_pago = db.Column(db.String(50), nullable=False, default='Efectivo')
     tarjeta_titular = db.Column(db.String(120))
     tarjeta_ultimos4 = db.Column(db.String(4))
@@ -403,8 +405,10 @@ class DetallePedido(db.Model):
     id_detalle = db.Column(db.Integer, primary_key=True)
     cantidad = db.Column(db.Integer, nullable=False)
     subtotal = db.Column(db.Float, nullable=False)
-    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido'), nullable=False)
-    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
+    atendido = db.Column(db.Boolean, nullable=False, default=False)
+    en_produccion = db.Column(db.Boolean, nullable=False, default=False)
+    id_pedido = db.Column(db.Integer, db.ForeignKey('pedidos.id_pedido', ondelete='CASCADE'), nullable=False)
+    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto', ondelete='RESTRICT'), nullable=False)
 
     pedido = db.relationship('Pedido', back_populates='detalles')
     producto= db.relationship('Producto', back_populates='detalle_pedidos')
@@ -413,7 +417,7 @@ class DetallePedido(db.Model):
         CheckConstraint('cantidad > 0', name='check_cantidad_pedido_positiva'),
         CheckConstraint('subtotal >= 0', name='check_subtotal_pedido_no_negativo'),
     )
- 
+    
 class Carrito(db.Model):
     __tablename__ = 'carritos'
     id_carrito = db.Column(db.Integer, primary_key=True)

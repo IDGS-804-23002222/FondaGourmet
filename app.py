@@ -54,7 +54,7 @@ def create_app():
     def load_user(user_id):
         """Carga el usuario desde la base de datos"""
         try:
-            return Usuario.query.get(int(user_id))
+            return db.session.get(Usuario, int(user_id))
         except Exception as e:
             app.logger.error(f"Error loading user {user_id}: {str(e)}")
             return None
