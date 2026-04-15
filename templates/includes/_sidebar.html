@@ -47,6 +47,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('clientes.') else '' }}"
+                href="{{ url_for('clientes.index') }}">
+                <i class="bi bi-person-lines-fill"></i> Clientes
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link {{ 'active' if request.endpoint == 'proveedores.index' else '' }}"
                 href="{{ url_for('proveedores.index') }}">
                 <i class="bi bi-truck"></i> Proveedores
