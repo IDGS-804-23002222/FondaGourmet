@@ -23,6 +23,7 @@ from models import (
     db,
 )
 from mongo_models import guardar_log_pedido, guardar_ticket_pedido
+from utils.id_obfuscation import encode_id
 
 logger = logging.getLogger(__name__)
 
@@ -206,6 +207,7 @@ def _serializar_pedido(pedido):
 
     ticket = {
         'id_pedido': pedido.id_pedido,
+        'id_hash': encode_id(pedido.id_pedido, namespace='pedido'),
         'fecha': fecha_ticket,
         'fecha_entrega': fecha_entrega,
         'cliente': cliente,
@@ -220,6 +222,7 @@ def _serializar_pedido(pedido):
 
     return {
         'id_pedido': pedido.id_pedido,
+        'id_hash': encode_id(pedido.id_pedido, namespace='pedido'),
         'fecha': fecha_ticket,
         'fecha_entrega': fecha_entrega,
         'cliente': cliente,

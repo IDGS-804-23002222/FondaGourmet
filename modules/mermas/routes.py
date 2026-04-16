@@ -29,6 +29,55 @@ def _normalizar_motivo_merma(motivo_raw):
     return mapa.get(motivo)
 
 
+def _motivo_a_texto(motivo):
+    if hasattr(motivo, 'value'):
+        return str(motivo.value)
+    return str(motivo or '').strip()
+
+
+def _merma_payload_key(tipo_origen, articulo_id, cantidad, costo_perdida, motivo):
+    try:
+        articulo = int(articulo_id) if articulo_id is not None else None
+    except (TypeError, ValueError):
+        articulo = None
+
+    try:
+        cant = round(float(cantidad or 0), 4)
+    except (TypeError, ValueError):
+        cant = 0.0
+
+    try:
+        costo = round(float(costo_perdida or 0), 2)
+    except (TypeError, ValueError):
+        costo = 0.0
+
+    return (
+        (tipo_origen or '').strip(),
+        articulo,
+        cant,
+        costo,
+        _motivo_a_texto(motivo),
+    )
+
+
+def _merma_key_from_payload(payload):
+    tipo_origen = (payload.get('tipo_origen') or '').strip()
+    if tipo_origen == 'MateriaPrima':
+        articulo_id = payload.get('id_materia')
+    elif tipo_origen == 'InventarioTerminado':
+        articulo_id = payload.get('id_inventario')
+    else:
+        articulo_id = None
+
+    return _merma_payload_key(
+        tipo_origen=tipo_origen,
+        articulo_id=articulo_id,
+        cantidad=payload.get('cantidad'),
+        costo_perdida=payload.get('costo_perdida'),
+        motivo=payload.get('motivo'),
+    )
+
+
 def _registrar_log_merma_mongo(payload):
     try:
         mongo_db = getattr(current_app, 'mongo', None)
@@ -136,7 +185,12 @@ def registrar():
                     inventario = InventarioTerminado.query.get(id_inventario)
                     if not inventario:
                         raise ValueError('Inventario terminado no encontrado')
-                    if int(inventario.cantidad_disponible or 0) < int(cantidad):
+
+                    if not float(cantidad).is_integer():
+                        raise ValueError('Para inventario terminado la cantidad debe ser un numero entero')
+
+                    cantidad_inventario = int(cantidad)
+                    if int(inventario.cantidad_disponible or 0) < cantidad_inventario:
                         raise ValueError('Stock insuficiente de inventario terminado para registrar merma')
 
                     producto = Producto.query.get(inventario.id_producto)
@@ -145,7 +199,7 @@ def registrar():
 
                     porciones_base = int((producto.recetas[0].rendimiento_porciones if producto.recetas else 1) or 1)
                     costo_unitario = round(float(producto.precio or 0) / max(1, porciones_base), 2)
-                    costo_perdida = round(cantidad * costo_unitario, 2)
+                    costo_perdida = round(cantidad_inventario * costo_unitario, 2)
 
                     autorizada = 1
                     id_usuario_autorizacion = None
@@ -156,13 +210,13 @@ def registrar():
                             )
                         id_usuario_autorizacion = int(current_user.id_usuario)
 
-                    inventario.cantidad_disponible = int(inventario.cantidad_disponible or 0) - int(cantidad)
+                    inventario.cantidad_disponible = int(inventario.cantidad_disponible or 0) - cantidad_inventario
                     inventario.fecha_actualizacion = datetime.utcnow()
 
                     db.session.add(Merma(
                         tipo_articulo='InventarioTerminado',
                         articulo_id=id_inventario,
-                        cantidad=float(int(cantidad)),
+                        cantidad=float(cantidad_inventario),
                         motivo=motivo,
                         costo_perdida=round(costo_perdida, 2),
                         fecha_registro=datetime.utcnow(),
@@ -173,7 +227,7 @@ def registrar():
                         'tipo_origen': 'InventarioTerminado',
                         'id_inventario': id_inventario,
                         'id_producto': producto.id_producto,
-                        'cantidad': int(cantidad),
+                        'cantidad': cantidad_inventario,
                         'costo_unitario': costo_unitario,
                         'costo_perdida': costo_perdida,
                         'motivo': motivo,
@@ -251,7 +305,7 @@ def historial():
 
     rows = query.limit(200).all()
 
-    mongo_payload_by_obs = {}
+    mongo_payload_by_key = {}
     mongo_db = _obtener_mongo_db()
     if mongo_db is not None:
         try:
@@ -263,9 +317,9 @@ def historial():
             )
             for doc in docs:
                 payload = doc.get('payload_merma') or {}
-                obs = (payload.get('observaciones') or '').strip()
-                if obs and obs not in mongo_payload_by_obs:
-                    mongo_payload_by_obs[obs] = payload
+                key = _merma_key_from_payload(payload)
+                if key not in mongo_payload_by_key:
+                    mongo_payload_by_key[key] = payload
         except Exception as exc:
             current_app.logger.warning(f'No se pudo leer historial de mermas en Mongo: {exc}')
 
@@ -274,13 +328,21 @@ def historial():
     for row in rows:
         costo = float(row.costo_perdida or 0)
         total_perdidas += costo
-        observaciones = ''
-        payload_mongo = mongo_payload_by_obs.get(observaciones) if observaciones else None
 
         try:
             articulo_id = int(row.articulo_id) if row.articulo_id is not None else None
         except (TypeError, ValueError):
             articulo_id = None
+
+        payload_key = _merma_payload_key(
+            tipo_origen=row.tipo_articulo,
+            articulo_id=articulo_id,
+            cantidad=row.cantidad,
+            costo_perdida=row.costo_perdida,
+            motivo=row.motivo,
+        )
+        payload_mongo = mongo_payload_by_key.get(payload_key)
+        observaciones = (payload_mongo.get('observaciones') or '').strip() if payload_mongo else ''
 
         if row.tipo_articulo == 'MateriaPrima':
             if articulo_id is None:

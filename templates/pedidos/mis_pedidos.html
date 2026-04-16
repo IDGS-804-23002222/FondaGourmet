@@ -76,6 +76,7 @@
       <select id="estadoFiltroPedidos" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
         <option value="todos">Todos</option>
         <option value="pendiente">Pendiente</option>
+        <option value="pagado">Pagado</option>
         <option value="solicitado">Solicitado</option>
         <option value="en proceso">En Proceso</option>
         <option value="producido">Producido</option>
@@ -103,7 +104,7 @@
         </thead>
         <tbody class="divide-y divide-slate-100 bg-white">
           {% for p in pedidos %}
-          <tr class="hover:bg-slate-50/80 transition" data-estado="{{ (p.estado or '')|lower }}">
+          <tr class="hover:bg-slate-50/80 transition" data-estado="{{ ((p.estado_mostrado or p.estado or '') ~ ' ' ~ (p.estado or ''))|lower }}">
             <td class="px-6 py-4 font-bold text-slate-900">#{{ p.id }}</td>
             <td class="px-6 py-4 text-slate-700">{{ p.fecha_str or p.fecha or '' }}</td>
             <td class="px-6 py-4 text-slate-700">
@@ -119,27 +120,35 @@
             <td class="px-6 py-4 text-slate-700">{{ p.usuario_responsable }}</td>
             <td class="px-6 py-4 font-bold text-ember-600">${{ "%.2f"|format(p.total) }}</td>
             <td class="px-6 py-4">
-              {% if p.estado == "Pendiente" %}
+              {% set estado_visible = p.estado_mostrado or p.estado %}
+
+              {% if estado_visible == "Pendiente" %}
                 <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Pendiente</span>
+              {% elif estado_visible == "Pagado" %}
+                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Pagado</span>
               {% elif p.estado == "En Proceso" %}
                 <span class="inline-flex rounded-full bg-gourmet-100 px-3 py-1 text-xs font-bold text-gourmet-700">En Proceso</span>
               {% elif p.estado == "Completado" %}
                 <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Completado</span>
-              {% elif p.estado == "Cancelado" %}
+              {% elif estado_visible == "Cancelado" or p.estado == "Cancelado" %}
                 <span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700">Cancelado</span>
               {% else %}
-                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ p.estado }}</span>
+                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ estado_visible }}</span>
+              {% endif %}
+
+              {% if p.estado and estado_visible != p.estado %}
+              <p class="mt-2 text-xs text-slate-500">Operativo: {{ p.estado }}</p>
               {% endif %}
             </td>
             <td class="px-6 py-4 text-center">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="window.location.href='{{ url_for('pedidos.ver_detalles_pedido', id_pedido=p.id) }}'"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gourmet-600 text-white transition hover:bg-gourmet-700"
-                        title="Ver detalles">
+                <a href="{{ url_for('pedidos.ver_detalles_pedido', pedido_ref=(p.id_hash or p.id)) }}"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gourmet-600 text-white transition hover:bg-gourmet-700"
+                  title="Ver detalles">
                   <i class="bi bi-eye"></i>
-                </button>
+                </a>
                 {% if p.estado in ["Pendiente", "Solicitado"] %}
-                <button onclick="cancelarPedido('{{ p.id }}')"
+                <button onclick="cancelarPedido('{{ p.id_hash or p.id }}')"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500 text-white transition hover:bg-rose-600"
                         title="Cancelar pedido">
                   <i class="bi bi-trash"></i>
@@ -209,7 +218,7 @@
 
       filas.forEach((fila) => {
         const estadoFila = (fila.dataset.estado || '').toLowerCase();
-        const mostrar = estado === 'todos' || estadoFila === estado;
+        const mostrar = estado === 'todos' || estadoFila.includes(estado);
         fila.style.display = mostrar ? '' : 'none';
         if (mostrar) visibles++;
       });

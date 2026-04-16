@@ -31,7 +31,7 @@
                 {% for alerta in alertas_pedidos_cliente %}
                 <li>
                     <a class="dropdown-item text-warning"
-                        href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=alerta.id_pedido) }}">
+                        href="{{ url_for('pedidos.ver_detalles_pedido', pedido_ref=alerta.id_pedido) }}">
                         <i class="bi bi-receipt-cutoff me-2"></i>
                         Pedido #{{ alerta.id_pedido }}
                         <small class="d-block text-muted">Estado actual: {{ alerta.estado }}</small>

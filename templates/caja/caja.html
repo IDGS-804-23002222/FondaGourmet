@@ -322,7 +322,7 @@
                             </td>
                             <td>
                                 {% if mov.tipo == 'Ingreso' and mov.id_pedido %}
-                                <a class="btn btn-view" href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=mov.id_pedido) }}">Ver pedido</a>
+                                <a class="btn btn-view" href="{{ url_for('pedidos.ver_detalles_pedido', pedido_ref=mov.id_pedido) }}">Ver pedido</a>
                                 {% elif mov.tipo == 'Egreso' and mov.id_compra %}
                                 <a class="btn btn-view" href="{{ url_for('compras.ver', id=mov.id_compra) }}">Ver compra</a>
                                 {% else %}

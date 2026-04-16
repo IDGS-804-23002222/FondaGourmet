@@ -433,7 +433,75 @@ def run():
                 )
             )
 
-        # 6) Add FK constraints when missing
+        # 6) Mermas compatibility for mixed legacy/new schemas.
+        if has_table(s, "mermas"):
+            if has_column(s, "mermas", "tipo_articulo") and has_column(s, "mermas", "tipo_origen"):
+                s.execute(
+                    text(
+                        """
+                        UPDATE mermas
+                        SET tipo_origen = COALESCE(tipo_origen, tipo_articulo)
+                        WHERE tipo_articulo IS NOT NULL
+                        """
+                    )
+                )
+
+            # Legacy NOT NULL on tipo_origen breaks ORM inserts that only send tipo_articulo.
+            if has_column(s, "mermas", "tipo_origen") and not is_nullable(s, "mermas", "tipo_origen"):
+                s.execute(text("ALTER TABLE mermas MODIFY COLUMN tipo_origen VARCHAR(30) NULL"))
+
+            if has_column(s, "mermas", "costo_unitario"):
+                # Keep historical value when possible and avoid NOT NULL insert crashes.
+                s.execute(
+                    text(
+                        """
+                        UPDATE mermas
+                        SET costo_unitario = COALESCE(
+                            costo_unitario,
+                            CASE
+                                WHEN cantidad IS NOT NULL AND cantidad <> 0 THEN (costo_perdida / cantidad)
+                                ELSE 0
+                            END
+                        )
+                        """
+                    )
+                )
+                if not is_nullable(s, "mermas", "costo_unitario"):
+                    s.execute(text("ALTER TABLE mermas MODIFY COLUMN costo_unitario DOUBLE NULL"))
+
+            if has_column(s, "mermas", "id_usuario_registro") and has_column(s, "mermas", "usuario_id"):
+                s.execute(
+                    text(
+                        """
+                        UPDATE mermas
+                        SET id_usuario_registro = COALESCE(id_usuario_registro, usuario_id)
+                        WHERE usuario_id IS NOT NULL
+                        """
+                    )
+                )
+                if not is_nullable(s, "mermas", "id_usuario_registro"):
+                    s.execute(text("ALTER TABLE mermas MODIFY COLUMN id_usuario_registro INT NULL"))
+
+            if has_column(s, "mermas", "id_usuario_autorizacion") and not is_nullable(s, "mermas", "id_usuario_autorizacion"):
+                s.execute(text("ALTER TABLE mermas MODIFY COLUMN id_usuario_autorizacion INT NULL"))
+
+            if has_column(s, "mermas", "autorizada") and not is_nullable(s, "mermas", "autorizada"):
+                s.execute(text("ALTER TABLE mermas MODIFY COLUMN autorizada TINYINT(1) NULL"))
+
+            if has_column(s, "mermas", "fecha") and has_column(s, "mermas", "fecha_registro"):
+                s.execute(
+                    text(
+                        """
+                        UPDATE mermas
+                        SET fecha = COALESCE(fecha, fecha_registro)
+                        WHERE fecha_registro IS NOT NULL
+                        """
+                    )
+                )
+                if not is_nullable(s, "mermas", "fecha"):
+                    s.execute(text("ALTER TABLE mermas MODIFY COLUMN fecha DATETIME NULL"))
+
+        # 7) Add FK constraints when missing
         if has_column(s, "proveedores", "id_categoria_proveedor") and not has_fk(
             s, "proveedores", "fk_proveedores_categoria_proveedor"
         ):
@@ -489,7 +557,7 @@ def run():
                 )
             )
 
-        # 7) Recreate legacy stored procedures aligned with current schema
+        # 8) Recreate legacy stored procedures aligned with current schema
         s.execute(text("DROP PROCEDURE IF EXISTS sp_crearCliente"))
         s.execute(
             text(

@@ -90,6 +90,15 @@
         <p class="mt-2 max-w-3xl text-sm text-slate-600">
           Panel de control con estado de pago, estado operativo, ticket y detalle de ítems.
         </p>
+        <div class="mt-4">
+          <button
+            type="button"
+            class="inline-flex items-center rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-600"
+            onclick="abrirNuevoPedidoModal()"
+          >
+            Nuevo pedido (sucursal/cliente)
+          </button>
+        </div>
       </div>
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
@@ -193,7 +202,7 @@
                 </button>
 
                 {% if pedido.estado_pago != 'Pagado' and pedido.estado_pago != 'Cancelado' %}
-                <form method="POST" action="{{ url_for('pedidos.pagar', id_pedido=pedido.id_pedido) }}" class="inline">
+                <form method="POST" action="{{ url_for('pedidos.pagar', pedido_ref=(pedido.id_hash or pedido.id_pedido)) }}" class="inline">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="metodo_pago" value="{{ pedido.metodo_pago }}">
                   <button type="submit" class="inline-flex items-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500">
@@ -205,8 +214,16 @@
                 {% if pedido.estado_pago == 'Pendiente' %}
                 <button
                   type="button"
+                  class="inline-flex items-center rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-500"
+                  onclick="procesarPedido({{ pedido.id_pedido }})"
+                >
+                  Procesar
+                </button>
+
+                <button
+                  type="button"
                   class="inline-flex items-center rounded-xl bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-rose-500"
-                  onclick="cancelarPedido({{ pedido.id_pedido }})"
+                  onclick="cancelarPedido('{{ pedido.id_hash or pedido.id_pedido }}')"
                 >
                   Cancelar
                 </button>
@@ -314,6 +331,87 @@
     </div>
   </div>
 </div>
+
+<div id="nuevoPedidoModal" tabindex="-1" aria-hidden="true" class="fixed left-0 right-0 top-0 z-50 hidden h-[100vh] w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-950/70 p-4">
+  <div class="relative w-full max-w-4xl">
+    <div class="relative overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-teal-700">Registro</p>
+            <h3 class="text-2xl font-black text-slate-900">Nuevo pedido</h3>
+          </div>
+          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-slate-900" onclick="cerrarNuevoPedidoModal()">
+            <span class="text-2xl leading-none">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('pedidos.crear') }}" class="p-6 lg:p-8" id="formNuevoPedido">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-semibold text-slate-700">Cliente</label>
+            <select class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" name="id_cliente">
+              <option value="">Venta en sucursal</option>
+              {% for cliente in clientes %}
+              <option value="{{ cliente.id_cliente }}">
+                {{ cliente.persona.nombre }} {{ cliente.persona.apellido_p }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-semibold text-slate-700">Método de pago</label>
+            <select class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" name="metodo_pago" id="metodoPagoPedido" required>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="tarjetaFieldsPedido" class="mt-4 hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Número</label>
+              <input type="text" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" id="numeroTarjetaPedido" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="23" autocomplete="cc-number">
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Titular</label>
+              <input type="text" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" id="titularTarjetaPedido" name="titular_tarjeta" placeholder="Nombre del titular" autocomplete="cc-name">
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Vencimiento</label>
+              <input type="text" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" id="vencimientoTarjetaPedido" name="vencimiento_tarjeta" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">CVV</label>
+              <input type="password" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" id="cvvTarjetaPedido" name="cvv_tarjeta" placeholder="123" maxlength="4" autocomplete="cc-csc">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="mb-2 flex items-center justify-between">
+            <p class="text-sm font-semibold text-slate-700">Productos</p>
+            <button type="button" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" onclick="agregarRenglonProducto()">
+              + Agregar producto
+            </button>
+          </div>
+          <div id="productosContainer" class="space-y-3"></div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" onclick="cerrarNuevoPedidoModal()">Cancelar</button>
+          <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">Guardar pedido</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -340,6 +438,89 @@
     modalEl.classList.add('hidden');
     modalEl.classList.remove('flex');
     limpiarBackdropsModal();
+  }
+
+  function abrirNuevoPedidoModal() {
+    const modalEl = document.getElementById('nuevoPedidoModal');
+    if (!modalEl) return;
+    limpiarBackdropsModal();
+    modalEl.classList.remove('hidden');
+    modalEl.classList.add('flex');
+  }
+
+  function cerrarNuevoPedidoModal() {
+    const modalEl = document.getElementById('nuevoPedidoModal');
+    if (!modalEl) return;
+    modalEl.classList.add('hidden');
+    modalEl.classList.remove('flex');
+    limpiarBackdropsModal();
+  }
+
+  function templateProductoRow() {
+    return `
+      <div class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-12 pedido-row">
+        <div class="sm:col-span-7">
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Producto</label>
+          <select class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" name="id_producto[]" required>
+            <option value="">Selecciona un producto</option>
+            {% for p in productos %}
+            <option value="{{ p.id_producto }}">{{ p.nombre }} - {{ '%.2f'|format(p.precio) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="sm:col-span-3">
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Cantidad</label>
+          <input class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800" type="number" name="cantidad[]" min="1" step="1" value="1" required>
+        </div>
+        <div class="sm:col-span-2 flex items-end">
+          <button type="button" class="w-full rounded-xl border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50" onclick="eliminarRenglonProducto(this)">Quitar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function agregarRenglonProducto() {
+    const container = document.getElementById('productosContainer');
+    if (!container) return;
+    container.insertAdjacentHTML('beforeend', templateProductoRow());
+  }
+
+  function eliminarRenglonProducto(btn) {
+    const container = document.getElementById('productosContainer');
+    if (!container) return;
+    if (container.querySelectorAll('.pedido-row').length <= 1) return;
+    btn.closest('.pedido-row').remove();
+  }
+
+  async function procesarPedido(idPedido) {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const hoy = new Date();
+    const mañana = new Date(hoy.getTime() + 24 * 60 * 60 * 1000);
+    const defaultValue = `${mañana.getFullYear()}-${String(mañana.getMonth() + 1).padStart(2, '0')}-${String(mañana.getDate()).padStart(2, '0')}T12:00`;
+
+    const respuestaFecha = await Swal.fire({
+      title: 'Procesar pedido',
+      text: 'Si requiere producción, se usará la fecha indicada.',
+      input: 'datetime-local',
+      inputValue: defaultValue,
+      showCancelButton: true,
+      confirmButtonText: 'Procesar',
+      cancelButtonText: 'Cancelar',
+      buttonsStyling: false,
+    });
+
+    if (!respuestaFecha.isConfirmed) return;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("pedidos.procesar") }}';
+    form.innerHTML = `
+      <input type="hidden" name="csrf_token" value="${token}">
+      <input type="hidden" name="id_pedido" value="${idPedido}">
+      <input type="hidden" name="fecha_necesaria" value="${respuestaFecha.value || ''}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
   }
 
   function findPedido(idPedido) {
@@ -380,7 +561,8 @@
     document.getElementById('ticketItems').textContent = ticket.total_items || 0;
     document.getElementById('ticketResponsable').textContent = ticket.usuario_responsable || '-';
     document.getElementById('ticketEntrega').textContent = ticket.fecha_entrega || 'Sin fecha';
-    const detalleUrl = `/pedidos/ticket/${ticket.id_pedido}`;
+    const pedidoRef = ticket.id_hash || ticket.id_pedido;
+    const detalleUrl = `/pedidos/ticket/${pedidoRef}`;
     const detalleLink = document.getElementById('ticketDetalleLink');
     detalleLink.href = detalleUrl;
     detalleLink.dataset.href = detalleUrl;
@@ -444,7 +626,49 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const modalEl = document.getElementById('ticketModal');
+    const nuevoPedidoModalEl = document.getElementById('nuevoPedidoModal');
     const detalleLink = document.getElementById('ticketDetalleLink');
+    const metodoPagoPedido = document.getElementById('metodoPagoPedido');
+    const tarjetaFieldsPedido = document.getElementById('tarjetaFieldsPedido');
+    const numeroTarjetaPedido = document.getElementById('numeroTarjetaPedido');
+    const titularTarjetaPedido = document.getElementById('titularTarjetaPedido');
+    const vencimientoTarjetaPedido = document.getElementById('vencimientoTarjetaPedido');
+    const cvvTarjetaPedido = document.getElementById('cvvTarjetaPedido');
+
+    agregarRenglonProducto();
+
+    function toggleTarjetaFieldsPedido() {
+      const esTarjeta = metodoPagoPedido && metodoPagoPedido.value === 'Tarjeta';
+      if (tarjetaFieldsPedido) {
+        tarjetaFieldsPedido.classList.toggle('hidden', !esTarjeta);
+      }
+      [numeroTarjetaPedido, titularTarjetaPedido, vencimientoTarjetaPedido, cvvTarjetaPedido].forEach((input) => {
+        if (input) input.required = esTarjeta;
+      });
+    }
+
+    if (metodoPagoPedido) {
+      metodoPagoPedido.addEventListener('change', toggleTarjetaFieldsPedido);
+      toggleTarjetaFieldsPedido();
+    }
+
+    if (numeroTarjetaPedido) {
+      numeroTarjetaPedido.addEventListener('input', (e) => {
+        const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+        e.target.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+      });
+    }
+
+    if (vencimientoTarjetaPedido) {
+      vencimientoTarjetaPedido.addEventListener('input', (e) => {
+        const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+        if (digits.length >= 3) {
+          e.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        } else {
+          e.target.value = digits;
+        }
+      });
+    }
 
     if (detalleLink) {
       detalleLink.addEventListener('click', (event) => {
@@ -467,9 +691,18 @@
       });
     }
 
+    if (nuevoPedidoModalEl) {
+      nuevoPedidoModalEl.addEventListener('click', (event) => {
+        if (event.target === nuevoPedidoModalEl) {
+          cerrarNuevoPedidoModal();
+        }
+      });
+    }
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         cerrarTicketModal();
+        cerrarNuevoPedidoModal();
       }
     });
 
@@ -478,6 +711,10 @@
       if (modalEl) {
         modalEl.classList.add('hidden');
         modalEl.classList.remove('flex');
+      }
+      if (nuevoPedidoModalEl) {
+        nuevoPedidoModalEl.classList.add('hidden');
+        nuevoPedidoModalEl.classList.remove('flex');
       }
     });
 

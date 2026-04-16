@@ -138,7 +138,7 @@
                 </td>
                 <td>
                     <div class="pedido-acciones-stack">
-                        <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=pedido.id_pedido) }}" class="btn btn-info btn-sm">
+                        <a href="{{ url_for('pedidos.ver_detalles_pedido', pedido_ref=(pedido.id_hash if pedido.id_hash is defined else pedido.id_pedido)) }}" class="btn btn-info btn-sm">
                             Ver detalles
                         </a>
 
@@ -240,7 +240,7 @@
         </div>
 
         <div class="pedido-mobile-actions">
-            <a href="{{ url_for('pedidos.ver_detalles_pedido', id_pedido=pedido.id_pedido) }}" class="btn btn-info btn-sm">Ver detalles</a>
+            <a href="{{ url_for('pedidos.ver_detalles_pedido', pedido_ref=(pedido.id_hash if pedido.id_hash is defined else pedido.id_pedido)) }}" class="btn btn-info btn-sm">Ver detalles</a>
 
             {% if pedido.estado != "Completado" and pedido.estado != "Cancelado" and pedido.estado != "En Proceso" %}
                 {% if pedido.stock_suficiente %}

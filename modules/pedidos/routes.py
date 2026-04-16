@@ -7,6 +7,7 @@ from sqlalchemy import func
 from . import pedidos
 from models import Cliente, Pedido, Producto
 from utils.security import role_required
+from utils.id_obfuscation import decode_or_int
 from .services import (
     cancelar_pedido,
     completar_o_producir,
@@ -76,10 +77,15 @@ def mis_pedidos():
     return render_template('pedidos/mis_pedidos.html', pedidos=pedidos_lista)
 
 
-@pedidos.route('/detalles/<int:id_pedido>')
+@pedidos.route('/detalles/<pedido_ref>')
 @login_required
 @role_required(1, 3, 4)
-def ver_detalles_pedido(id_pedido):
+def ver_detalles_pedido(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        flash('Pedido inválido', 'danger')
+        return redirect(url_for('pedidos.mis_pedidos'))
+
     pedido = Pedido.query.get(id_pedido)
 
     if not pedido:
@@ -123,10 +129,15 @@ def procesar():
     return redirect(url_for('pedidos.index'))
 
 
-@pedidos.route('/pagar/<int:id_pedido>', methods=['POST'])
+@pedidos.route('/pagar/<pedido_ref>', methods=['POST'])
 @login_required
 @role_required(1, 3, 4)
-def pagar(id_pedido):
+def pagar(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        flash('Pedido inválido', 'danger')
+        return redirect(url_for('pedidos.index'))
+
     metodo_pago = request.form.get('metodo_pago')
     datos_tarjeta = {
         'numero_tarjeta': request.form.get('numero_tarjeta', ''),
@@ -142,13 +153,18 @@ def pagar(id_pedido):
         datos_tarjeta=datos_tarjeta,
     )
     flash(mensaje, 'success' if exito else 'danger')
-    return redirect(url_for('pedidos.ticket', id_pedido=id_pedido))
+    return redirect(url_for('pedidos.ticket', pedido_ref=id_pedido))
 
 
-@pedidos.route('/ticket/<int:id_pedido>')
+@pedidos.route('/ticket/<pedido_ref>')
 @login_required
 @role_required(1, 3, 4)
-def ticket(id_pedido):
+def ticket(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        flash('Pedido inválido', 'danger')
+        return redirect(url_for('pedidos.index'))
+
     pedido = Pedido.query.get(id_pedido)
     if not pedido:
         flash('Pedido no encontrado', 'danger')
@@ -160,15 +176,19 @@ def ticket(id_pedido):
 
     if (pedido.estado_pago or '').strip().lower() != 'pagado':
         flash('El ticket solo está disponible cuando el pedido está pagado', 'warning')
-        return redirect(url_for('pedidos.ver_detalles_pedido', id_pedido=id_pedido))
+        return redirect(url_for('pedidos.ver_detalles_pedido', pedido_ref=id_pedido))
 
     return render_template('pedidos/detalles_pedido.html', pedido=pedido)
 
 
-@pedidos.route('/calificar/<int:id_pedido>', methods=['POST'])
+@pedidos.route('/calificar/<pedido_ref>', methods=['POST'])
 @login_required
 @role_required(4)
-def calificar_servicio(id_pedido):
+def calificar_servicio(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        return jsonify({'success': False, 'message': 'Pedido inválido'}), 400
+
     pedido = Pedido.query.get(id_pedido)
     if not pedido:
         return jsonify({'success': False, 'message': 'Pedido no encontrado'}), 404
@@ -223,10 +243,14 @@ def calificar_servicio(id_pedido):
     return jsonify({'success': exito, 'message': mensaje}), status
 
 
-@pedidos.route('/cancelar/<int:id_pedido>', methods=['POST'])
+@pedidos.route('/cancelar/<pedido_ref>', methods=['POST'])
 @login_required
 @role_required(1, 3, 4)
-def cancelar(id_pedido):
+def cancelar(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        return {'success': False, 'message': 'Pedido inválido'}, 400
+
     if current_user.id_rol == 4:
         pedido = Pedido.query.get(id_pedido)
         if not pedido or not current_user.cliente or pedido.id_cliente != current_user.cliente.id_cliente:
@@ -273,10 +297,15 @@ def crear():
     return redirect(url_for('pedidos.index'))
 
 
-@pedidos.route('/editar/<int:id_pedido>', methods=['GET', 'POST'])
+@pedidos.route('/editar/<pedido_ref>', methods=['GET', 'POST'])
 @login_required
 @role_required(4)
-def editar(id_pedido):
+def editar(pedido_ref):
+    id_pedido = decode_or_int(pedido_ref, namespace='pedido')
+    if not id_pedido:
+        flash('Pedido inválido', 'danger')
+        return redirect(url_for('pedidos.mis_pedidos'))
+
     pedido = Pedido.query.get(id_pedido)
 
     if not pedido or not current_user.cliente or pedido.id_cliente != current_user.cliente.id_cliente:

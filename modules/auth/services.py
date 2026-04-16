@@ -14,7 +14,7 @@ def autenticar_usuario(username, password):
         logger.warning(f"Intento de autenticación fallido para usuario: {username}")
         return None, "Credenciales inválidas"
     
-    if user.estado != 'activo':
+    if not bool(user.estado):
         logger.warning(f"Usuario inactivo: {username}")
         return None, "Tu cuenta está inactiva. Contacta al administrador."
     
