@@ -49,11 +49,17 @@
                 <div>
                     {{ form.nombre.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.nombre(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                    {% for error in form.nombre.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
                 <div>
                     {{ form.unidad_medida.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.unidad_medida(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                    {% for error in form.unidad_medida.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
             </div>
@@ -68,23 +74,35 @@
                 <div>
                     {{ form.stock_minimo.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.stock_minimo(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                    {% for error in form.stock_minimo.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
                 <div>
                     {{ form.precio.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.precio(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                    {% for error in form.precio.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
                 <div>
                     {{ form.porcentaje_merma.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.porcentaje_merma(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm")
                     }}
+                    {% for error in form.porcentaje_merma.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
                 <div>
                     {{ form.factor_conversion.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.factor_conversion(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm")
                     }}
+                    {% for error in form.factor_conversion.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
             </div>
@@ -100,12 +118,18 @@
                     {{ form.id_categoria_ingrediente.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.id_categoria_ingrediente(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3
                     text-sm", id="id_categoria_ingrediente") }}
+                    {% for error in form.id_categoria_ingrediente.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
                 <div>
                     {{ form.id_proveedor.label(class="text-sm font-semibold text-slate-700") }}
                     {{ form.id_proveedor(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm",
                     id="id_proveedor") }}
+                    {% for error in form.id_proveedor.errors %}
+                        <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
 
             </div>
