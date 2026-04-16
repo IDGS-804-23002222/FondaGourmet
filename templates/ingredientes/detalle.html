@@ -1,17 +1,156 @@
 {% extends "base.html" %}
 {% block title %}Detalle Ingrediente{% endblock %}
 
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+                },
+                colors: {
+                    gourmet: {
+                        50: '#f8fafc',
+                        100: '#e2e8f0',
+                        500: '#0f766e',
+                        600: '#115e59',
+                        700: '#134e4a',
+                        800: '#0f172a',
+                    },
+                },
+                boxShadow: {
+                    glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+                },
+            },
+        }
+    }
+</script>
+{% endblock %}
+
 {% block content %}
-<h1>Detalle de Ingrediente</h1>
-<div class="card" style="margin-top:20px;">
-    <h3>{{ ingrediente.nombre }}</h3>
-    <p><strong>Unidad:</strong> {{ ingrediente.unidad_medida }}</p>
-    <p><strong>Stock actual:</strong> {{ ingrediente.stock_actual }}</p>
-    <p><strong>Stock mínimo:</strong> {{ ingrediente.stock_minimo }}</p>
-    <p><strong>Merma:</strong> {{ ingrediente.porcentaje_merma }}%</p>
-    <p><strong>Factor conversión:</strong> {{ ingrediente.factor_conversion }}</p>
-    <p><strong>Categoría:</strong> {{ ingrediente.categoria_ingrediente.nombre if ingrediente.categoria_ingrediente else 'N/A' }}</p>
-    <p><strong>Proveedor:</strong> {{ ingrediente.proveedor.persona.nombre if ingrediente.proveedor and ingrediente.proveedor.persona else 'N/A' }}</p>
-    <a href="{{ url_for('ingredientes.index') }}" class="btn-secondary">Volver</a>
+
+<div class="mx-auto max-w-5xl px-4 py-8">
+
+    {% if ingrediente %}
+
+    <!-- CARD PRINCIPAL -->
+    <div class="rounded-3xl border border-white/60 bg-white/90 shadow-glow backdrop-blur p-6">
+
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200">
+
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">
+                    {{ ingrediente.nombre }}
+                </h1>
+                <p class="text-sm text-slate-600 mt-1">
+                    Categoría: {{ ingrediente.categoria_nombre if ingrediente.categoria_nombre else 'N/A' }}
+                </p>
+            </div>
+
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold
+                {% if ingrediente.estado %}
+                    bg-emerald-100 text-emerald-700
+                {% else %}
+                    bg-rose-100 text-rose-700
+                {% endif %}">
+                {{ 'Activo' if ingrediente.estado else 'Inactivo' }}
+            </span>
+
+        </div>
+
+        <!-- GRID INFO -->
+        <div class="grid md:grid-cols-2 gap-5 mt-6">
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Unidad de medida</p>
+                <p class="mt-2 text-slate-700 font-semibold">
+                    {{ ingrediente.unidad_medida }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Stock actual</p>
+                <p class="mt-2 text-slate-800 font-semibold">
+                    {{ ingrediente.stock_actual }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Stock mínimo</p>
+                <p class="mt-2 text-slate-800 font-semibold">
+                    {{ ingrediente.stock_minimo }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Merma</p>
+                <p class="mt-2 text-slate-700 font-semibold">
+                    {{ ingrediente.porcentaje_merma }}%
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white md:col-span-2">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Factor de conversión</p>
+                <p class="mt-2 text-slate-700 font-semibold">
+                    {{ ingrediente.factor_conversion }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Categoría</p>
+                <p class="mt-2 text-slate-700">
+                    {{ ingrediente.categoria_ingrediente.nombre if ingrediente.categoria_ingrediente else 'N/A' }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Proveedor</p>
+                <p class="mt-2 text-slate-700">
+                    {{ ingrediente.proveedor.persona.nombre if ingrediente.proveedor and ingrediente.proveedor.persona
+                    else 'N/A' }}
+                </p>
+            </div>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="mt-6 flex flex-wrap gap-3">
+
+            <button type="button"
+                onclick=window.location.href='{{ url_for("ingredientes.editar", id=ingrediente.id_materia) }}'
+                class="rounded-2xl bg-amber-500 px-5 py-3 text-white font-semibold hover:bg-amber-600 transition">
+                Editar
+            </button>
+
+            <button type="button" onclick=window.location.href='{{ url_for("ingredientes.index") }}'
+                class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-slate-700 font-semibold hover:bg-slate-100 transition">
+                Volver
+            </button>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- ERROR -->
+    <div class="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-700">
+        Ingrediente no encontrado
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('ingredientes.index') }}"
+            class="inline-flex rounded-2xl bg-gourmet-600 px-5 py-3 text-white font-semibold hover:bg-gourmet-700">
+            Volver
+        </a>
+    </div>
+
+    {% endif %}
+
 </div>
+
 {% endblock %}

@@ -1,82 +1,187 @@
 {% extends "base.html" %}
 {% block title %}Crear Ingrediente{% endblock %}
 
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+                },
+                colors: {
+                    gourmet: {
+                        500: '#0f766e',
+                        600: '#115e59',
+                        700: '#134e4a',
+                    },
+                },
+                boxShadow: {
+                    glow: '0 20px 80px rgba(15,118,110,0.18)',
+                },
+            },
+        }
+    }
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="form-page">
-    <div class="form-container">
-        <div class="form-title">
-            <h1>Registrar Ingrediente</h1>
+
+<div class="mx-auto max-w-6xl px-4 py-8">
+
+    <!-- HEADER -->
+    <div class="mb-8 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-glow">
+        <h1 class="text-3xl font-black text-slate-900">Registrar Ingrediente</h1>
+        <p class="text-sm text-slate-600 mt-2">Agrega un nuevo ingrediente al inventario.</p>
+    </div>
+
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <!-- INFORMACIÓN BÁSICA -->
+        <div class="mb-6 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-gourmet-700 mb-4">Información básica</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+                <div>
+                    {{ form.nombre.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.nombre(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                </div>
+
+                <div>
+                    {{ form.unidad_medida.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.unidad_medida(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                </div>
+
+            </div>
         </div>
 
-        <form method="POST" novalidate>
-            {{ form.hidden_tag() }}
-            <div class="form-grid">
-                <div class="form-group-half">{{ form.nombre.label(class="form-label") }}{{ form.nombre(class="form-control") }}{% for error in form.nombre.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.unidad_medida.label(class="form-label") }}{{ form.unidad_medida(class="form-control") }}{% for error in form.unidad_medida.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.stock_minimo.label(class="form-label") }}{{ form.stock_minimo(class="form-control") }}{% for error in form.stock_minimo.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.precio.label(class="form-label") }}{{ form.precio(class="form-control") }}{% for error in form.precio.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.porcentaje_merma.label(class="form-label") }}{{ form.porcentaje_merma(class="form-control") }}{% for error in form.porcentaje_merma.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.factor_conversion.label(class="form-label") }}{{ form.factor_conversion(class="form-control") }}{% for error in form.factor_conversion.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.id_categoria_ingrediente.label(class="form-label") }}{{ form.id_categoria_ingrediente(class="form-control", id="id_categoria_ingrediente") }}{% for error in form.id_categoria_ingrediente.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
-                <div class="form-group-half">{{ form.id_proveedor.label(class="form-label") }}{{ form.id_proveedor(class="form-control") }}{% for error in form.id_proveedor.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}</div>
+        <!-- STOCK Y COSTOS -->
+        <div class="mb-6 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-gourmet-700 mb-4">Stock y costos</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+                <div>
+                    {{ form.stock_minimo.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.stock_minimo(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                </div>
+
+                <div>
+                    {{ form.precio.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.precio(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm") }}
+                </div>
+
+                <div>
+                    {{ form.porcentaje_merma.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.porcentaje_merma(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm")
+                    }}
+                </div>
+
+                <div>
+                    {{ form.factor_conversion.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.factor_conversion(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm")
+                    }}
+                </div>
+
             </div>
-            <div class="button-group">
-                {{ form.submit(class="crear-btn") }}
-                <a href="{{ url_for('ingredientes.index') }}" class="btn volver-btn">Cancelar</a>
+        </div>
+
+        <!-- CLASIFICACIÓN -->
+        <div class="mb-6 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-gourmet-700 mb-4">Clasificación</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+
+                <div>
+                    {{ form.id_categoria_ingrediente.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.id_categoria_ingrediente(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3
+                    text-sm", id="id_categoria_ingrediente") }}
+                </div>
+
+                <div>
+                    {{ form.id_proveedor.label(class="text-sm font-semibold text-slate-700") }}
+                    {{ form.id_proveedor(class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm",
+                    id="id_proveedor") }}
+                </div>
+
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="flex gap-3">
+
+            {{ form.submit(class="rounded-2xl bg-gourmet-600 px-6 py-3 text-white font-semibold hover:bg-gourmet-700")
+            }}
+
+            <a href="{{ url_for('ingredientes.index') }}"
+                class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const proveedorSelect = document.getElementById('id_proveedor');
-    const categoriaSelect = document.getElementById('id_categoria_ingrediente');
+    document.addEventListener('DOMContentLoaded', function () {
 
-    if (!proveedorSelect || !categoriaSelect) return;
+        const proveedorSelect = document.getElementById('id_proveedor');
+        const categoriaSelect = document.getElementById('id_categoria_ingrediente');
 
-    const resetCategorias = () => {
-        categoriaSelect.innerHTML = '';
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Selecciona un proveedor primero';
-        categoriaSelect.appendChild(opt);
-    };
+        if (!proveedorSelect || !categoriaSelect) return;
 
-    resetCategorias();
+        const resetCategorias = () => {
+            categoriaSelect.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Selecciona un proveedor primero';
+            categoriaSelect.appendChild(opt);
+        };
 
-    proveedorSelect.addEventListener('change', async function() {
-        if (!this.value) {
-            resetCategorias();
-            return;
-        }
-        try {
-            const response = await fetch(`/ingredientes/categorias-por-proveedor/${this.value}`);
-            if (!response.ok) return;
-            const data = await response.json();
+        resetCategorias();
 
-            if (Array.isArray(data.categorias) && data.categorias.length) {
-                categoriaSelect.innerHTML = '';
-                data.categorias.forEach(cat => {
-                    const opt = document.createElement('option');
-                    opt.value = String(cat.id_categoria_ingrediente);
-                    opt.textContent = cat.nombre;
-                    categoriaSelect.appendChild(opt);
-                });
-            } else {
+        proveedorSelect.addEventListener('change', async function () {
+            if (!this.value) {
                 resetCategorias();
                 return;
             }
 
-            if (data.id_categoria_ingrediente_sugerida) {
-                categoriaSelect.value = String(data.id_categoria_ingrediente_sugerida);
+            try {
+                const response = await fetch(`/ingredientes/categorias-por-proveedor/${this.value}`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+
+                if (Array.isArray(data.categorias) && data.categorias.length) {
+                    categoriaSelect.innerHTML = '';
+
+                    data.categorias.forEach(cat => {
+                        const opt = document.createElement('option');
+                        opt.value = String(cat.id_categoria_ingrediente);
+                        opt.textContent = cat.nombre;
+                        categoriaSelect.appendChild(opt);
+                    });
+                } else {
+                    resetCategorias();
+                    return;
+                }
+
+                if (data.id_categoria_ingrediente_sugerida) {
+                    categoriaSelect.value = String(data.id_categoria_ingrediente_sugerida);
+                }
+
+            } catch (err) {
+                console.error('No se pudo cargar categorías por proveedor:', err);
             }
-        } catch (err) {
-            console.error('No se pudo cargar categorías por proveedor:', err);
-        }
+        });
     });
-});
 </script>
 {% endblock %}
