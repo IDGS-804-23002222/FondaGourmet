@@ -1,46 +1,136 @@
 {% extends "base.html" %}
 {% block title %}Recetas{% endblock %}
 
-{% block content %}
-<h1>Recetas</h1>
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+{% endblock %}
 
-<table class="data-table">
-	<thead>
-		<tr>
-			<th>ID</th>
-			<th>Producto</th>
-			<th>Porciones</th>
-			<th>Estado</th>
-			<th>Fecha</th>
-			<th>Ingredientes</th>
-			<th>Acciones</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for receta in recetas %}
-		<tr>
-			<td>{{ receta.id_receta }}</td>
-			<td>{{ receta.producto_nombre }}</td>
-			<td>{{ receta.porciones or 1 }}</td>
-			<td>{{ 'Activa' if receta.estado else 'Inactiva' }}</td>
-			<td>{{ receta.fecha_creacion.strftime('%d/%m/%Y %H:%M') if receta.fecha_creacion else 'N/A' }}</td>
-			<td>
-				{% if receta.detalles %}
-					{% for detalle in receta.detalles %}
-						<div>{{ detalle.materia_nombre }} - {{ detalle.cantidad }}</div>
+{% block content %}
+
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+	<!-- HEADER -->
+	<div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur">
+		<p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-teal-700">
+			Gestión del sistema
+		</p>
+		<h1 class="text-3xl font-black text-slate-900 sm:text-4xl">
+			Recetas
+		</h1>
+		<p class="mt-2 text-sm text-slate-600">
+			Administración de recetas del sistema
+		</p>
+	</div>
+
+	<!-- TABLA -->
+	<div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+
+		<div class="overflow-x-auto">
+
+			<table class="min-w-full divide-y divide-slate-200 text-left text-sm data-table">
+
+				<thead class="bg-slate-50 text-xs uppercase tracking-[0.18em] text-slate-500">
+					<tr>
+						<th class="px-6 py-4">ID</th>
+						<th class="px-6 py-4">Producto</th>
+						<th class="px-6 py-4">Porciones</th>
+						<th class="px-6 py-4">Estado</th>
+						<th class="px-6 py-4">Fecha</th>
+						<th class="px-6 py-4">Ingredientes</th>
+						<th class="px-6 py-4 text-right">Acciones</th>
+					</tr>
+				</thead>
+
+				<tbody class="divide-y divide-slate-100 bg-white">
+
+					{% for receta in recetas %}
+
+					<tr class="hover:bg-slate-50/80 transition-all duration-300">
+
+						<!-- ID -->
+						<td class="px-6 py-4 font-semibold text-slate-700">
+							#{{ receta.id_receta }}
+						</td>
+
+						<!-- PRODUCTO -->
+						<td class="px-6 py-4">
+							<div class="font-semibold text-slate-900">
+								{{ receta.producto_nombre }}
+							</div>
+						</td>
+
+						<!-- PORCIONES -->
+						<td class="px-6 py-4 text-slate-700">
+							{{ receta.porciones or 1 }}
+						</td>
+
+						<!-- ESTADO -->
+						<td class="px-6 py-4">
+							<span class="inline-flex rounded-full px-3 py-1 text-xs font-bold
+                                {% if receta.estado %}
+                                    bg-emerald-100 text-emerald-700
+                                {% else %}
+                                    bg-rose-100 text-rose-700
+                                {% endif %}">
+								{{ 'Activa' if receta.estado else 'Inactiva' }}
+							</span>
+						</td>
+
+						<!-- FECHA -->
+						<td class="px-6 py-4 text-slate-600 text-sm">
+							{{ receta.fecha_creacion.strftime('%d/%m/%Y %H:%M') if receta.fecha_creacion else 'N/A' }}
+						</td>
+
+						<!-- INGREDIENTES -->
+						<td class="px-6 py-4">
+							{% if receta.detalles %}
+							<div class="space-y-1 text-sm">
+								{% for detalle in receta.detalles %}
+								<div class="text-slate-700">
+									• {{ detalle.materia_nombre }} - {{ detalle.cantidad }}
+								</div>
+								{% endfor %}
+							</div>
+							{% else %}
+							<span class="text-slate-400">Sin ingredientes</span>
+							{% endif %}
+						</td>
+
+						<!-- ACCIONES -->
+						<td class="px-6 py-4 text-right">
+							<div class="flex justify-end gap-2">
+
+								<a href="{{ url_for('recetas.ver', id_receta=receta.id_receta) }}"
+									class="rounded-xl bg-indigo-500 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-600 transition">
+									Ver
+								</a>
+
+								<a href="{{ url_for('recetas.editar', id_receta=receta.id_receta) }}"
+									class="rounded-xl bg-amber-500 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-600 transition">
+									Editar
+								</a>
+
+							</div>
+						</td>
+
+					</tr>
+
+					{% else %}
+					<tr>
+						<td colspan="7" class="text-center py-6 text-slate-500">
+							No hay recetas registradas.
+						</td>
+					</tr>
 					{% endfor %}
-				{% else %}
-					Sin ingredientes
-				{% endif %}
-			</td>
-			<td>
-				<a class="btn btn-view" href="{{ url_for('recetas.ver', id_receta=receta.id_receta) }}">Ver</a>
-				<a class="btn btn-edit" href="{{ url_for('recetas.editar', id_receta=receta.id_receta) }}">Editar</a>
-			</td>
-		</tr>
-		{% else %}
-		<tr><td colspan="7" style="text-align:center;">No hay recetas registradas.</td></tr>
-		{% endfor %}
-	</tbody>
-</table>
+
+				</tbody>
+
+			</table>
+
+		</div>
+	</div>
+
+</div>
+
 {% endblock %}
