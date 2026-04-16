@@ -1,61 +1,118 @@
 {% extends "base.html" %}
 {% block title %}Inventario{% endblock %}
 
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+                },
+                colors: {
+                    gourmet: {
+                        50: '#f8fafc',
+                        100: '#e2e8f0',
+                        500: '#0f766e',
+                        600: '#115e59',
+                        700: '#134e4a',
+                        800: '#0f172a',
+                    },
+                },
+                boxShadow: {
+                    glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+                },
+            },
+        },
+    }
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-3">
-    <div class="mb-4">
-        <h1 class="mb-2">Centro de Inventario</h1>
-        <p class="text-muted mb-0">Selecciona qué inventario quieres consultar.</p>
+
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- HEADER -->
+    <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-teal-700">
+            Gestión del sistema
+        </p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            Centro de Inventario
+        </h1>
+        <p class="mt-2 text-sm text-slate-600">
+            Selecciona qué inventario quieres consultar.
+        </p>
     </div>
 
-    <div class="row g-4">
-        <div class="col-12 col-lg-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-3 p-3" style="background: rgba(44, 95, 45, 0.12); color: #2c5f2d;">
-                            <i class="bi bi-box-seam fs-4"></i>
-                        </div>
-                        <div>
-                            <h3 class="h5 mb-1">Inventario de Productos</h3>
-                            <p class="text-muted mb-0">Stock de producto terminado, mínimos y disponibilidad.</p>
-                        </div>
-                    </div>
+    <!-- GRID -->
+    <div class="grid gap-6 md:grid-cols-2">
 
-                    <div class="mt-auto">
-                        {% if puede_ver_productos %}
-                        <a href="{{ url_for('productos.index') }}" class="btn btn-primary w-100">Ver inventario de productos</a>
-                        {% else %}
-                        <button class="btn btn-secondary w-100" disabled>No tienes permisos para esta sección</button>
-                        {% endif %}
-                    </div>
+        <!-- INVENTARIO PRODUCTOS -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl flex flex-col justify-between">
+
+            <div class="flex items-center gap-4 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">
+                        Inventario de Productos
+                    </h3>
+                    <p class="text-sm text-slate-600">
+                        Stock de producto terminado, mínimos y disponibilidad.
+                    </p>
                 </div>
             </div>
+
+            <div class="mt-4">
+                {% if puede_ver_productos %}
+                <a href="{{ url_for('productos.index') }}"
+                    class="block w-full text-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition">
+                    Ver inventario de productos
+                </a>
+                {% else %}
+                <button
+                    class="w-full rounded-2xl border border-slate-300 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed">
+                    No tienes permisos para esta sección
+                </button>
+                {% endif %}
+            </div>
+
         </div>
 
-        <div class="col-12 col-lg-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-3 p-3" style="background: rgba(58, 110, 165, 0.12); color: #3a6ea5;">
-                            <i class="bi bi-bezier2 fs-4"></i>
-                        </div>
-                        <div>
-                            <h3 class="h5 mb-1">Inventario de Materia Prima</h3>
-                            <p class="text-muted mb-0">Stock de insumos, mínimos y control de ingredientes.</p>
-                        </div>
-                    </div>
+        <!-- INVENTARIO MATERIA PRIMA -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl flex flex-col justify-between">
 
-                    <div class="mt-auto">
-                        {% if puede_ver_materia_prima %}
-                        <a href="{{ url_for('ingredientes.index') }}" class="btn btn-primary w-100">Ver inventario de materia prima</a>
-                        {% else %}
-                        <button class="btn btn-secondary w-100" disabled>No tienes permisos para esta sección</button>
-                        {% endif %}
-                    </div>
+            <div class="flex items-center gap-4 mb-4">
+
+
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">
+                        Inventario de Materia Prima
+                    </h3>
+                    <p class="text-sm text-slate-600">
+                        Stock de insumos, mínimos y control de ingredientes.
+                    </p>
                 </div>
             </div>
+
+            <div class="mt-4">
+                {% if puede_ver_materia_prima %}
+                <a href="{{ url_for('ingredientes.index') }}"
+                    class="block w-full text-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition">
+                    Ver inventario de materia prima
+                </a>
+                {% else %}
+                <button
+                    class="w-full rounded-2xl border border-slate-300 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed">
+                    No tienes permisos para esta sección
+                </button>
+                {% endif %}
+            </div>
+
         </div>
+
     </div>
+
 </div>
+
 {% endblock %}
