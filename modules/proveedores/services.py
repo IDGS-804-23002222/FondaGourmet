@@ -206,6 +206,7 @@ def obtener_proveedor(id_proveedor):
                 'id_categoria_proveedor': proveedor.id_categoria_proveedor,
                 'categoria_proveedor': proveedor.categoria_proveedor.nombre if proveedor.categoria_proveedor else None,
                 'estado': proveedor.estado,
+                'estado_bool': True if proveedor.estado == 1 or proveedor.estado == True else False,
                 'compras': compras,
             }, None
         return None, "Proveedor no encontrado"

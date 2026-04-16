@@ -1,152 +1,202 @@
 {% extends "base.html" %}
 {% block title %}Gestión de Proveedores{% endblock %}
+
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+                },
+                colors: {
+                    gourmet: {
+                        50: '#f8fafc',
+                        100: '#e2e8f0',
+                        500: '#0f766e',
+                        600: '#115e59',
+                        700: '#134e4a',
+                        800: '#0f172a',
+                    },
+                },
+                boxShadow: {
+                    glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+                },
+            },
+        },
+    }
+</script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
 {% endblock %}
+
 {% block content %}
-    <h1>Gestión de Proveedores</h1>
-    
-<div class="button-group">
-   <button type="button" class="crear-btn" onclick=window.location.href='{{ url_for("proveedores.crear") }}'>Nuevo</button>
-<button type="button" class="volver-btn" onclick=window.location.href='{{ url_for("auth.redirigir") }}'>Volver</button>
-</div>
-<div class="toolbar">
-    <input type="text" id="searchInput" 
-    class="px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-600 
-                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-800
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           cursor-pointer text-sm min-w-[140px]" placeholder="Buscar...">       
-            <select id="statusFilter" 
-                    class="px-5 py-3.5 rounded-2xl border border-gray-300 dark:border-gray-600 
-                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-800
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           cursor-pointer text-sm min-w-[140px]">
-                <option value="all">Todos los estados</option>
-                <option value="active">Activos</option>
-                <option value="inactive">Inactivos</option>
-            </select>
-</div>
 
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-<table class="userTable data-table" id="provTable">
-    <thead>
-        <tr>
-            <th onclick="sortTable(0)">
-                <div class="flex items-center gap-2">
-                            Nombre Completo
-                            <i class="bi bi-arrow-down-up text-xs"></i>
-                        </div>
-                    </th>
-                <th>Categoría proveedor</th>
-                <th>Contacto</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-gray-600 dark:bg-gray-800">
-                {% if proveedores %}
+    <!-- HEADER -->
+    <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+
+            <div>
+                <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-teal-700">
+                    Gestión del sistema
+                </p>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                    Proveedores
+                </h1>
+                <p class="mt-2 text-sm text-slate-600">
+                    Administración de proveedores del sistema
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BOTONES (LOS DEJÉ TAL CUAL) -->
+    <div class="mb-6 flex flex-wrap gap-3">
+
+        <button type="button"
+            class="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition"
+            onclick=window.location.href='{{ url_for("proveedores.crear") }}'>
+            Nuevo
+        </button>
+
+        <button type="button"
+            class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition"
+            onclick=window.location.href='{{ url_for("auth.redirigir") }}'>
+            Volver
+        </button>
+
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="mb-6 flex flex-wrap gap-3 rounded-3xl border border-white/60 bg-white/85 p-4 shadow-sm backdrop-blur">
+
+        <input type="text" id="searchInput" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm"
+            placeholder="Buscar...">
+
+        <select id="statusFilter" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+        </select>
+
+    </div>
+
+    <!-- TABLA estilo usuarios -->
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+
+        <div class="overflow-x-auto">
+
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm data-table">
+
+                <thead class="bg-slate-50 text-xs uppercase tracking-[0.18em] text-slate-500">
+                    <tr>
+                        <th class="px-6 py-4">Nombre</th>
+                        <th class="px-6 py-4">Categoría</th>
+                        <th class="px-6 py-4">Contacto</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+
                     {% for proveedor in proveedores %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-all duration-300 user-row"
-                        data-nombre="{{ proveedor.nombre or 'N/A' }} {{ proveedor.apellido_paterno or '' }} {{ proveedor.apellido_materno or '' }}"
-                        data-estado="{% if proveedor.estado_bool %}active{% else %}inactive{% endif %}">
-                        
-                        <td class="px-4 md:px-6 py-4">
+
+                    <tr class="hover:bg-slate-50/80 transition-all duration-300 user-row" data-nombre="{{ proveedor.nombre }}" data-estado="{{ 'active' if proveedor.estado_bool else 'inactive' }}">
+
+                        <!-- NOMBRE -->
+                        <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md text-sm md:text-base flex-shrink-0">
+
+                                <div
+                                    class="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold shadow-md">
                                     {{ (proveedor.nombre[0] if proveedor.nombre else 'U') | upper }}
                                 </div>
-                                <div class="min-w-0">
-                                    <div class="font-semibold text-gray-900 dark:text-white text-sm md:text-base truncate">
-                                        {{ proveedor.nombre }} {{ proveedor.apellido_paterno or '' }} {{ proveedor.apellido_materno or '' }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td> 
-                        <td class="px-4 md:px-6 py-4">
-                            <div class="text-gray-900 dark:text-white text-sm md:text-base">
-                                {{ proveedor.categoria_proveedor or 'N/A' }}
-                            </div>
-                        </td>
-                       <td class="px-4 md:px-6 py-4">
-                            <div class="text-gray-900 dark:text-white text-sm md:text-base">
-                                {{ proveedor.correo or 'Correo no disponible' }}
-                            </div>
-                            <div class="text-gray-500 dark:text-gray-400 text-xs md:text-sm">
-                                {{ proveedor.telefono or 'Teléfono no disponible' }}
-                            </div>
-                        </td>
-                        
-                        <td class="px-4 md:px-6 py-4">
-    <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-2xl
-        {% if proveedor.estado_bool %}
-            bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 border border-green-200 dark:border-green-800
-        {% else %}
-            bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-800
-        {% endif %}">
-        <span class="w-2 h-2 rounded-full 
-            {% if proveedor.estado_bool %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
-        {{ proveedor.estado_display if proveedor.estado_display is defined else ('Activo' if proveedor.estado_bool else 'Inactivo') }}
-    </span>
-</td>
 
-                        <td class="px-4 md:px-6 py-4">
-                            <div class="flex items-center justify-center gap-1.5 md:gap-2">
-                                <button onclick=window.location.href='{{ url_for("proveedores.editar", id_proveedor=proveedor.id_proveedor) }}'
-                                        class="btn-edit p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all hover:scale-105"
-                                        title="Editar">
-                                    <i class="bi bi-pencil text-lg"></i>
+                                <div class="font-semibold text-slate-900">
+                                    {{ proveedor.nombre }} {{ proveedor.apellido_paterno or '' }} {{
+                                    proveedor.apellido_materno or '' }}
+                                </div>
+
+                            </div>
+                        </td>
+
+                        <!-- CATEGORIA -->
+                        <td class="px-6 py-4 text-slate-700">
+                            {{ proveedor.categoria_proveedor or 'N/A' }}
+                        </td>
+
+                        <!-- CONTACTO -->
+                        <td class="px-6 py-4">
+                            <div>{{ proveedor.correo or 'Sin correo' }}</div>
+                            <div class="text-xs text-slate-500">{{ proveedor.telefono or 'Sin teléfono' }}</div>
+                        </td>
+
+                        <!-- ESTADO -->
+                        <td class="px-6 py-4">
+                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold
+                                {% if proveedor.estado_bool %}
+                                    bg-emerald-100 text-emerald-700
+                                {% else %}
+                                    bg-rose-100 text-rose-700
+                                {% endif %}">
+                                {{ 'Activo' if proveedor.estado_bool else 'Inactivo' }}
+                            </span>
+                        </td>
+
+                        <!-- ACCIONES (TUS BOTONES SIN CAMBIAR LÓGICA) -->
+                        <!-- ACCIONES (ESTILO USUARIOS) -->
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+
+                                <button
+                                    onclick=window.location.href='{{ url_for("proveedores.editar", id_proveedor=proveedor.id_proveedor) }}'
+                                    class="rounded-xl bg-amber-500 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-600 transition">
+                                    Editar
                                 </button>
-                                <button onclick=window.location.href='{{ url_for("proveedores.detalles", id_proveedor=proveedor.id_proveedor) }}'
-                                        class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
-                                        title="Ver detalles">
-                                    <i class="bi bi-eye text-lg"></i>
+
+                                <button
+                                    onclick=window.location.href='{{ url_for("proveedores.detalles", id_proveedor=proveedor.id_proveedor) }}'
+                                    class="rounded-xl bg-indigo-500 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-600 transition">
+                                    Ver
                                 </button>
-                                 {% if proveedor.estado_bool %}
-                                <button onclick="desactivarProveedor('{{ proveedor.id_proveedor }}', '{{ proveedor.nombre }}')"
-                                        class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
-                                        title="Desactivar">
-                                    <i class="bi bi-ban text-lg"></i>       
+
+                                {% if proveedor.estado_bool %}
+                                <button
+                                    onclick="desactivarProveedor('{{ proveedor.id_proveedor }}', '{{ proveedor.nombre }}')"
+                                    class="rounded-xl bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500 transition">
+                                    Desactivar
                                 </button>
                                 {% else %}
-                                <button onclick="activarProveedor('{{ proveedor.id_proveedor }}', '{{ proveedor.nombre }}')"
-                                        class="btn-activate p-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all hover:scale-105"
-                                        title="Activar">
-                                    <i class="bi bi-check-circle text-lg"></i>
+                                <button
+                                    onclick="activarProveedor('{{ proveedor.id_proveedor }}', '{{ proveedor.nombre }}')"
+                                    class="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition">
+                                    Activar
                                 </button>
                                 {% endif %}
+
                             </div>
                         </td>
+
                     </tr>
+
                     {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="6" class="px-6 py-20 text-center">
-                            <div class="flex flex-col items-center gap-4">
-                                <i class="bi bi-people text-7xl text-gray-300 dark:text-gray-600"></i>
-                                <p class="text-xl font-medium text-gray-500 dark:text-gray-400">No hay proveedores registrados</p>
-                                <a href="{{ url_for('proveedores.crear') }}" 
-                                   class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
-                                    <i class="bi bi-person-plus"></i>
-                                    Crear primer proveedor
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+
+                </tbody>
+
+            </table>
+
+        </div>
     </div>
 
-    <!-- Paginación y contador -->
-    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
-        <div class="text-gray-500 dark:text-gray-400">
-            Mostrando <span id="showingStart">1</span> - <span id="showingEnd">10</span> de <span id="totalCount">0</span> proveedores
-        </div>
-        <div class="flex gap-2" id="pagination"></div>
-    </div>
 </div>
+
 {% endblock %}
 
-{% block scripts %} 
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/pages/proveedores.js') }}"></script>
 {% endblock %}

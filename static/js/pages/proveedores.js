@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         rows.forEach((row) => {
             const nombre = (row.getAttribute('data-nombre') || '').toLowerCase();
-            const estado = row.getAttribute('data-estado') || '';
+            const estado = (row.getAttribute('data-estado') || '').toLowerCase();
 
             const matchesSearch = nombre.includes(searchValue) || 
                                   row.textContent.toLowerCase().includes(searchValue);
