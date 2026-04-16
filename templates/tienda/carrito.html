@@ -1,194 +1,232 @@
 {% extends "base.html" %}
 {% block title %}Carrito{% endblock %}
 
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f8fafc',
+            100: '#e2e8f0',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
+
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/tienda.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/clientes.css') }}">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="cliente-container carrito-view">
-{% set ns = namespace(total_items=0) %}
-{% for p in carrito.productos %}
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  {% set ns = namespace(total_items=0) %}
+  {% for p in carrito.productos %}
     {% set ns.total_items = ns.total_items + p.cantidad %}
-{% endfor %}
+  {% endfor %}
 
-<div class="carrito-hero">
-    <div>
-        <p class="carrito-kicker mb-1">PEDIDO EN CURSO</p>
-        <h1 class="carrito-title mb-1">Mi Carrito</h1>
-        <p class="carrito-subtitle mb-0">Revisa tus productos antes de finalizar la compra.</p>
-    </div>
-    <div class="carrito-hero-metrics">
-        <div class="carrito-total-chip">
-            <small>Total</small>
-            <span>${{ "%.2f"|format(carrito.total) }}</span>
+  <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-teal-700">PEDIDO EN CURSO</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Mi Carrito</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">Revisa tus productos antes de finalizar la compra.</p>
+      </div>
+      <div class="flex gap-3">
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Total</p>
+          <p class="mt-1 text-2xl font-black text-emerald-900">${{ "%.2f"|format(carrito.total) }}</p>
         </div>
-        <div class="carrito-items-chip">
-            <small>Artículos</small>
-            <span>{{ ns.total_items }}</span>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Artículos</p>
+          <p class="mt-1 text-2xl font-black text-amber-900">{{ ns.total_items }}</p>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-{% if carrito.productos %}
+  {% if carrito.productos %}
 
-<div class="carrito-card">
-    <div class="table-responsive">
-    <table class="data-table carrito-table">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-                <th>Acciones</th>
-            </tr>
+  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+      <h2 class="text-lg font-bold text-slate-900">Productos en tu carrito</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50 text-xs uppercase tracking-[0.2em] text-slate-500">
+          <tr>
+            <th class="px-6 py-4 text-left">Producto</th>
+            <th class="px-6 py-4 text-left">Precio</th>
+            <th class="px-6 py-4 text-center">Cantidad</th>
+            <th class="px-6 py-4 text-right">Subtotal</th>
+            <th class="px-6 py-4 text-center">Acciones</th>
+          </tr>
         </thead>
-
-        <tbody>
-            {% for p in carrito.productos %}
-            <tr>
-                <td class="producto-cell">{{ p.producto }}</td>
-
-                <td>${{ "%.2f"|format(p.precio) }}</td>
-
-                <td>
-                    <span class="cantidad-pill">{{ p.cantidad }}</span>
-                </td>
-
-
-                <td>${{ "%.2f"|format(p.subtotal) }}</td>
-                    <td class="acciones-cell">
-                     <a href="{{url_for('tienda.aumentar_cantidad', id=p.id_detalle)}}" class="btn btn-primary btn-sm carrito-btn-control" title="Agregar una unidad">
-                         <i class="bi bi-plus"></i>
-                     </a>
-                     <a href="{{url_for('tienda.reducir_cantidad', id=p.id_detalle)}}" class="btn btn-secondary btn-sm carrito-btn-control" title="Quitar una unidad">
-                         <i class="bi bi-dash"></i>
-                     </a>
-                    </td>
-                
-            </tr>
-            {% endfor %}
+        <tbody class="divide-y divide-slate-100 bg-white">
+          {% for p in carrito.productos %}
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="px-6 py-4">
+              <div class="font-semibold text-slate-900">{{ p.producto }}</div>
+            </td>
+            <td class="px-6 py-4 text-slate-700">${{ "%.2f"|format(p.precio) }}</td>
+            <td class="px-6 py-4 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <a href="{{ url_for('tienda.reducir_cantidad', id=p.id_detalle) }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200">
+                  <i class="bi bi-dash"></i>
+                </a>
+                <span class="w-8 text-center font-semibold text-slate-900">{{ p.cantidad }}</span>
+                <a href="{{ url_for('tienda.aumentar_cantidad', id=p.id_detalle) }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200">
+                  <i class="bi bi-plus"></i>
+                </a>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-right font-semibold text-slate-900">${{ "%.2f"|format(p.subtotal) }}</td>
+            <td class="px-6 py-4 text-center">
+              <a href="{{ url_for('tienda.reducir_cantidad', id=p.id_detalle) }}?delete=1" class="text-rose-500 transition hover:text-rose-700" title="Eliminar producto">
+                <i class="bi bi-trash text-lg"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-
-        <tfoot>
-            <tr>
-                <td colspan="3" class="total-label"><strong>Total:</strong></td>
-                <td class="total-value">
-                    <strong>${{ "%.2f"|format(carrito.total) }}</strong>
-                </td>
-                <td></td>
-            </tr>
+        <tfoot class="bg-slate-50">
+          <tr>
+            <td colspan="3" class="px-6 py-4 text-right font-bold text-slate-900">Total:</td>
+            <td class="px-6 py-4 text-right text-xl font-black text-emerald-700">${{ "%.2f"|format(carrito.total) }}</td>
+            <td class="px-6 py-4"></td>
+          </tr>
         </tfoot>
-    </table>
+      </table>
     </div>
-</div>
+  </div>
 
-<form method="POST" action="{{ url_for('tienda.finalizar_compra') }}" class="checkout-form">
+  <form method="POST" action="{{ url_for('tienda.finalizar_compra') }}" class="mt-8">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <div class="checkout-payment-card">
-        <h3 class="checkout-title mb-2">Método de pago</h3>
-        <div class="checkout-payment-row">
-            <label for="metodo_pago" class="form-label mb-1">Selecciona un método</label>
-            <select name="metodo_pago" id="metodo_pago" class="form-select" required>
-                <option value="Efectivo">Efectivo</option>
-                <option value="Tarjeta" selected>Tarjeta</option>
-                <option value="Transferencia">Transferencia</option>
-            </select>
-        </div>
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-softxl">
+      <h3 class="mb-4 text-xl font-bold text-slate-900">Método de pago</h3>
+      
+      <div class="mb-4">
+        <label for="metodo_pago" class="mb-1 block text-sm font-semibold text-slate-700">Selecciona un método</label>
+        <select name="metodo_pago" id="metodo_pago" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100" required>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta" selected>Tarjeta</option>
+          <option value="Transferencia">Transferencia</option>
+        </select>
+      </div>
 
-        <div id="tarjetaFields" class="tarjeta-fields" style="display: none;">
-            <div class="tarjeta-grid">
-                <div>
-                    <label for="numero_tarjeta" class="form-label mb-1">Número de tarjeta</label>
-                    <input type="text" id="numero_tarjeta" name="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="23" autocomplete="cc-number">
-                </div>
-                <div>
-                    <label for="titular_tarjeta" class="form-label mb-1">Titular</label>
-                    <input type="text" id="titular_tarjeta" name="titular_tarjeta" class="form-control" placeholder="Nombre del titular" autocomplete="cc-name">
-                </div>
-                <div>
-                    <label for="vencimiento_tarjeta" class="form-label mb-1">Vencimiento</label>
-                    <input type="text" id="vencimiento_tarjeta" name="vencimiento_tarjeta" class="form-control" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
-                </div>
-                <div>
-                    <label for="cvv_tarjeta" class="form-label mb-1">CVV</label>
-                    <input type="password" id="cvv_tarjeta" name="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" autocomplete="cc-csc">
-                </div>
-            </div>
+      <div id="tarjetaFields" class="grid gap-4 sm:grid-cols-2" style="display: none;">
+        <div>
+          <label for="numero_tarjeta" class="mb-1 block text-sm font-semibold text-slate-700">Número de tarjeta</label>
+          <input type="text" id="numero_tarjeta" name="numero_tarjeta" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm" placeholder="1234 5678 9012 3456" maxlength="23" autocomplete="cc-number">
         </div>
+        <div>
+          <label for="titular_tarjeta" class="mb-1 block text-sm font-semibold text-slate-700">Titular</label>
+          <input type="text" id="titular_tarjeta" name="titular_tarjeta" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm" placeholder="Nombre del titular" autocomplete="cc-name">
+        </div>
+        <div>
+          <label for="vencimiento_tarjeta" class="mb-1 block text-sm font-semibold text-slate-700">Vencimiento</label>
+          <input type="text" id="vencimiento_tarjeta" name="vencimiento_tarjeta" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
+        </div>
+        <div>
+          <label for="cvv_tarjeta" class="mb-1 block text-sm font-semibold text-slate-700">CVV</label>
+          <input type="password" id="cvv_tarjeta" name="cvv_tarjeta" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm" placeholder="123" maxlength="4" autocomplete="cc-csc">
+        </div>
+      </div>
     </div>
 
-    <div class="carrito-actions">
-        <a href="{{ url_for('tienda.menu') }}" class="btn-secondary">
-            <i class="bi bi-arrow-left"></i> Seguir comprando
-        </a>
-
-        <button type="submit" class="btn-primary">
-            Finalizar compra <i class="bi bi-arrow-right"></i>
-        </button>
+    <div class="mt-6 flex flex-wrap justify-between gap-4">
+      <a href="{{ url_for('tienda.menu') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+        <i class="bi bi-arrow-left"></i> Seguir comprando
+      </a>
+      <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
+        Finalizar compra <i class="bi bi-arrow-right"></i>
+      </button>
     </div>
-</form>
+  </form>
 
-{% else %}
+  {% else %}
 
-<div class="carrito-empty-state">
-    <i class="bi bi-bag-x"></i>
-    <p class="carrito-vacio mb-2">Tu carrito está vacío.</p>
-    <a href="{{ url_for('tienda.menu') }}" class="link-menu">Ir al menú</a>
+  <div class="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-softxl">
+    <i class="bi bi-bag-x text-6xl text-slate-300"></i>
+    <p class="mt-4 text-lg text-slate-500">Tu carrito está vacío.</p>
+    <a href="{{ url_for('tienda.menu') }}" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-teal-500">
+      Ir al menú <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  {% endif %}
 </div>
-
-{% endif %}
-
-</section>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const metodoPagoSelect = document.getElementById('metodo_pago');
-    const tarjetaFields = document.getElementById('tarjetaFields');
-    const numeroTarjeta = document.getElementById('numero_tarjeta');
-    const titularTarjeta = document.getElementById('titular_tarjeta');
-    const vencimientoTarjeta = document.getElementById('vencimiento_tarjeta');
-    const cvvTarjeta = document.getElementById('cvv_tarjeta');
+  const metodoPagoSelect = document.getElementById('metodo_pago');
+  const tarjetaFields = document.getElementById('tarjetaFields');
+  const numeroTarjeta = document.getElementById('numero_tarjeta');
+  const titularTarjeta = document.getElementById('titular_tarjeta');
+  const vencimientoTarjeta = document.getElementById('vencimiento_tarjeta');
+  const cvvTarjeta = document.getElementById('cvv_tarjeta');
 
-    function toggleTarjetaFields() {
-        const esTarjeta = metodoPagoSelect && metodoPagoSelect.value === 'Tarjeta';
-        if (tarjetaFields) {
-            tarjetaFields.style.display = esTarjeta ? 'block' : 'none';
-        }
-        [numeroTarjeta, titularTarjeta, vencimientoTarjeta, cvvTarjeta].forEach((input) => {
-            if (input) {
-                input.required = esTarjeta;
-            }
-        });
+  function toggleTarjetaFields() {
+    const esTarjeta = metodoPagoSelect && metodoPagoSelect.value === 'Tarjeta';
+    if (tarjetaFields) {
+      tarjetaFields.style.display = esTarjeta ? 'grid' : 'none';
     }
+    [numeroTarjeta, titularTarjeta, vencimientoTarjeta, cvvTarjeta].forEach((input) => {
+      if (input) {
+        input.required = esTarjeta;
+      }
+    });
+  }
 
-    if (metodoPagoSelect) {
-        metodoPagoSelect.addEventListener('change', toggleTarjetaFields);
-    }
+  if (metodoPagoSelect) {
+    metodoPagoSelect.addEventListener('change', toggleTarjetaFields);
+  }
 
-    if (numeroTarjeta) {
-        numeroTarjeta.addEventListener('input', (e) => {
-            const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
-            e.target.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-        });
-    }
+  if (numeroTarjeta) {
+    numeroTarjeta.addEventListener('input', (e) => {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+      e.target.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    });
+  }
 
-    if (vencimientoTarjeta) {
-        vencimientoTarjeta.addEventListener('input', (e) => {
-            const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-            if (digits.length >= 3) {
-                e.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
-            } else {
-                e.target.value = digits;
-            }
-        });
-    }
+  if (vencimientoTarjeta) {
+    vencimientoTarjeta.addEventListener('input', (e) => {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (digits.length >= 3) {
+        e.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      } else {
+        e.target.value = digits;
+      }
+    });
+  }
 
-    toggleTarjetaFields();
+  toggleTarjetaFields();
 </script>
 {% endblock %}
