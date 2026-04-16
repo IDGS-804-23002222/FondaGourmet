@@ -2,195 +2,169 @@
 {% block title %}Gestión de Productos{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/pages/usuarios.css') }}">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+                },
+                colors: {
+                    gourmet: {
+                        500: '#0f766e',
+                        600: '#115e59',
+                    },
+                },
+                boxShadow: {
+                    glow: '0 20px 80px rgba(15,118,110,0.18)',
+                },
+            },
+        },
+    }
+</script>
 {% endblock %}
 
 {% block content %}
-    <h1>Gestión de Productos</h1>
 
-<div class="toolbar">
-    <input type="text" id="searchInput" class="search" placeholder="Buscar por nombre o categoría...">
-     <select id="statusFilter" class="filter">
-                <option value="all">Todos los estados</option>
-                <option value="active">Activos</option>
-                <option value="inactive">Inactivos</option>
-            </select>
-                 <select id="categoriaFilter" class="filter">
-                <option value="all">Todas las categorías</option>
-                {% for categoria in categorias %}
-                <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
-                {% endfor %}
-            </select>
-            <div class="button-group">
-    {% if current_user.id_rol == 1 %}
-   <button type="button" class="btn btn-primary" onclick=window.location.href='{{ url_for("productos.crear") }}'>Nuevo Producto</button>
-   {% endif %}
-   <button type="button" class="btn btn-secondary" onclick=window.location.href='{{ url_for("inventario.index") }}'>Volver</button>
-</div>
-</div>
+<div class="mx-auto max-w-7xl px-4 py-8">
 
-<table class="userTable data-table" id="productTable">
-    <thead>
-        <tr>
-            <th onclick="sortTable(0)">
-                <div class="flex items-center gap-2">
-                    Nombre
-                    <i class="bi bi-arrow-down-up text-xs"></i>
-                </div>
-            </th>
-            <th onclick="sortTable(1)">
-                <div class="flex items-center gap-2">
-                    Categoría
-                    <i class="bi bi-arrow-down-up text-xs"></i>
-                </div>
-            </th>
-            <th onclick="sortTable(2)">
-                <div class="flex items-center gap-2">
-                    Precio
-                    <i class="bi bi-arrow-down-up text-xs"></i>
-                </div>
-            </th>
-            <th>Stock</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-gray-600 dark:bg-gray-800">
-        {% if productos %}
-            {% for producto in productos %}
-            <tr 
-            class="product-row"
-    data-nombre="{{ producto.nombre }}"
-    data-categoria="{{ producto.categoria_nombre }}"
-    data-categoria-id="{{ producto.id_categoria }}"
-    data-estado="{% if producto.estado %}active{% else %}inactive{% endif %}">
-                
-                <td class="px-4 md:px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold shadow-md text-sm md:text-base flex-shrink-0">
-                            {{ (producto.nombre[0] if producto.nombre else 'P') | upper }}
-                        </div>
-                        <div class="min-w-0">
-                            <div class="font-semibold text-gray-900 dark:text-white text-sm md:text-base truncate">
-                                {{ producto.nombre }}
-                            </div>
-                            {% if producto.descripcion %}
-                            <div class="text-gray-500 dark:text-gray-400 text-xs md:text-sm truncate">
-                                {{ producto.descripcion[:50] }}{% if producto.descripcion|length > 50 %}...{% endif %}
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </td>
-
-                <td class="px-4 md:px-6 py-4">
-                    <div class="text-gray-900 dark:text-white text-sm md:text-base">
-                        {{ producto.categoria_nombre }}
-                    </div>
-                </td>
-
-                <td class="px-4 md:px-6 py-4">
-                    <div class="text-gray-900 dark:text-white font-semibold text-sm md:text-base">
-                        ${{ "%.2f"|format(producto.precio) }}
-                    </div>
-                </td>
-
-                <td class="px-4 md:px-6 py-4">
-                    <div class="text-gray-900 dark:text-white text-sm md:text-base">
-                        {{ producto.stock_actual | int }}{% if producto.stock_minimo %} / Min: {{ producto.stock_minimo | int }}{% endif %}
-                    </div>
-                    {% if producto.stock_actual <= producto.stock_minimo %}
-                    <span class="text-red-600 dark:text-red-400 text-xs font-semibold">
-                        ⚠️ Stock bajo
-                    </span>
-                    {% endif %}
-                </td>
-
-                <td class="px-4 md:px-6 py-4">
-                    <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-2xl
-                        {% if producto.estado %}
-                            bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 border border-green-200 dark:border-green-800
-                        {% else %}
-                            bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-800
-                        {% endif %}">
-                        <span class="w-2 h-2 rounded-full 
-                            {% if producto.estado %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
-                        {{ producto.estado_display }}
-                    </span>
-                </td>
-
-                <td class="px-4 md:px-6 py-4">
-                    <div class="flex items-center justify-center gap-1.5 md:gap-2">
-                    <button onclick=window.location.href='{{ url_for("productos.detalles", id_producto=producto.id_producto) }}'
-                                class="btn-view p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Ver detalles">
-                            <i class="bi bi-eye text-lg"></i>
-                        </button>
-
-                        {% if current_user.id_rol == 1 %}
-                        <button onclick=window.location.href='{{ url_for("productos.editar", id_producto=producto.id_producto) }}'
-                                class="btn-edit p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Editar">
-                            <i class="bi bi-pencil text-lg"></i>
-                        </button>
-                        {% if producto.estado %}
-                        <button onclick="desactivarProducto('{{ producto.id_producto }}', '{{ producto.nombre }}')"
-                                class="btn-delete p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Desactivar">
-                            <i class="bi bi-ban text-lg"></i>
-                        </button>
-                        {% else %}
-                        <button onclick="activarProducto('{{ producto.id_producto }}', '{{ producto.nombre }}')"
-                                class="btn-activate p-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all hover:scale-105"
-                                title="Activar">
-                            <i class="bi bi-check-circle text-lg"></i>
-                        </button>
-                        {% endif %}
-                        {% endif %}
-                        {% if current_user.id_rol==3 %}
-                        <a href="{{ url_for('tienda.agregar_carrito', id=producto.id_producto) }}" class="btn btn-success btn-add">
-                Agregar al carrito
-            </a>
-            {%endif%}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="6" class="px-6 py-20 text-center">
-                    <div class="flex flex-col items-center gap-4">
-                        <i class="bi bi-box-seam text-7xl text-gray-300 dark:text-gray-600"></i>
-                        <p class="text-xl font-medium text-gray-500 dark:text-gray-400">No hay productos registrados</p>
-                        <a href="{{ url_for('productos.crear') }}" 
-                           class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all">
-                            <i class="bi bi-plus-circle"></i>
-                            Crear primer producto
-                        </a>
-                    </div>
-                </td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
-
-<!-- Paginación y contador -->
-<div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
-    <div class="text-gray-500 dark:text-gray-400">
-        Mostrando <span id="showingStart">1</span> - <span id="showingEnd">10</span> de <span id="totalCount">0</span> productos
+    <!-- HEADER -->
+    <div class="mb-8 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-glow">
+        <h1 class="text-3xl font-black text-slate-900">Gestión de Productos</h1>
+        <p class="text-sm text-slate-600 mt-2">
+            Administra productos, precios y disponibilidad
+        </p>
     </div>
-    <div class="flex gap-2" id="pagination"></div>
-</div>
+
+    <!-- TOOLBAR -->
+    <div class="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+
+        <input type="text" id="searchInput"
+            class="rounded-xl border border-slate-300 px-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="Buscar por nombre o categoría...">
+
+        <select id="statusFilter" class="rounded-xl border border-slate-300 px-4 py-2 text-sm">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+        </select>
+
+        <div class="flex gap-2 ml-auto">
+            {% if current_user.id_rol == 1 %}
+            <button onclick=window.location.href='{{ url_for("productos.crear") }}'
+                class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                Nuevo Producto
+            </button>
+            {% endif %}
+
+            <button onclick=window.location.href='{{ url_for("inventario.index") }}'
+                class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Volver
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+        <div class="overflow-x-auto">
+
+            <table class="min-w-full text-sm data-table">
+                <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                        <th class="px-6 py-4">Nombre</th>
+                        <th class="px-6 py-4">Categoría</th>
+                        <th class="px-6 py-4">Precio</th>
+                        <th class="px-6 py-4">Stock</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for producto in productos %}
+                    <tr class="hover:bg-slate-50 transition product-row" data-nombre="{{ producto.nombre }}"
+                        data-categoria="{{ producto.categoria_nombre }}"
+                        data-estado="{% if producto.estado %}active{% else %}inactive{% endif %}">
+
+                        <td class="px-6 py-4">{{ producto.nombre }}</td>
+                        <td class="px-6 py-4">{{ producto.categoria_nombre }}</td>
+                        <td class="px-6 py-4">${{ "%.2f"|format(producto.precio) }}</td>
+                        <td class="px-6 py-4">{{ producto.stock_actual | int }}</td>
+
+                        <td class="px-6 py-4">
+                            <span class="inline-flex px-3 py-1 text-xs font-bold rounded-full
+                                {% if producto.estado %}
+                                    bg-emerald-100 text-emerald-700
+                                {% else %}
+                                    bg-rose-100 text-rose-700
+                                {% endif %}">
+                                {{ producto.estado_display }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2 flex-wrap">
+
+                                <button
+                                    onclick=window.location.href='{{ url_for("productos.detalles", id_producto=producto.id_producto) }}'
+                                    class="rounded-lg bg-indigo-500 px-3 py-2 text-xs text-white hover:bg-indigo-600">
+                                    Ver
+                                </button>
+
+                                {% if current_user.id_rol == 1 %}
+                                <button
+                                    onclick=window.location.href='{{ url_for("productos.editar", id_producto=producto.id_producto) }}'
+                                    class="rounded-lg bg-amber-500 px-3 py-2 text-xs text-white hover:bg-amber-600">
+                                    Editar
+                                </button>
+
+                                {% if producto.estado %}
+                                <button
+                                    onclick="desactivarProducto('{{ producto.id_producto }}', '{{ producto.nombre }}')"
+                                    class="rounded-lg bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-500">
+                                    Desactivar
+                                </button>
+                                {% else %}
+                                <button onclick="activarProducto('{{ producto.id_producto }}', '{{ producto.nombre }}')"
+                                    class="rounded-lg bg-emerald-600 px-3 py-2 text-xs text-white hover:bg-emerald-500">
+                                    Activar
+                                </button>
+                                {% endif %}
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
 </div>
 
-<!-- Modal para confirmaciones -->
-<div id="confirmModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4">
-        <h3 id="modalTitle" class="text-lg font-bold text-gray-900 dark:text-white mb-4"></h3>
-        <p id="modalMessage" class="text-gray-600 dark:text-gray-300 mb-6"></p>
-        <div class="flex gap-3 justify-end">
-            <button onclick="closeConfirmModal()" class="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400">Cancelar</button>
-            <button onclick="confirmAction()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Confirmar</button>
+<!-- CONTADOR -->
+<div class="mt-6 flex justify-between text-sm text-slate-500">
+    <div>
+        Mostrando <span id="showingStart">1</span> -
+        <span id="showingEnd">10</span> de
+        <span id="totalCount">0</span> productos
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="confirmModal" style="display:none" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+    <div class="bg-white p-6 rounded-xl w-96">
+        <h3 id="modalTitle" class="text-lg font-bold mb-3"></h3>
+        <p id="modalMessage" class="mb-4"></p>
+
+        <div class="flex justify-end gap-2">
+            <button onclick="closeConfirmModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Cancelar</button>
+            <button onclick="confirmAction()" class="px-4 py-2 bg-red-600 text-white rounded-lg">Confirmar</button>
         </div>
     </div>
 </div>
@@ -198,130 +172,87 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script>
-let actionData = {};
+    let actionData = {};
+    const csrfToken = "{{ csrf_token() }}";
 
-function desactivarProducto(id, nombre) {
-    actionData = { id: id, nombre: nombre, action: 'desactivar' };
-    document.getElementById('modalTitle').textContent = 'Desactivar Producto';
-    document.getElementById('modalMessage').textContent = `¿Desactivar el producto "${nombre}"?`;
-    document.getElementById('confirmModal').style.display = 'flex';
-}
+    function desactivarProducto(id, nombre) {
+        actionData = { id, nombre, action: 'desactivar' };
+        document.getElementById('modalTitle').textContent = 'Desactivar Producto';
+        document.getElementById('modalMessage').textContent = `¿Desactivar "${nombre}"?`;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
 
-function activarProducto(id, nombre) {
-    actionData = { id: id, nombre: nombre, action: 'activar' };
-    document.getElementById('modalTitle').textContent = 'Activar Producto';
-    document.getElementById('modalMessage').textContent = `¿Activar el producto "${nombre}"?`;
-    document.getElementById('confirmModal').style.display = 'flex';
-}
+    function activarProducto(id, nombre) {
+        actionData = { id, nombre, action: 'activar' };
+        document.getElementById('modalTitle').textContent = 'Activar Producto';
+        document.getElementById('modalMessage').textContent = `¿Activar "${nombre}"?`;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
 
-function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-    actionData = {};
-}
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+        actionData = {};
+    }
 
-function confirmAction() {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = actionData.action === 'desactivar' 
-        ? '{{ url_for("productos.desactivar") }}'
-        : '{{ url_for("productos.activar") }}';
-    
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'id_producto';
-    input.value = actionData.id;
-    
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
-}
+    function confirmAction() {
+        const form = document.createElement('form');
+        form.method = 'POST';
 
-// Filtrado y búsqueda
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll('.product-row');
-    
-    rows.forEach(row => {
-        const nombre = row.getAttribute('data-nombre').toLowerCase();
-        const categoria = row.getAttribute('data-categoria').toLowerCase();
-        row.style.display = nombre.includes(filter) || categoria.includes(filter) ? '' : 'none';
-    });
-});
+        form.action = actionData.action === 'desactivar'
+            ? '{{ url_for("productos.desactivar") }}'
+            : '{{ url_for("productos.activar") }}';
 
-document.getElementById('statusFilter').addEventListener('change', function() {
-    const filter = this.value;
-    const rows = document.querySelectorAll('.product-row');
-    
-    rows.forEach(row => {
-        const estado = row.getAttribute('data-estado');
-        row.style.display = filter === 'all' || filter === estado ? '' : 'none';
-    });
-});
+        form.innerHTML = `
+        <input type="hidden" name="csrf_token" value="${csrfToken}">
+        <input type="hidden" name="id_producto" value="${actionData.id}">
+    `;
 
-// Sorting
-function sortTable(columnIndex) {
-    // Puedes implementar lógica de ordenamiento aquí si lo necesitas
-    console.log('Ordenar por columna:', columnIndex);
-}
+        document.body.appendChild(form);
+        form.submit();
+    }
 
-function setupPagination() {
-    const rowsPerPage = 10;
-    const rows = document.querySelectorAll('.product-row');
-    const totalRows = rows.length;
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-    
-    document.getElementById('totalCount').textContent = totalRows;
-    
-    if (totalPages <= 1) return; // No mostrar paginación si hay 1 o menos páginas
-    
-    const paginationContainer = document.getElementById('pagination');
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.className = 'px-3 py-1 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400';
-        pageButton.addEventListener('click', () => {
-            const start = (i - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            rows.forEach((row, index) => {
-                row.style.display = index >= start && index < end ? '' : 'none';
+    // FILTRO (SIN CATEGORÍA)
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const rows = document.querySelectorAll('.product-row');
+
+        function applyFilters() {
+
+            const search = searchInput.value.toLowerCase().trim();
+            const status = statusFilter.value;
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+
+                const nombre = (row.dataset.nombre || '').toLowerCase();
+                const catNombre = (row.dataset.categoria || '').toLowerCase();
+                const estado = row.dataset.estado;
+
+                const matchSearch = nombre.includes(search) || catNombre.includes(search);
+                const matchStatus = status === 'all' || status === estado;
+
+                const show = matchSearch && matchStatus;
+
+                row.style.display = show ? '' : 'none';
+
+                if (show) visibleCount++;
             });
-            document.getElementById('showingStart').textContent = start + 1;
-            document.getElementById('showingEnd').textContent = Math.min(end, totalRows);
-        });
-        paginationContainer.appendChild(pageButton);
-    }
-}
-setupPagination();
 
-function setupFilters() {
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const categoriaFilter = document.getElementById('categoriaFilter');
-    
-    function applyFilters() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const statusValue = statusFilter.value;
-        const categoriaValue = categoriaFilter.value;
-        
-        document.querySelectorAll('.product-row').forEach(row => {
-            const nombre = row.getAttribute('data-nombre').toLowerCase();
-            const categoria = row.getAttribute('data-categoria').toLowerCase();
-            const estado = row.getAttribute('data-estado');
-            
-            const matchesSearch = nombre.includes(searchTerm) || categoria.includes(searchTerm);
-            const matchesStatus = statusValue === 'all' || statusValue === estado;
-            const matchesCategoria = categoriaValue === 'all' || row.getAttribute('data-categoria-id') === categoriaValue;
-            
-            row.style.display = (matchesSearch && matchesStatus && matchesCategoria) ? '' : 'none';
-        });
-    }
-    
-    searchInput.addEventListener('input', applyFilters);
-    statusFilter.addEventListener('change', applyFilters);
-    categoriaFilter.addEventListener('change', applyFilters);
-}
-setupFilters();
+            document.getElementById('totalCount').textContent = rows.length;
+            document.getElementById('showingStart').textContent = visibleCount > 0 ? 1 : 0;
+            document.getElementById('showingEnd').textContent = visibleCount;
+        }
 
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        applyFilters();
+    });
 </script>
+
 {% endblock %}
