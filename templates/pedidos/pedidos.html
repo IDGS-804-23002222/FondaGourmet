@@ -46,6 +46,37 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* Evita conflictos con reglas globales de button en el proyecto */
+  .swal2-container .swal2-actions {
+    display: flex !important;
+    gap: 0.75rem !important;
+    margin-top: 1.25rem !important;
+  }
+
+  .swal2-container .swal2-confirm,
+  .swal2-container .swal2-cancel {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 120px !important;
+    padding: 0.6rem 1rem !important;
+    border-radius: 9999px !important;
+    border: none !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transform: none !important;
+  }
+
+  .swal2-container .swal2-confirm {
+    background: #b91c1c !important;
+    color: #ffffff !important;
+  }
+
+  .swal2-container .swal2-cancel {
+    background: #334155 !important;
+    color: #ffffff !important;
+  }
 </style>
 {% endblock %}
 
@@ -157,14 +188,13 @@
                   type="button"
                   class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
                   onclick="abrirTicket({{ pedido.id_pedido }})"
-                  data-modal-target="ticketModal"
-                  data-modal-toggle="ticketModal"
                 >
                   Ver ticket
                 </button>
 
                 {% if pedido.estado_pago != 'Pagado' and pedido.estado_pago != 'Cancelado' %}
                 <form method="POST" action="{{ url_for('pedidos.pagar', id_pedido=pedido.id_pedido) }}" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="metodo_pago" value="{{ pedido.metodo_pago }}">
                   <button type="submit" class="inline-flex items-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500">
                     Cobrar
@@ -200,7 +230,7 @@
             <p class="text-xs font-semibold uppercase tracking-[0.3em] text-teal-700">Ticket</p>
             <h3 class="text-2xl font-black text-slate-900" id="ticketTitle">Pedido #</h3>
           </div>
-          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-slate-900" data-modal-hide="ticketModal">
+          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-slate-900" onclick="cerrarTicketModal()">
             <span class="text-2xl leading-none">&times;</span>
           </button>
         </div>
@@ -275,7 +305,7 @@
             <a id="ticketDetalleLink" href="#" class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">
               Ver detalle completo
             </a>
-            <button type="button" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" data-modal-hide="ticketModal">
+            <button type="button" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" onclick="cerrarTicketModal()">
               Cerrar
             </button>
           </div>
@@ -290,7 +320,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js"></script>
 <script>
   const pedidosData = {{ pedidos | tojson }};
-  let ticketModalInstance = null;
+
+  function limpiarBackdropsModal() {
+    document.querySelectorAll('[modal-backdrop], .modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  function mostrarTicketModal() {
+    const modalEl = document.getElementById('ticketModal');
+    if (!modalEl) return;
+    limpiarBackdropsModal();
+    modalEl.classList.remove('hidden');
+    modalEl.classList.add('flex');
+  }
+
+  function cerrarTicketModal() {
+    const modalEl = document.getElementById('ticketModal');
+    if (!modalEl) return;
+    modalEl.classList.add('hidden');
+    modalEl.classList.remove('flex');
+    limpiarBackdropsModal();
+  }
 
   function findPedido(idPedido) {
     const targetId = Number(idPedido);
@@ -330,63 +380,110 @@
     document.getElementById('ticketItems').textContent = ticket.total_items || 0;
     document.getElementById('ticketResponsable').textContent = ticket.usuario_responsable || '-';
     document.getElementById('ticketEntrega').textContent = ticket.fecha_entrega || 'Sin fecha';
-    document.getElementById('ticketDetalleLink').href = `/pedidos/ticket/${ticket.id_pedido}`;
+    const detalleUrl = `/pedidos/ticket/${ticket.id_pedido}`;
+    const detalleLink = document.getElementById('ticketDetalleLink');
+    detalleLink.href = detalleUrl;
+    detalleLink.dataset.href = detalleUrl;
 
     renderTicketDetalles(ticket);
-
-    if (ticketModalInstance) {
-      ticketModalInstance.show();
-      return;
-    }
-
-    const modalEl = document.getElementById('ticketModal');
-    if (modalEl) {
-      modalEl.classList.remove('hidden');
-      modalEl.classList.add('flex');
-    }
+    mostrarTicketModal();
   }
 
-  function cancelarPedido(idPedido) {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    Swal.fire({
+  async function cancelarPedido(idPedido) {
+    const confirmacion = await Swal.fire({
       title: '¿Cancelar pedido?',
       text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, cancelar',
-      cancelButtonText: 'No'
-    }).then((result) => {
-      if (!result.isConfirmed) return;
+      cancelButtonText: 'No',
+      reverseButtons: true,
+      buttonsStyling: false,
+    });
 
-      fetch(`/pedidos/cancelar/${idPedido}`, {
+    if (!confirmacion.isConfirmed) return;
+
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    try {
+      const response = await fetch(`/pedidos/cancelar/${idPedido}`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': token,
         },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          Swal.fire({
-            title: data.success ? 'Cancelado' : 'Error',
-            text: data.message,
-            icon: data.success ? 'success' : 'error',
-          }).then(() => window.location.reload());
-        })
-        .catch(() => {
-          Swal.fire('Error', 'No se pudo cancelar el pedido', 'error');
-        });
-    });
+      });
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        data = { success: false, message: 'Respuesta inválida del servidor' };
+      }
+
+      await Swal.fire({
+        title: data.success ? 'Cancelado' : 'Error',
+        text: data.message || (data.success ? 'Pedido cancelado' : 'No se pudo cancelar el pedido'),
+        icon: data.success ? 'success' : 'error',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+      });
+
+      if (data.success) {
+        window.location.reload();
+      }
+    } catch (_) {
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo cancelar el pedido',
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     const modalEl = document.getElementById('ticketModal');
-    if (modalEl && typeof Modal !== 'undefined') {
-      ticketModalInstance = new Modal(modalEl, {
-        placement: 'center',
-        backdrop: 'dynamic',
-        closable: true,
+    const detalleLink = document.getElementById('ticketDetalleLink');
+
+    if (detalleLink) {
+      detalleLink.addEventListener('click', (event) => {
+        const href = detalleLink.dataset.href || detalleLink.getAttribute('href');
+        if (!href || href === '#') {
+          event.preventDefault();
+          return;
+        }
+        event.preventDefault();
+        cerrarTicketModal();
+        window.location.assign(href);
       });
     }
+
+    if (modalEl) {
+      modalEl.addEventListener('click', (event) => {
+        if (event.target === modalEl) {
+          cerrarTicketModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        cerrarTicketModal();
+      }
+    });
+
+    window.addEventListener('pageshow', () => {
+      limpiarBackdropsModal();
+      if (modalEl) {
+        modalEl.classList.add('hidden');
+        modalEl.classList.remove('flex');
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      limpiarBackdropsModal();
+    });
   });
 </script>
 {% endblock %}

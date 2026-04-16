@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint, event
+from sqlalchemy import CheckConstraint, event, func, select
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -217,10 +217,19 @@ class Producto(db.Model):
         CheckConstraint("imagen REGEXP '^((https?://.*\\.(png|jpg|jpeg|gif|svg|webp))|(uploads/.*\\.(png|jpg|jpeg|gif|svg|webp)))$'", name='check_formato_imagen'),
     )   
 
-    @property
+    @hybrid_property
     def stock_actual(self):
         inventario = InventarioTerminado.query.filter_by(id_producto=self.id_producto).first()
         return int(inventario.cantidad_disponible or 0) if inventario else 0
+
+    @stock_actual.expression
+    def stock_actual(cls):
+        return (
+            select(func.coalesce(InventarioTerminado.cantidad_disponible, 0))
+            .where(InventarioTerminado.id_producto == cls.id_producto)
+            .correlate(cls)
+            .scalar_subquery()
+        )
 
 
 class InventarioTerminado(db.Model):
