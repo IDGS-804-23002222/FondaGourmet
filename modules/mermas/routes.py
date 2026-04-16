@@ -277,13 +277,24 @@ def historial():
         observaciones = ''
         payload_mongo = mongo_payload_by_obs.get(observaciones) if observaciones else None
 
+        try:
+            articulo_id = int(row.articulo_id) if row.articulo_id is not None else None
+        except (TypeError, ValueError):
+            articulo_id = None
+
         if row.tipo_articulo == 'MateriaPrima':
-            materia = MateriaPrima.query.get(int(row.articulo_id))
-            item_nombre = materia.nombre if materia else f"Materia #{row.articulo_id}"
+            if articulo_id is None:
+                item_nombre = 'Materia sin referencia'
+            else:
+                materia = MateriaPrima.query.get(articulo_id)
+                item_nombre = materia.nombre if materia else f"Materia #{articulo_id}"
         else:
-            inventario = InventarioTerminado.query.get(int(row.articulo_id))
-            producto = Producto.query.get(inventario.id_producto) if inventario else None
-            item_nombre = producto.nombre if producto else f"Inventario #{row.articulo_id}"
+            if articulo_id is None:
+                item_nombre = 'Inventario sin referencia'
+            else:
+                inventario = InventarioTerminado.query.get(articulo_id)
+                producto = Producto.query.get(inventario.id_producto) if inventario else None
+                item_nombre = producto.nombre if producto else f"Inventario #{articulo_id}"
 
         historial_rows.append(
             {
