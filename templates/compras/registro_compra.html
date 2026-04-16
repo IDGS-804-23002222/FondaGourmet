@@ -1,28 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Registro de Compra{% endblock %}
+{% block title %}Registro de Compra - Casa Gourmet{% endblock %}
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f8fafc',
+            100: '#e2e8f0',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
 {% endblock %}
 
+{% block styles %}
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="mx-auto max-w-7xl px-2 py-4 sm:px-4">
-  <div class="mb-4 rounded-2xl bg-slate-900 p-4 text-white shadow-lg sm:flex sm:items-center sm:justify-between">
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-widest text-emerald-300">Abastecimiento</p>
-      <h1 class="text-2xl font-extrabold">Registro de Compra</h1>
-      <p class="text-sm text-slate-200">Control de recepcion de mercancia con filtros y captura rapida.</p>
-    </div>
-    <div class="mt-3 flex gap-2 sm:mt-0">
-      <a href="{{ url_for('compras.crear') }}" class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Nueva Solicitud</a>
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+  <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-gourmet-600">Abastecimiento</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Registro de Compra</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">Control de recepción de mercancía con filtros y captura rápida.</p>
+      </div>
+      <div class="flex gap-3">
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Completadas hoy</p>
+          <p class="mt-1 text-2xl font-black text-emerald-900">{{ compras_completadas_hoy|default(0) }}</p>
+        </div>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Solicitadas</p>
+          <p class="mt-1 text-2xl font-black text-amber-900">{{ compras_solicitadas|default(0) }}</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-3">
+  <div class="mb-6 grid gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-softxl sm:grid-cols-4">
     <div>
-      <label for="filtroProveedor" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Proveedor</label>
-      <select id="filtroProveedor" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+      <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Proveedor</label>
+      <select id="filtroProveedor" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
         <option value="">Todos</option>
         {% for proveedor in proveedores %}
           <option value="{{ proveedor.id_proveedor }}">{{ proveedor.persona.nombre if proveedor.persona else 'Proveedor' }}</option>
@@ -30,8 +76,8 @@
       </select>
     </div>
     <div>
-      <label for="filtroEstado" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</label>
-      <select id="filtroEstado" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
+      <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Estado</label>
+      <select id="filtroEstado" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
         <option value="">Todos</option>
         <option value="Solicitada">Solicitada</option>
         <option value="En Camino">En Camino</option>
@@ -40,100 +86,124 @@
       </select>
     </div>
     <div>
-      <label for="buscarCompra" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Buscar</label>
-      <input id="buscarCompra" type="text" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" placeholder="Compra, materia o responsable" />
+      <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Buscar</label>
+      <input id="buscarCompra" type="text" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100" placeholder="Compra, materia o responsable" />
+    </div>
+    <div class="flex items-end">
+      <a href="{{ url_for('compras.crear') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gourmet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gourmet-700">
+        <i class="bi bi-plus-circle"></i> Nueva Solicitud
+      </a>
     </div>
   </div>
 
-  <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <table id="tablaCompras" class="w-full text-left text-sm text-slate-700">
-      <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-        <tr>
-          <th class="px-4 py-3">Compra</th>
-          <th class="px-4 py-3">Proveedor</th>
-          <th class="px-4 py-3">Responsable</th>
-          <th class="px-4 py-3">Estado</th>
-          <th class="px-4 py-3">Materias</th>
-          <th class="px-4 py-3">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for compra in compras %}
-        <tr class="border-t border-slate-100 compra-row" data-id-proveedor="{{ compra.id_proveedor or '' }}" data-estado="{{ compra.estado }}">
-          <td class="px-4 py-3 align-top">
-            <p class="font-semibold">#{{ compra.id_compra }}</p>
-            <p class="text-xs text-slate-500">{{ compra.fecha.strftime('%d/%m/%Y %H:%M') if compra.fecha else '-' }}</p>
-          </td>
-          <td class="px-4 py-3 align-top">{{ compra.proveedor_nombre }}</td>
-          <td class="px-4 py-3 align-top">{{ compra.responsable }}</td>
-          <td class="px-4 py-3 align-top">
-            <span class="rounded-full px-2 py-1 text-xs font-semibold {% if compra.estado == 'Completada' %}bg-emerald-100 text-emerald-700{% elif compra.estado == 'En Camino' %}bg-amber-100 text-amber-700{% elif compra.estado == 'Solicitada' %}bg-slate-100 text-slate-700{% else %}bg-rose-100 text-rose-700{% endif %}">{{ compra.estado }}</span>
-            <p class="mt-1 text-xs text-slate-500">Avance {{ compra.progreso or 0 }}%</p>
-          </td>
-          <td class="px-4 py-3 align-top">
-            <ul class="space-y-1">
-              {% for m in compra.materias_primas %}
-                <li class="text-xs {% if m.recibido %}text-emerald-700{% else %}text-slate-600{% endif %}">
-                  {{ m.nombre }} · x{{ '%.2f'|format(m.cantidad) }}
-                  {% if m.recibido %}<span class="font-semibold">(recibido)</span>{% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-          </td>
-          <td class="px-4 py-3 align-top">
-            <div class="flex flex-col gap-2">
-              <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-700 hover:bg-slate-100">Ver</a>
-              {% if compra.estado != 'Completada' %}
-                <button type="button"
-                        class="abrir-modal rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-                        data-modal-target="modalRecepcion"
-                        data-modal-toggle="modalRecepcion"
-                        data-compra-id="{{ compra.id_compra }}">
-                  Registrar llegada
-                </button>
-              {% endif %}
-            </div>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+      <h2 class="text-lg font-bold text-slate-900">Compras realizadas</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table id="tablaCompras" class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50 text-xs uppercase tracking-[0.2em] text-slate-500">
+          <tr>
+            <th class="px-6 py-4 text-left">Compra</th>
+            <th class="px-6 py-4 text-left">Proveedor</th>
+            <th class="px-6 py-4 text-left">Responsable</th>
+            <th class="px-6 py-4 text-left">Estado</th>
+            <th class="px-6 py-4 text-left">Materias</th>
+            <th class="px-6 py-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          {% for compra in compras %}
+          <tr class="compra-row hover:bg-slate-50/80 transition" data-id-proveedor="{{ compra.id_proveedor or '' }}" data-estado="{{ compra.estado }}">
+            <td class="px-6 py-4 align-top">
+              <div class="font-bold text-slate-900">#{{ compra.id_compra }}</div>
+              <div class="mt-1 text-xs text-slate-500">{{ compra.fecha.strftime('%d/%m/%Y %H:%M') if compra.fecha else '-' }}</div>
+            </td>
+            <td class="px-6 py-4 align-top text-slate-700">{{ compra.proveedor_nombre }}</td>
+            <td class="px-6 py-4 align-top text-slate-700">{{ compra.responsable }}</td>
+            <td class="px-6 py-4 align-top">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold 
+                {% if compra.estado == 'Completada' %}bg-emerald-100 text-emerald-700
+                {% elif compra.estado == 'En Camino' %}bg-amber-100 text-amber-700
+                {% elif compra.estado == 'Solicitada' %}bg-slate-100 text-slate-700
+                {% else %}bg-rose-100 text-rose-700{% endif %}">
+                {{ compra.estado }}
+              </span>
+              <p class="mt-1 text-xs text-slate-500">Avance {{ compra.progreso or 0 }}%</p>
+            </td>
+            <td class="px-6 py-4 align-top">
+              <ul class="space-y-1">
+                {% for m in compra.materias_primas[:3] %}
+                  <li class="text-xs {% if m.recibido %}text-emerald-700{% else %}text-slate-600{% endif %}">
+                    {{ m.nombre }} · x{{ '%.2f'|format(m.cantidad) }}
+                    {% if m.recibido %}<span class="font-semibold">✓</span>{% endif %}
+                  </li>
+                {% endfor %}
+                {% if compra.materias_primas|length > 3 %}
+                  <li class="text-xs text-gourmet-600">+{{ compra.materias_primas|length - 3 }} más</li>
+                {% endif %}
+              </ul>
+            </td>
+            <td class="px-6 py-4 align-top text-center">
+              <div class="flex flex-col gap-2">
+                <a href="{{ url_for('compras.ver', id=compra.id_compra) }}" class="inline-flex items-center justify-center gap-1 rounded-lg border border-gourmet-500 bg-white px-3 py-1.5 text-xs font-semibold text-gourmet-600 transition hover:bg-gourmet-50">
+                   Ver
+                </a>
+                {% if compra.estado != 'Completada' %}
+                  <button type="button"
+                          class="abrir-modal inline-flex items-center justify-center gap-1 rounded-lg bg-gourmet-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-gourmet-700"
+                          data-modal-target="modalRecepcion"
+                          data-modal-toggle="modalRecepcion"
+                          data-compra-id="{{ compra.id_compra }}">
+                     Registrar llegada
+                  </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-</section>
+</div>
 
 <div id="modalRecepcion" tabindex="-1" aria-hidden="true" class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0">
   <div class="relative max-h-full w-full max-w-lg">
-    <div class="relative rounded-xl bg-white shadow">
-      <div class="flex items-center justify-between rounded-t border-b p-4">
-        <h3 class="text-lg font-semibold text-slate-800">Registrar Llegada de Mercancia</h3>
-        <button type="button" class="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-slate-100 hover:text-slate-900" data-modal-hide="modalRecepcion">x</button>
+    <div class="relative rounded-3xl bg-white shadow-softxl">
+      <div class="flex items-center justify-between rounded-t-3xl border-b border-slate-200 bg-slate-50 px-6 py-4">
+        <h3 class="text-lg font-bold text-slate-900">Registrar Llegada de Mercancía</h3>
+        <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-500 transition hover:bg-slate-100" data-modal-hide="modalRecepcion">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-      <form id="formRecepcionRapida" method="POST">
+      <form id="formRecepcionRapida" method="POST" class="p-6">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="space-y-3 p-4">
+        <div class="space-y-4">
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Metodo de pago</label>
-            <select name="metodo_pago" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Método de pago</label>
+            <select name="metodo_pago" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100" required>
               <option value="Efectivo">Efectivo</option>
               <option value="Tarjeta">Tarjeta</option>
               <option value="Transferencia">Transferencia</option>
             </select>
           </div>
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de pago</label>
-            <select name="tipo_pago" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Tipo de pago</label>
+            <select name="tipo_pago" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100" required>
               <option value="Contado">Contado</option>
-              <option value="Credito">Credito</option>
+              <option value="Credito">Crédito</option>
             </select>
           </div>
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha de entrega</label>
-            <input type="date" name="fecha_entrega" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Fecha de entrega</label>
+            <input type="date" name="fecha_entrega" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100" required>
           </div>
         </div>
-        <div class="flex items-center justify-end gap-2 border-t p-4">
-          <button data-modal-hide="modalRecepcion" type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancelar</button>
-          <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Completar compra</button>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" data-modal-hide="modalRecepcion" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="rounded-xl bg-gourmet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gourmet-700">Completar compra</button>
         </div>
       </form>
     </div>
@@ -149,11 +219,12 @@
   const filtroEstado = document.getElementById('filtroEstado');
   const buscarCompra = document.getElementById('buscarCompra');
   const rows = Array.from(document.querySelectorAll('.compra-row'));
+  const formRecepcion = document.getElementById('formRecepcionRapida');
 
   function aplicarFiltros() {
-    const proveedor = (filtroProveedor.value || '').trim();
-    const estado = (filtroEstado.value || '').trim().toLowerCase();
-    const q = (buscarCompra.value || '').trim().toLowerCase();
+    const proveedor = (filtroProveedor?.value || '').trim();
+    const estado = (filtroEstado?.value || '').trim().toLowerCase();
+    const q = (buscarCompra?.value || '').trim().toLowerCase();
 
     rows.forEach((row) => {
       const byProveedor = !proveedor || String(row.dataset.idProveedor || '') === proveedor;
@@ -167,13 +238,16 @@
   if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
   if (buscarCompra) buscarCompra.addEventListener('input', aplicarFiltros);
 
-  const formRecepcion = document.getElementById('formRecepcionRapida');
   document.querySelectorAll('.abrir-modal').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idCompra = btn.dataset.compraId;
-      formRecepcion.action = `/compras/completar/${idCompra}`;
+      if (formRecepcion) {
+        formRecepcion.action = `/compras/completar/${idCompra}`;
+      }
     });
   });
+
+  aplicarFiltros();
 })();
 </script>
 {% endblock %}
