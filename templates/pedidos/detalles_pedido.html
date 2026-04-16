@@ -1,8 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Detalle pedido{% endblock %}
+{% block title %}Detalle pedido - Casa Gourmet{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f0fdfa',
+            100: '#ccfbf1',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+          ember: {
+            50: '#fff8f1',
+            100: '#feecdc',
+            500: '#c2410c',
+            600: '#9a3412',
+            700: '#7c2d12',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -11,82 +55,151 @@
     {% set ns.total_items = ns.total_items + d.cantidad %}
 {% endfor %}
 
-<section class="pedido-detalle-view">
+<div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 
-<div class="pedido-detail-hero">
-    <div>
-        <p class="hero-kicker mb-1">DETALLE DE PEDIDO</p>
-        <h1 class="pedido-title mb-1">Pedido #{{ pedido.id_pedido }}</h1>
-        <p class="hero-subtitle mb-0">Consulta la información completa de este pedido.</p>
-    </div>
-    <div class="detail-hero-metrics">
-        <div class="hero-count-chip">
-            <span>{{ ns.total_items }}</span>
-            <small>artículos</small>
+  <!-- Hero con toque pastel -->
+  <div class="mb-8 rounded-3xl border border-gourmet-100/60 bg-gradient-to-r from-gourmet-50/80 to-white/90 p-6 shadow-glow backdrop-blur lg:p-8">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-gourmet-500">DETALLE DE PEDIDO</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-800 sm:text-4xl">Pedido #{{ pedido.id_pedido }}</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-500">Consulta la información completa de este pedido.</p>
+      </div>
+      <div class="flex gap-3">
+        <div class="rounded-2xl border border-gourmet-200/60 bg-gradient-to-br from-gourmet-50 to-white px-5 py-3 text-center shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">Artículos</p>
+          <p class="mt-1 text-2xl font-black text-gourmet-600">{{ ns.total_items }}</p>
         </div>
-        <div class="hero-count-chip">
-            <span>${{ '%.2f'|format(pedido.total) }}</span>
-            <small>total</small>
+        <div class="rounded-2xl border border-ember-200/60 bg-gradient-to-br from-ember-50 to-white px-5 py-3 text-center shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ember-500">Total</p>
+          <p class="mt-1 text-2xl font-black text-ember-600">${{ '%.2f'|format(pedido.total) }}</p>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="pedido-detalle-card">
-    <div class="mb-2">
-        <span class="pedido-estado-chip">{{ pedido.estado }}</span>
+  <!-- Tarjeta principal -->
+  <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-softxl">
+    
+    <!-- Badge de estado con colores pastel -->
+    <div class="border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white px-6 py-4">
+      {% if pedido.estado == "Pendiente" %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100/80 px-4 py-1.5 text-sm font-semibold text-amber-700">
+          <i class="bi bi-clock-history"></i> Pendiente
+        </span>
+      {% elif pedido.estado == "En Proceso" %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-gourmet-100/80 px-4 py-1.5 text-sm font-semibold text-gourmet-700">
+          <i class="bi bi-arrow-repeat"></i> En Proceso
+        </span>
+      {% elif pedido.estado == "Completado" %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+          <i class="bi bi-check-circle"></i> Completado
+        </span>
+      {% elif pedido.estado == "Cancelado" %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-100/80 px-4 py-1.5 text-sm font-semibold text-rose-700">
+          <i class="bi bi-x-circle"></i> Cancelado
+        </span>
+      {% else %}
+        <span class="inline-flex rounded-full bg-slate-100/80 px-4 py-1.5 text-sm font-semibold text-slate-600">{{ pedido.estado }}</span>
+      {% endif %}
     </div>
 
-    <ul class="info-list">
-        <li><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y') if pedido.fecha else 'No disponible' }}</li>
-        <li><strong>Cliente:</strong> {{ (pedido.cliente.persona.nombre ~ ' ' ~ (pedido.cliente.persona.apellido_p or '')) if pedido.cliente and pedido.cliente.persona else 'No disponible' }}</li>
-        <li><strong>Estado:</strong> {{ pedido.estado }}</li>
-        <li><strong>Estado de pago:</strong> {{ pedido.estado_pago if pedido.estado_pago else 'Pendiente' }}</li>
-        <li><strong>Método de pago:</strong> {{ pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D' }}</li>
+    <!-- Información del pedido con tarjetas pastel -->
+    <div class="p-6 lg:p-8">
+      <h2 class="mb-4 text-md font-semibold text-gourmet-600">
+        <i class="bi bi-info-circle mr-2"></i> Información del pedido
+      </h2>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-calendar3 mr-1"></i> Fecha
+          </p>
+          <p class="mt-1 font-medium text-slate-700">{{ pedido.fecha.strftime('%d/%m/%Y') if pedido.fecha else 'No disponible' }}</p>
+        </div>
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-person mr-1"></i> Cliente
+          </p>
+          <p class="mt-1 font-medium text-slate-700">{{ (pedido.cliente.persona.nombre ~ ' ' ~ (pedido.cliente.persona.apellido_p or '')) if pedido.cliente and pedido.cliente.persona else 'No disponible' }}</p>
+        </div>
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-credit-card mr-1"></i> Estado de pago
+          </p>
+          {% if pedido.estado_pago == "Pagado" %}
+            <p class="mt-1 font-medium text-emerald-600"><i class="bi bi-check-circle-fill mr-1"></i> {{ pedido.estado_pago }}</p>
+          {% else %}
+            <p class="mt-1 font-medium text-amber-600"><i class="bi bi-exclamation-triangle-fill mr-1"></i> {{ pedido.estado_pago if pedido.estado_pago else 'Pendiente' }}</p>
+          {% endif %}
+        </div>
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-wallet2 mr-1"></i> Método de pago
+          </p>
+          <p class="mt-1 font-medium text-slate-700">{{ pedido.meta_pedido.metodo_pago if pedido.meta_pedido else 'N/D' }}</p>
+        </div>
         {% if pedido.meta_pedido and pedido.meta_pedido.metodo_pago == 'Tarjeta' %}
-        <li><strong>Titular:</strong> {{ pedido.meta_pedido.tarjeta_titular or 'N/D' }}</li>
-        <li><strong>Tarjeta:</strong> **** **** **** {{ pedido.meta_pedido.tarjeta_ultimos4 or '----' }}</li>
-        <li><strong>Vencimiento:</strong> {{ pedido.meta_pedido.tarjeta_vencimiento or 'N/D' }}</li>
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-person-badge mr-1"></i> Titular
+          </p>
+          <p class="mt-1 font-medium text-slate-700">{{ pedido.meta_pedido.tarjeta_titular or 'N/D' }}</p>
+        </div>
+        <div class="rounded-xl bg-gradient-to-br from-slate-50/90 to-white p-4 border border-slate-100 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-500">
+            <i class="bi bi-credit-card-2-front mr-1"></i> Tarjeta
+          </p>
+          <p class="mt-1 font-medium text-slate-700">**** **** **** {{ pedido.meta_pedido.tarjeta_ultimos4 or '----' }}</p>
+        </div>
         {% endif %}
-    </ul>
+      </div>
+    </div>
 
-    <h3 class="subtitulo">Productos del pedido</h3>
-
-    <div class="table-responsive detalle-table-wrap">
-    <table class="data-table detalle-table">
-        <thead>
+    <!-- Productos con cabecera pastel -->
+    <div class="border-t border-slate-100 px-6 py-5 lg:px-8">
+      <h3 class="mb-4 text-md font-semibold text-gourmet-600">
+        <i class="bi bi-box-seam mr-2"></i> Productos del pedido
+      </h3>
+      
+      <div class="overflow-hidden rounded-xl border border-slate-200/80 shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-gradient-to-r from-gourmet-50/80 to-gourmet-100/40">
             <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
+              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gourmet-600">Producto</th>
+              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gourmet-600">Precio</th>
+              <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gourmet-600">Cantidad</th>
+              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gourmet-600">Subtotal</th>
             </tr>
-        </thead>
-
-        <tbody>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
             {% for d in pedido.detalles %}
-            <tr>
-                <td class="fw-semibold">{{ d.producto.nombre }}</td>
-                <td>${{ '%.2f'|format(d.producto.precio) }}</td>
-                <td>{{ d.cantidad }}</td>
-                <td class="fw-semibold">${{ '%.2f'|format(d.subtotal) }}</td>
+            <tr class="hover:bg-gourmet-50/30 transition">
+              <td class="px-5 py-3 font-medium text-slate-800">{{ d.producto.nombre }}</td>
+              <td class="px-5 py-3 text-slate-600">${{ '%.2f'|format(d.producto.precio) }}</td>
+              <td class="px-5 py-3 text-center">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gourmet-100/60 text-sm font-semibold text-gourmet-600">{{ d.cantidad }}</span>
+              </td>
+              <td class="px-5 py-3 text-right font-semibold text-ember-600">${{ '%.2f'|format(d.subtotal) }}</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+          </tbody>
+          <tfoot class="bg-gradient-to-r from-slate-50/50 to-white">
+            <tr>
+              <td colspan="3" class="px-5 py-3 text-right font-semibold text-slate-700">Total:</td>
+              <td class="px-5 py-3 text-right text-lg font-black text-ember-600">${{ '%.2f'|format(pedido.total) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
 
-    <h2 class="pedido-total">
-        Total: ${{ '%.2f'|format(pedido.total) }}
-    </h2>
-
-    <div class="account-actions mt-3">
-        <a href="{{ url_for('pedidos.mis_pedidos') if current_user.id_rol == 4 else url_for('pedidos.index') }}" class="btn btn-secondary">
-            Volver
-        </a>
+    <!-- Botón volver pastel -->
+    <div class="border-t border-slate-100 bg-gradient-to-r from-slate-50/30 to-white px-6 py-4 lg:px-8">
+      <a href="{{ url_for('pedidos.mis_pedidos') if current_user.id_rol == 4 else url_for('pedidos.index') }}" 
+         class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gourmet-500/90 to-gourmet-600/90 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-md">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
     </div>
-
+  </div>
 </div>
-
-</section>
-
 {% endblock %}

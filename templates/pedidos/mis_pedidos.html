@@ -1,31 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Mis pedidos{% endblock %}
+{% block title %}Mis pedidos - Casa Gourmet{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f0fdfa',
+            100: '#ccfbf1',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+          ember: {
+            50: '#fff8f1',
+            100: '#feecdc',
+            500: '#c2410c',
+            600: '#9a3412',
+            700: '#7c2d12',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/clientes.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/pedidos.css') }}">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="mis-pedidos-view">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-<div class="mis-pedidos-hero">
-    <div>
-        <p class="hero-kicker mb-1">CLIENTE</p>
-        <h1 class="section-title mb-1">Mis Pedidos</h1>
-        <p class="hero-subtitle mb-0">Consulta estado, detalles y acciones disponibles de tus pedidos.</p>
+  <!-- Hero -->
+  <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-gourmet-600">CLIENTE</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Mis Pedidos</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">Consulta estado, detalles y acciones disponibles de tus pedidos.</p>
+      </div>
+      <div class="rounded-2xl border border-gourmet-200 bg-gourmet-50 px-5 py-3 text-center">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-700">Registrados</p>
+        <p class="mt-1 text-2xl font-black text-gourmet-700" id="visiblePedidosCount">{{ pedidos|length if pedidos else 0 }}</p>
+      </div>
     </div>
-    <div class="hero-count-chip">
-        <span id="visiblePedidosCount">{{ pedidos|length if pedidos else 0 }}</span>
-        <small>registrados</small>
-    </div>
-</div>
+  </div>
 
-{% if pedidos %}
+  {% if pedidos %}
 
-<div class="pedidos-toolbar mb-3">
-    <label for="estadoFiltroPedidos" class="form-label mb-0">Filtrar por estado:</label>
-    <select id="estadoFiltroPedidos" class="form-select form-select-sm pedidos-filter-select">
+  <!-- Filtro -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <label for="estadoFiltroPedidos" class="text-sm font-semibold text-slate-700">Filtrar por estado:</label>
+      <select id="estadoFiltroPedidos" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
         <option value="todos">Todos</option>
         <option value="pendiente">Pendiente</option>
         <option value="solicitado">Solicitado</option>
@@ -33,157 +81,149 @@
         <option value="producido">Producido</option>
         <option value="completado">Completado</option>
         <option value="cancelado">Cancelado</option>
-    </select>
-</div>
-
-<div class="pedidos-wrapper">
-    <div class="table-responsive">
-    <table class="data-table pedidos-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Fecha Creación</th>
-                <th>Fecha</th>
-                <th>Método de pago</th>
-                <th>Responsable</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th></th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for p in pedidos %}
-            <tr data-estado="{{ (p.estado or '')|lower }}">
-                <td>#{{ p.id }}</td>
-
-                <td>
-                    {{ p.fecha_str or p.fecha or '' }}
-                </td>
-              <td>
-    {% if p.estado == "Completado" %}
-        {{ p.fecha_entrega_str or p.fecha_entrega or 'No definida' }}
-    {% elif p.estado == "En Proceso" %}
-        {{ p.fecha_estimada_str or p.fecha_estimada or 'No definida' }}
-    {% else %}
-        <span class="text-gray-500 italic">No definida</span>
-    {% endif %}
-</td>
-
-                <td>{{ p.metodo_pago }}</td>
-                <td>{{ p.usuario_responsable }}</td>
-
-                <td>${{ "%.2f"|format(p.total) }}</td>
-
-                <td>
-                    {% if p.estado == "Pendiente" %}
-                        <span class="badge badge-pendiente">Pendiente</span>
-                        {% elif p.estado == "En Proceso" %}
-                        <span class="badge badge-en-proceso">En Proceso</span>
-                        {% elif p.estado == "Completado" %}
-                        <span class="badge badge-completado">Completado</span>
-                    {% elif p.estado == "Cancelado" %}
-                        <span class="badge badge-cancelado">Cancelado</span>
-                    {% else %}
-                        <span class="badge">{{ p.estado }}</span>
-                    {% endif %}
-                </td>
-
-                <td class="actions-col">
-                    <div class="pedido-actions-row">
-                    <button onclick=window.location.href='{{ url_for("pedidos.ver_detalles_pedido", id_pedido=p.id) }}'
-                                class="btn-view pedido-action-btn"
-                                title="Ver detalles">
-                            <i class="bi bi-eye text-lg"></i>
-                        </button>
-                        {% if p.estado in ["Pendiente", "Solicitado"] %}
-<button onclick="cancelarPedido('{{ p.id }}')"
-    class="btn-delete pedido-action-btn"
-    title="Cancelar pedido">
-    <i class="bi bi-trash text-lg"></i>
-</button>
-{% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+      </select>
     </div>
+  </div>
+
+  <!-- Tabla de pedidos -->
+  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50 text-xs uppercase tracking-[0.2em] text-slate-500">
+          <tr>
+            <th class="px-6 py-4 text-left">ID</th>
+            <th class="px-6 py-4 text-left">Fecha Creación</th>
+            <th class="px-6 py-4 text-left">Fecha Entrega</th>
+            <th class="px-6 py-4 text-left">Método de pago</th>
+            <th class="px-6 py-4 text-left">Responsable</th>
+            <th class="px-6 py-4 text-left">Total</th>
+            <th class="px-6 py-4 text-left">Estado</th>
+            <th class="px-6 py-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          {% for p in pedidos %}
+          <tr class="hover:bg-slate-50/80 transition" data-estado="{{ (p.estado or '')|lower }}">
+            <td class="px-6 py-4 font-bold text-slate-900">#{{ p.id }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ p.fecha_str or p.fecha or '' }}</td>
+            <td class="px-6 py-4 text-slate-700">
+              {% if p.estado == "Completado" %}
+                {{ p.fecha_entrega_str or p.fecha_entrega or 'No definida' }}
+              {% elif p.estado == "En Proceso" %}
+                {{ p.fecha_estimada_str or p.fecha_estimada or 'No definida' }}
+              {% else %}
+                <span class="text-slate-400 italic">No definida</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-slate-700">{{ p.metodo_pago }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ p.usuario_responsable }}</td>
+            <td class="px-6 py-4 font-bold text-ember-600">${{ "%.2f"|format(p.total) }}</td>
+            <td class="px-6 py-4">
+              {% if p.estado == "Pendiente" %}
+                <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Pendiente</span>
+              {% elif p.estado == "En Proceso" %}
+                <span class="inline-flex rounded-full bg-gourmet-100 px-3 py-1 text-xs font-bold text-gourmet-700">En Proceso</span>
+              {% elif p.estado == "Completado" %}
+                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Completado</span>
+              {% elif p.estado == "Cancelado" %}
+                <span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700">Cancelado</span>
+              {% else %}
+                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ p.estado }}</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="window.location.href='{{ url_for('pedidos.ver_detalles_pedido', id_pedido=p.id) }}'"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gourmet-600 text-white transition hover:bg-gourmet-700"
+                        title="Ver detalles">
+                  <i class="bi bi-eye"></i>
+                </button>
+                {% if p.estado in ["Pendiente", "Solicitado"] %}
+                <button onclick="cancelarPedido('{{ p.id }}')"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500 text-white transition hover:bg-rose-600"
+                        title="Cancelar pedido">
+                  <i class="bi bi-trash"></i>
+                </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+
+  <!-- Estado vacío -->
+  <div class="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-softxl">
+    <i class="bi bi-receipt text-6xl text-slate-300"></i>
+    <p class="mt-4 text-lg text-slate-500">No tienes pedidos aún.</p>
+    <a href="{{ url_for('tienda.menu') }}" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-gourmet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gourmet-700">
+      Explorar menú <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  {% endif %}
 </div>
-
-{% else %}
-
-<div class="pedidos-empty-state">
-    <i class="bi bi-receipt"></i>
-    <p class="text-center mb-2">No tienes pedidos aún.</p>
-    <a href="{{ url_for('tienda.menu') }}" class="btn btn-primary btn-sm">Explorar menú</a>
-</div>
-
-{% endif %}
-
-</section>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-function cancelarPedido(id) {
+  function cancelarPedido(id) {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     Swal.fire({
-        title: "¿Estás seguro?",
-        text: "¿Quieres cancelar este pedido?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Sí, cancelar",
-        cancelButtonText: "No, mantener"
+      title: "¿Estás seguro?",
+      text: "¿Quieres cancelar este pedido?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "No, mantener"
     }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/pedidos/cancelar/${id}`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": token
-            }
-
+      if (result.isConfirmed) {
+        fetch(`/pedidos/cancelar/${id}`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": token
+          }
         })
         .then(res => res.json())
         .then(data => {
-            Swal.fire("¡Éxito!", data.message, "success");
-            location.reload();
+          Swal.fire("¡Éxito!", data.message, "success");
+          location.reload();
         });
-    }
+      }
     });
-}    
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     const estadoFiltro = document.getElementById('estadoFiltroPedidos');
-    const filas = Array.from(document.querySelectorAll('.pedidos-table tbody tr'));
+    const filas = Array.from(document.querySelectorAll('.pedidos-table tbody tr, tbody tr'));
     const visiblePedidosCount = document.getElementById('visiblePedidosCount');
 
     function aplicarFiltro() {
-        const estado = (estadoFiltro?.value || 'todos').toLowerCase();
-        let visibles = 0;
+      const estado = (estadoFiltro?.value || 'todos').toLowerCase();
+      let visibles = 0;
 
-        filas.forEach((fila) => {
-            const estadoFila = (fila.dataset.estado || '').toLowerCase();
-            const mostrar = estado === 'todos' || estadoFila === estado;
-            fila.style.display = mostrar ? '' : 'none';
-            if (mostrar) {
-                visibles += 1;
-            }
-        });
+      filas.forEach((fila) => {
+        const estadoFila = (fila.dataset.estado || '').toLowerCase();
+        const mostrar = estado === 'todos' || estadoFila === estado;
+        fila.style.display = mostrar ? '' : 'none';
+        if (mostrar) visibles++;
+      });
 
-        if (visiblePedidosCount) {
-            visiblePedidosCount.textContent = visibles;
-        }
+      if (visiblePedidosCount) {
+        visiblePedidosCount.textContent = visibles;
+      }
     }
 
     if (estadoFiltro) {
-        estadoFiltro.addEventListener('change', aplicarFiltro);
+      estadoFiltro.addEventListener('change', aplicarFiltro);
     }
 
     aplicarFiltro();
-});
+  });
 </script>
 {% endblock %}
