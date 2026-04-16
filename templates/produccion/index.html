@@ -1,186 +1,203 @@
 {% extends "base.html" %}
-{% block title %}Producción{% endblock %}
+{% block title %}Producción - Casa Gourmet{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f8fafc',
+            100: '#e2e8f0',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/produccion.css') }}">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="produccion-index-hero">
-    <div>
-        <p class="hero-kicker mb-2">Cocina y tiempos</p>
-        <h1 class="mb-2">Órdenes de Producción</h1>
-        <p class="hero-subtitle mb-0">Supervisa urgencia, progreso y cumplimiento de fechas desde un tablero único.</p>
-    </div>
-    <div class="produccion-hero-stats">
-        <div class="hero-count-chip">
-            <span>{{ ordenes_completadas_hoy }}</span>
-            <small>Completadas hoy</small>
-        </div>
-        <div class="hero-count-chip hero-count-chip-soft">
-            <span>{{ ordenes_solicitadas }}</span>
-            <small>Solicitadas</small>
-        </div>
-        <div class="hero-count-chip hero-count-chip-soft">
-            <span>{{ ordenes_en_proceso }}</span>
-            <small>En proceso</small>
-        </div>
-        <div class="hero-count-chip hero-count-chip-soft">
-            <span>{{ total_ordenes }}</span>
-            <small>Totales</small>
-        </div>
-    </div>
-</div>
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-<div class="produccion-index-shell">
-    <div class="toolbar produccion-toolbar" id="filtrosUrgencia">
-        <input type="text" class="search" id="buscarProduccion" placeholder="Buscar orden, responsable o estado...">
-        <input type="date" class="search" id="filtroFechaProduccion" title="Filtrar por fecha necesaria">
-        <select class="filter" id="filtroEstadoProduccion">
+  <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-gourmet-600">Cocina y tiempos</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Órdenes de Producción</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">Supervisa urgencia, progreso y cumplimiento de fechas desde un tablero único.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Completadas hoy</p>
+          <p class="text-xl font-black text-emerald-900">{{ ordenes_completadas_hoy }}</p>
+        </div>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Solicitadas</p>
+          <p class="text-xl font-black text-amber-900">{{ ordenes_solicitadas }}</p>
+        </div>
+        <div class="rounded-2xl border border-gourmet-100 bg-gourmet-50 px-4 py-2 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-700">En proceso</p>
+          <p class="text-xl font-black text-gourmet-700">{{ ordenes_en_proceso }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-center">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Totales</p>
+          <p class="text-xl font-black text-slate-700">{{ total_ordenes }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap gap-2">
+          <input type="text" id="buscarProduccion" placeholder="Buscar orden, responsable o estado..." class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
+          <input type="date" id="filtroFechaProduccion" class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
+          <select id="filtroEstadoProduccion" class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100">
             <option value="todas">Todas las órdenes</option>
             <option value="solicitada">Solicitadas</option>
             <option value="en proceso">En proceso</option>
             <option value="completada">Completadas</option>
             <option value="cancelada">Canceladas</option>
-        </select>
-        <div class="urgencia-switches">
-            <button type="button" class="btn btn-sm btn-outline-secondary active" data-urgencia="todas">Todas</button>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-urgencia="urgente">Urgentes</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-urgencia="proxima">Próximas</button>
-            <button type="button" class="btn btn-sm btn-outline-success" data-urgencia="normal">A tiempo</button>
+          </select>
         </div>
+        <div class="flex flex-wrap gap-2" id="filtrosUrgencia">
+          <button type="button" class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 active" data-urgencia="todas">Todas</button>
+          <button type="button" class="rounded-xl border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50" data-urgencia="urgente">Urgentes</button>
+          <button type="button" class="rounded-xl border border-gourmet-300 bg-white px-3 py-1.5 text-xs font-semibold text-gourmet-600 transition hover:bg-gourmet-50" data-urgencia="proxima">Próximas</button>
+          <button type="button" class="rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50" data-urgencia="normal">A tiempo</button>
+        </div>
+      </div>
     </div>
 
-<div class="produccion-table-wrap">
-<table class="data-table produccion-table">
-    <thead>
-        <tr>
-            <th>No. orden</th>
-            <th>Responsable</th>
-            <th>Estado</th>
-            <th>Fecha Solicitud</th>
-            <th>Fecha a Completar</th>
-            <th>Fecha Producción</th>
-            <th>Urgencia</th>
-            <th>Acciones</th>
-        </tr>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-slate-50 text-xs uppercase tracking-[0.2em] text-slate-500">
+          <tr class="border-b border-slate-200">
+            <th class="px-6 py-4 text-left">No. orden</th>
+            <th class="px-6 py-4 text-left">Responsable</th>
+            <th class="px-6 py-4 text-left">Estado</th>
+            <th class="px-6 py-4 text-left">Fecha Solicitud</th>
+            <th class="px-6 py-4 text-left">Fecha a Completar</th>
+            <th class="px-6 py-4 text-left">Fecha Producción</th>
+            <th class="px-6 py-4 text-left">Urgencia</th>
+            <th class="px-6 py-4 text-center">Acciones</th>
+          </tr>
         </thead>
-    <tbody>
-{% for p in producciones %}
-<tr data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
-    <td>{{ p.id_produccion }}</td>
-    <td>
-        {{ p.usuario }}
-    </td>
-    <td>
-        <span class="badge  
-        {% if p.estado == 'Solicitada' %}
-            bg-warning
-        {% elif p.estado == 'En Proceso' %}
-            bg-info
-        {% elif p.estado == 'Completada' %}
-            bg-success
-        {% elif p.estado == 'Cancelada' %}
-            bg-danger
-        {% endif %}
-                ">
+        <tbody class="divide-y divide-slate-100">
+          {% for p in producciones %}
+          <tr class="hover:bg-slate-50/80 transition" data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
+            <td class="px-6 py-4 font-bold text-slate-900">{{ p.id_produccion }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ p.usuario }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold 
+                {% if p.estado == 'Solicitada' %}bg-amber-100 text-amber-700
+                {% elif p.estado == 'En Proceso' %}bg-gourmet-100 text-gourmet-700
+                {% elif p.estado == 'Completada' %}bg-emerald-100 text-emerald-700
+                {% elif p.estado == 'Cancelada' %}bg-rose-100 text-rose-700
+                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                {{ p.estado }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-slate-700">{{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</td>
+            <td class="px-6 py-4">
+              {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
+                <span class="inline-flex rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">Urgente</span>
+              {% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
+                <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">Próximo</span>
+              {% else %}
+                <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">A tiempo</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-center">
+              <a href="{{ url_for('produccion.ver', id=p.id_produccion) }}" class="inline-block rounded-lg border border-gourmet-500 bg-white px-3 py-1.5 text-xs font-semibold text-gourmet-600 transition hover:bg-gourmet-50">Ver</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="produccion-cards-mobile hidden flex-col gap-3 p-4 sm:flex-col md:hidden">
+      {% for p in producciones %}
+      <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
+        <div class="mb-3 flex items-start justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gourmet-600">Orden #{{ p.id_produccion }}</p>
+            <h3 class="text-base font-bold text-slate-900">{{ p.usuario }}</h3>
+          </div>
+          <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold 
+            {% if p.estado == 'Solicitada' %}bg-amber-100 text-amber-700
+            {% elif p.estado == 'En Proceso' %}bg-gourmet-100 text-gourmet-700
+            {% elif p.estado == 'Completada' %}bg-emerald-100 text-emerald-700
+            {% elif p.estado == 'Cancelada' %}bg-rose-100 text-rose-700
+            {% else %}bg-slate-100 text-slate-700{% endif %}">
             {{ p.estado }}
-        </span>
-    </td>
-
-    <td>{{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</td>
-    <td>{{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</td>
-    <td>{{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</td>
-    <td>
-        {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
-    <span class="badge bg-danger">URGENTE</span>
-{% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
-    <span class="badge bg-warning">Próximo</span>
-{% else %}
-    <span class="badge bg-success">A tiempo</span>
-{% endif %}
-    </td>
-    <td>
-        <a href="{{ url_for('produccion.ver', id=p.id_produccion) }}" class="btn btn-view">Ver</a>
-    </td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-
-<div class="produccion-cards-mobile">
-{% for p in producciones %}
-<article class="produccion-mobile-card" data-dias-restantes="{{ p.dias_restantes if p.dias_restantes is not none else '' }}" data-estado="{{ p.estado }}" data-fecha-necesaria="{{ p.fecha_necesaria.strftime('%Y-%m-%d') if p.fecha_necesaria else '' }}">
-    <div class="produccion-mobile-head">
-        <div>
-            <p class="produccion-mobile-kicker mb-1">Orden #{{ p.id_produccion }}</p>
-            <h3 class="produccion-mobile-title mb-0">{{ p.usuario }}</h3>
+          </span>
         </div>
-        <span class="badge
-            {% if p.estado == 'Solicitada' %}bg-warning text-dark
-            {% elif p.estado == 'En Proceso' %}bg-info
-            {% elif p.estado == 'Completada' %}bg-success
-            {% elif p.estado == 'Cancelada' %}bg-danger
-            {% else %}bg-secondary{% endif %}">
-            {{ p.estado }}
-        </span>
+        <div class="mb-3 flex flex-wrap gap-3 text-xs text-slate-600">
+          <div><span class="font-semibold">Solicitud:</span> {{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</div>
+          <div><span class="font-semibold">A completar:</span> {{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</div>
+          <div><span class="font-semibold">Producción:</span> {{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</div>
+        </div>
+        <div class="mb-3">
+          <span class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Urgencia</span>
+          {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
+            <span class="ml-2 inline-flex rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">Urgente</span>
+          {% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
+            <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">Próximo</span>
+          {% else %}
+            <span class="ml-2 inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">A tiempo</span>
+          {% endif %}
+        </div>
+        <div>
+          <a href="{{ url_for('produccion.ver', id=p.id_produccion) }}" class="inline-block w-full rounded-lg border border-gourmet-500 bg-white px-3 py-2 text-center text-xs font-semibold text-gourmet-600 transition hover:bg-gourmet-50">Ver</a>
+        </div>
+      </article>
+      {% endfor %}
     </div>
-
-    <div class="produccion-mobile-meta">
-        <div><strong>Solicitud:</strong> {{ p.fecha_solicitud.strftime('%d/%m/%Y') }}</div>
-        <div><strong>A completar:</strong> {{ p.fecha_necesaria.strftime('%d/%m/%Y') }}</div>
-        <div><strong>Producción:</strong> {{ p.fecha_completada.strftime('%d/%m/%Y') if p.fecha_completada else 'Sin completar' }}</div>
-    </div>
-
-    <div class="produccion-mobile-block">
-        <span class="produccion-mobile-label">Urgencia</span>
-        {% if p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 1 %}
-            <span class="badge bg-danger">URGENTE</span>
-        {% elif p.estado != 'Completada' and p.dias_restantes is not none and p.dias_restantes <= 2 %}
-            <span class="badge bg-warning">Próximo</span>
-        {% else %}
-            <span class="badge bg-success">A tiempo</span>
-        {% endif %}
-    </div>
-
-    <div class="produccion-mobile-actions">
-        <a href="{{ url_for('produccion.ver', id=p.id_produccion) }}" class="btn btn-view">Ver</a>
-    </div>
-</article>
-{% endfor %}
+  </div>
 </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
 <script>
 function normalizarTexto(texto) {
-    return (texto || '')
-        .toString()
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+    return (texto || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 function clasificarUrgencia(dias, estado) {
-    if (estado === 'completada' || estado === 'cancelada') {
-        return 'normal';
-    }
-
-    if (dias === null || Number.isNaN(dias)) {
-        return 'normal';
-    }
-
-    if (dias < 0) {
-        return 'vencida';
-    }
-    if (dias <= 1) {
-        return 'urgente';
-    }
-    if (dias <= 2) {
-        return 'proxima';
-    }
+    if (estado === 'completada' || estado === 'cancelada') return 'normal';
+    if (dias === null || Number.isNaN(dias)) return 'normal';
+    if (dias < 0) return 'vencida';
+    if (dias <= 1) return 'urgente';
+    if (dias <= 2) return 'proxima';
     return 'normal';
 }
 
@@ -194,10 +211,7 @@ function aplicarFiltrosProduccion() {
     const estadoSeleccionado = normalizarTexto(filtroEstado ? filtroEstado.value : 'todas');
     const filtroUrgencia = urgenciaActiva ? urgenciaActiva.dataset.urgencia : 'todas';
 
-    const filas = document.querySelectorAll('table.data-table tbody tr');
-    const cards = document.querySelectorAll('.produccion-cards-mobile .produccion-mobile-card');
-
-    filas.forEach((fila) => {
+    document.querySelectorAll('table tbody tr').forEach((fila) => {
         const diasRaw = fila.dataset.diasRestantes;
         const estado = normalizarTexto(fila.dataset.estado);
         const fechaFila = fila.dataset.fechaNecesaria || '';
@@ -208,11 +222,10 @@ function aplicarFiltrosProduccion() {
         const coincideEstado = estadoSeleccionado === 'todas' || estado === estadoSeleccionado;
         const coincideFecha = !fechaNecesaria || fechaFila === fechaNecesaria;
         const coincideUrgencia = filtroUrgencia === 'todas' || urgencia === filtroUrgencia;
-
         fila.style.display = (coincideBusqueda && coincideEstado && coincideFecha && coincideUrgencia) ? '' : 'none';
     });
 
-    cards.forEach((card) => {
+    document.querySelectorAll('.produccion-cards-mobile article').forEach((card) => {
         const diasRaw = card.dataset.diasRestantes;
         const estado = normalizarTexto(card.dataset.estado);
         const fechaFila = card.dataset.fechaNecesaria || '';
@@ -223,7 +236,6 @@ function aplicarFiltrosProduccion() {
         const coincideEstado = estadoSeleccionado === 'todas' || estado === estadoSeleccionado;
         const coincideFecha = !fechaNecesaria || fechaFila === fechaNecesaria;
         const coincideUrgencia = filtroUrgencia === 'todas' || urgencia === filtroUrgencia;
-
         card.style.display = (coincideBusqueda && coincideEstado && coincideFecha && coincideUrgencia) ? '' : 'none';
     });
 }
@@ -244,17 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (buscador) {
-        buscador.addEventListener('input', aplicarFiltrosProduccion);
-    }
-
-    if (filtroEstado) {
-        filtroEstado.addEventListener('change', aplicarFiltrosProduccion);
-    }
-
-    if (filtroFecha) {
-        filtroFecha.addEventListener('change', aplicarFiltrosProduccion);
-    }
+    if (buscador) buscador.addEventListener('input', aplicarFiltrosProduccion);
+    if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltrosProduccion);
+    if (filtroFecha) filtroFecha.addEventListener('change', aplicarFiltrosProduccion);
 
     aplicarFiltrosProduccion();
 });

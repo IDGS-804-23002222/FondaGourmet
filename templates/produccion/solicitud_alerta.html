@@ -1,61 +1,96 @@
 {% extends "base.html" %}
-{% block title %}Solicitud de Producción{% endblock %}
+{% block title %}Solicitud de Producción - Casa Gourmet{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          gourmet: {
+            50: '#f8fafc',
+            100: '#e2e8f0',
+            500: '#0f766e',
+            600: '#115e59',
+            700: '#134e4a',
+            800: '#0f172a',
+          },
+        },
+        boxShadow: {
+          glow: '0 20px 80px rgba(15, 118, 110, 0.18)',
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  }
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='style/pages/produccion.css') }}">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="produccion-index-hero">
-    <div>
-        <p class="hero-kicker mb-2">Alerta de stock</p>
-        <h1 class="mb-2">Crear solicitud para {{ producto.nombre }}</h1>
-        <p class="hero-subtitle mb-0">El stock actual está por debajo del mínimo. Captura cuántas unidades deseas producir.</p>
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+
+  <div class="mb-8 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-glow backdrop-blur">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-gourmet-600">Alerta de stock</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Crear solicitud para {{ producto.nombre }}</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">El stock actual está por debajo del mínimo. Captura cuántas unidades deseas producir.</p>
+      </div>
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-center">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Stock actual</p>
+        <p class="mt-1 text-2xl font-black text-amber-900">{{ '%.2f'|format(producto.stock_actual or 0) }}</p>
+      </div>
     </div>
-    <div class="hero-count-chip">
-        <span>{{ '%.2f'|format(producto.stock_actual or 0) }}</span>
-        <small>Stock actual</small>
+  </div>
+
+  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-lg font-bold text-slate-900">Solicitud de producción</h2>
+        <span class="inline-flex rounded-full bg-gourmet-100 px-3 py-1 text-xs font-semibold text-gourmet-700">Mínimo: {{ '%.2f'|format(producto.stock_minimo or 0) }}</span>
+      </div>
     </div>
-</div>
 
-<div class="produccion-index-shell">
-    <div class="section-card" style="max-width: 720px; margin: 0 auto;">
-        <header class="section-head">
-            <h2>Solicitud de producción</h2>
-            <small>Mínimo: {{ '%.2f'|format(producto.stock_minimo or 0) }}</small>
-        </header>
-        <div class="section-body">
-            <form method="POST" action="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id_producto) }}" class="d-grid gap-3">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div>
-                    <label for="cantidad" class="form-label">Cantidad a producir</label>
-                    <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        id="cantidad"
-                        name="cantidad"
-                        class="form-control"
-                        value="{{ cantidad_sugerida }}"
-                        required
-                    >
-                    <small class="text-muted d-block mt-1">Se sugiere iniciar con 10 unidades, pero puedes cambiarlo antes de guardar.</small>
-                </div>
+    <div class="p-6 lg:p-8">
+      <form method="POST" action="{{ url_for('produccion.crear_desde_alerta', id_producto=producto.id_producto) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <div class="alert alert-warning mb-0">
-                    <strong>Faltante estimado:</strong> {{ '%.2f'|format(faltante) }}
-                </div>
-
-                <div class="d-flex gap-2 flex-wrap">
-                    <button type="submit" class="btn btn-primary">Crear solicitud</button>
-                    {% if current_user.id_rol == 3 %}
-                    <a href="{{ url_for('pedidos.index') }}" class="btn btn-secondary">Volver</a>
-                    {% else %}
-                    <a href="{{ url_for('produccion.index') }}" class="btn btn-secondary">Volver</a>
-                    {% endif %}
-                </div>
-            </form>
+        <div class="mb-6">
+          <label for="cantidad" class="mb-1 block text-sm font-semibold text-slate-700">Cantidad a producir</label>
+          <input type="number" min="1" step="1" id="cantidad" name="cantidad" value="{{ cantidad_sugerida }}" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-gourmet-500 focus:outline-none focus:ring-2 focus:ring-gourmet-100" required>
+          <p class="mt-1 text-xs text-slate-500">Se sugiere iniciar con 10 unidades, pero puedes cambiarlo antes de guardar.</p>
         </div>
+
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <p class="text-sm font-semibold text-amber-700">Faltante estimado: {{ '%.2f'|format(faltante) }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button type="submit" class="rounded-xl bg-gourmet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gourmet-700">Crear solicitud</button>
+          {% if current_user.id_rol == 3 %}
+            <a href="{{ url_for('pedidos.index') }}" class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Volver</a>
+          {% else %}
+            <a href="{{ url_for('produccion.index') }}" class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Volver</a>
+          {% endif %}
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 {% endblock %}
