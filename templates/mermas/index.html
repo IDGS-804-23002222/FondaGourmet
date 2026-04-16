@@ -1,84 +1,175 @@
 {% extends 'base.html' %}
-{% block title %}Mermas y Ajustes{% endblock %}
+{% block title %}Mermas y Ajustes - Casa Gourmet{% endblock %}
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Nunito Sans', 'sans-serif'],
+        },
+        colors: {
+          ember: {
+            50: '#fff8f1',
+            100: '#feecdc',
+            500: '#c2410c',
+            600: '#9a3412',
+            700: '#7c2d12',
+          },
+          tealx: {
+            50: '#f0fdfa',
+            100: '#ccfbf1',
+            500: '#0f766e',
+            700: '#115e59',
+          },
+        },
+        boxShadow: {
+          softxl: '0 24px 48px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+  };
+</script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
 {% endblock %}
 
+{% block styles %}
+<style>
+  body {
+    background:
+      radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.16), transparent 24%),
+      radial-gradient(circle at 90% 12%, rgba(194, 65, 12, 0.14), transparent 30%),
+      linear-gradient(180deg, #f8fafc 0%, #ecfeff 100%);
+  }
+
+  .panel-glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="mx-auto max-w-3xl px-3 py-6 sm:px-6">
-  <div class="mb-5 rounded-2xl bg-slate-900 p-5 text-white shadow-lg">
-    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Control de Perdidas</p>
-    <h1 class="mt-1 text-2xl font-black">Mermas y Ajustes</h1>
-    <p class="mt-2 text-sm text-slate-200">Registra mermas en ingredientes o inventario terminado con trazabilidad y costo de perdida.</p>
-  </div>
-
-  <form method="POST" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-    <div class="grid gap-4 sm:grid-cols-2">
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+  
+  <section class="panel-glass mb-6 rounded-3xl border border-white/60 p-6 shadow-softxl">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <label for="tipo_origen" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Origen</label>
-        <select id="tipo_origen" name="tipo_origen" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
-          <option value="MateriaPrima">Ingrediente</option>
-          <option value="InventarioTerminado">Inventario terminado</option>
-        </select>
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.35em] text-tealx-700">Control de Pérdidas</p>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Mermas y Ajustes</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-600">Registra mermas con costo de pérdida.</p>
       </div>
-      <div>
-        <label for="cantidad" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad</label>
-        <input id="cantidad" name="cantidad" type="number" min="1" step="0.01" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
+       <a href="{{ url_for('mermas.historial') }}" 
+         class="inline-flex items-center justify-center rounded-xl bg-ember-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-ember-700">
+        <i class="bi bi-clock-history mr-2"></i> Ver historial
+      </a>
+    </div>
+
+    <div class="mt-5 grid gap-3 md:grid-cols-3">
+      <div class="rounded-2xl border border-tealx-100 bg-tealx-50 p-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-tealx-700">Total Mermas</p>
+        <p class="mt-1 text-2xl font-black text-tealx-700" id="totalMermas">0</p>
+      </div>
+      <div class="rounded-2xl border border-ember-100 bg-ember-50 p-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-ember-700">Costo Total</p>
+        <p class="mt-1 text-2xl font-black text-ember-700" id="costoTotal">$0</p>
+      </div>
+      <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Requieren Autorización</p>
+        <p class="mt-1 text-2xl font-black text-amber-700" id="requierenAutorizacion">0</p>
       </div>
     </div>
+  </section>
 
-    <div id="bloqueMateria" class="mt-4">
-      <label for="buscarMateria" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Buscar ingrediente</label>
-      <input id="buscarMateria" type="text" placeholder="Ej. Jitomate" class="mb-2 block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
-      <select id="id_materia" name="id_materia" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
-        <option value="">Selecciona ingrediente</option>
-        {% for materia in materias %}
-          <option value="{{ materia.id_materia }}" data-search="{{ materia.nombre|lower }}">{{ materia.nombre }} · Stock {{ '%.2f'|format(materia.stock_actual or 0) }} · ${{ '%.2f'|format(materia.precio or 0) }}</option>
-        {% endfor %}
-      </select>
+  <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-softxl">
+    <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+      <h2 class="text-lg font-bold text-slate-900">Registrar nueva merma</h2>
+      <p class="text-sm text-slate-500">Completa los datos del producto y motivo de pérdida.</p>
     </div>
 
-    <div id="bloqueInventario" class="mt-4 hidden">
-      <label for="buscarInventario" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Buscar producto terminado</label>
-      <input id="buscarInventario" type="text" placeholder="Ej. Salsa Verde" class="mb-2 block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
-      <select id="id_inventario" name="id_inventario" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm">
-        <option value="">Selecciona inventario terminado</option>
-        {% for inv, producto in inventarios %}
-          <option value="{{ inv.id_inventario }}" data-search="{{ producto.nombre|lower }}">{{ producto.nombre }} · Porciones {{ inv.cantidad_disponible }} · Precio venta ${{ '%.2f'|format(producto.precio or 0) }}</option>
-        {% endfor %}
-      </select>
-    </div>
+    <form method="POST" class="p-6 lg:p-8">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <div class="mt-4 grid gap-4 sm:grid-cols-2">
-      <div>
-        <label for="motivo" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Motivo</label>
-        <select id="motivo" name="motivo" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" required>
-          {% for motivo in motivos %}
-            <option value="{{ motivo }}">{{ motivo }}</option>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="tipo_origen" class="mb-1 block text-sm font-semibold text-slate-700">Origen</label>
+          <select id="tipo_origen" name="tipo_origen" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100" required>
+            <option value="MateriaPrima">Ingrediente</option>
+            <option value="InventarioTerminado">Inventario terminado</option>
+          </select>
+        </div>
+        <div>
+          <label for="cantidad" class="mb-1 block text-sm font-semibold text-slate-700">Cantidad</label>
+          <input id="cantidad" name="cantidad" type="number" min="1" step="0.01" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100" required placeholder="0.00">
+        </div>
+      </div>
+
+      <div id="bloqueMateria" class="mt-5">
+        <label for="buscarMateria" class="mb-1 block text-sm font-semibold text-slate-700">Buscar ingrediente</label>
+        <input id="buscarMateria" type="text" placeholder="Ej. Harina, Huevo, Leche..." class="mb-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100">
+        <select id="id_materia" name="id_materia" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100">
+          <option value="">Selecciona un ingrediente</option>
+          {% for materia in materias %}
+            <option value="{{ materia.id_materia }}" data-search="{{ materia.nombre|lower }}">{{ materia.nombre }} · Stock {{ '%.2f'|format(materia.stock_actual or 0) }} · ${{ '%.2f'|format(materia.precio or 0) }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-        Mermas mayores a <strong>${{ '%.2f'|format(monto_admin) }}</strong> requieren autorizacion de rol Admin.
+
+      <div id="bloqueInventario" class="mt-5 hidden">
+        <label for="buscarInventario" class="mb-1 block text-sm font-semibold text-slate-700">Buscar producto terminado</label>
+        <input id="buscarInventario" type="text" placeholder="Ej. Mole, Enfrijoladas, Café..." class="mb-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100">
+        <select id="id_inventario" name="id_inventario" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100">
+          <option value="">Selecciona un producto</option>
+          {% for inv, producto in inventarios %}
+            <option value="{{ inv.id_inventario }}" data-search="{{ producto.nombre|lower }}">{{ producto.nombre }} · Porciones {{ inv.cantidad_disponible }} · ${{ '%.2f'|format(producto.precio or 0) }}</option>
+          {% endfor %}
+        </select>
       </div>
-    </div>
 
-    <div class="mt-4">
-      <label for="observaciones" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Observaciones</label>
-      <textarea id="observaciones" name="observaciones" rows="3" class="block w-full rounded-lg border border-slate-300 p-2.5 text-sm" placeholder="Describe lo sucedido..."></textarea>
-    </div>
+      <div class="mt-5 grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="motivo" class="mb-1 block text-sm font-semibold text-slate-700">Motivo</label>
+          <select id="motivo" name="motivo" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100" required>
+            {% for motivo in motivos %}
+              <option value="{{ motivo }}">{{ motivo }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <i class="bi bi-info-circle-fill mr-1"></i>
+          Mermas mayores a <strong>${{ '%.2f'|format(monto_admin) }}</strong> requieren autorización de rol Admin.
+        </div>
+      </div>
 
-    <div class="mt-5 flex flex-wrap gap-2">
-      <button type="submit" class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">Registrar merma</button>
-      <a href="{{ url_for('mermas.historial') }}" class="rounded-lg border border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Ver historial</a>
-      <a href="{{ url_for('dashboard.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Volver</a>
-    </div>
-  </form>
-</section>
+      <div class="mt-5">
+        <label for="observaciones" class="mb-1 block text-sm font-semibold text-slate-700">Observaciones</label>
+        <textarea id="observaciones" name="observaciones" rows="3" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-tealx-500 focus:outline-none focus:ring-2 focus:ring-tealx-100" placeholder="Describe lo sucedido..."></textarea>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-500">
+          <i class="bi bi-trash"></i> Registrar merma
+        </button>
+        <a href="{{ url_for('dashboard.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+          <i class="bi bi-arrow-left"></i> Volver
+        </a>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+// Script para actualizar estadísticas (opcional)
+document.addEventListener('DOMContentLoaded', function() {
+  // Puedes agregar aquí una llamada AJAX para cargar las estadísticas reales
+  // Por ahora son placeholders
+  document.getElementById('totalMermas').textContent = '0';
+  document.getElementById('costoTotal').textContent = '$0';
+  document.getElementById('requierenAutorizacion').textContent = '0';
+});
+</script>
 {% endblock %}
 
 {% block scripts %}
@@ -95,8 +186,8 @@
     const isMateria = tipoOrigen.value === 'MateriaPrima';
     bloqueMateria.classList.toggle('hidden', !isMateria);
     bloqueInventario.classList.toggle('hidden', isMateria);
-    selectMateria.required = isMateria;
-    selectInventario.required = !isMateria;
+    if (selectMateria) selectMateria.required = isMateria;
+    if (selectInventario) selectInventario.required = !isMateria;
   }
 
   function filtrarOpciones(inputId, selectId) {
@@ -111,13 +202,13 @@
           opt.hidden = false;
           return;
         }
-        const hay = (opt.dataset.search || '').includes(q);
-        opt.hidden = !hay;
+        const searchText = (opt.dataset.search || '').toLowerCase();
+        opt.hidden = q !== '' && !searchText.includes(q);
       });
     });
   }
 
-  tipoOrigen.addEventListener('change', syncBloques);
+  if (tipoOrigen) tipoOrigen.addEventListener('change', syncBloques);
   syncBloques();
   filtrarOpciones('buscarMateria', 'id_materia');
   filtrarOpciones('buscarInventario', 'id_inventario');
